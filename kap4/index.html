@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapittel 4 — Autentisering og autorisasjon</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="../" class="nav-back">&larr; Alle kapitler</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 4: Autentisering og autorisasjon">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 4 · Identitet og tilgang</div>
+    <h1>Autentisering og <em>autorisasjon</em></h1>
+    <p class="lede">«Hvem er du?» og «hva får du lov til?» — to distinkte spørsmål som forvirres hele tiden, og der forvirringen er der de fleste tilgangsfeilene bor.</p>
+  </div>
+</header>
+
+<nav class="chapter-toc">
+  <div class="container">
+    <ol class="chapter-toc-list">
+      <li><span class="toc-num">01</span><a href="#overblikk">Helhetsbilde</a></li>
+      <li><span class="toc-num">02</span><a href="#deler">Delsider</a></li>
+      <li><span class="toc-num">03</span><a href="#quiz">Test deg selv</a></li>
+    </ol>
+  </div>
+</nav>
+
+<section id="overblikk">
+  <div class="container">
+    <div class="section-badge">Overblikk</div>
+    <h2>Det store <em>bildet</em></h2>
+    <p class="section-intro">Autentisering og autorisasjon er to lag — og begge må fungere for at tilgangssikringen skal holde.</p>
+    <p class="lead">En vakt ved inngangsdøren sjekker legitimasjonen din — det er autentisering. En annen vakt inne i bygget sjekker om du har tilgang til det spesifikke rommet du prøver å gå inn i — det er autorisasjon. Mange systemer implementerer god autentisering men svak autorisasjon: du er bekreftet som bruker, men ingen sjekker om akkurat du skal ha tilgang til akkurat denne ressursen.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="13">
+        <defs>
+          <marker id="aa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker>
+        </defs>
+        <rect x="40" y="75" width="140" height="50" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="110" y="97" text-anchor="middle" font-weight="600" fill="#b04428">Bruker</text>
+        <text x="110" y="113" text-anchor="middle" font-size="11" fill="#6b6257">credentials</text>
+        <line x1="182" y1="100" x2="238" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#aa)"/>
+        <rect x="240" y="75" width="160" height="50" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="320" y="93" text-anchor="middle" font-weight="600" fill="#2d4a7a">Autentisering</text>
+        <text x="320" y="109" text-anchor="middle" font-size="11" fill="#6b6257">«Hvem er du?»</text>
+        <text x="320" y="122" text-anchor="middle" font-size="10" fill="#3d6b3a">→ identitet bekreftet</text>
+        <line x1="402" y1="100" x2="458" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#aa)"/>
+        <rect x="460" y="75" width="200" height="50" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="560" y="93" text-anchor="middle" font-weight="600" fill="#3d6b3a">Autorisasjon</text>
+        <text x="560" y="109" text-anchor="middle" font-size="11" fill="#6b6257">«Hva får du lov til?»</text>
+        <text x="560" y="122" text-anchor="middle" font-size="10" fill="#3d6b3a">→ tilgang innvilget/nektet</text>
+        <text x="110" y="160" text-anchor="middle" font-size="11" fill="#a39886" font-style="italic">Passord, MFA, OAuth, OIDC</text>
+        <text x="560" y="160" text-anchor="middle" font-size="11" fill="#a39886" font-style="italic">RBAC, ABAC, zero trust, least privilege</text>
+      </svg>
+      <figcaption>Autentisering bekrefter identitet; autorisasjon bestemmer hva den identiteten får gjøre.</figcaption>
+    </figure>
+
+    <div class="callout callout-green">
+      <h4>Kapittelets kjerneidé</h4>
+      <p>Autentisering uten autorisasjon er en inngangsdør uten rom. Autorisasjon uten autentisering er rom uten inngangsdør. Begge må til — og begge må skje på serversiden.</p>
+    </div>
+  </div>
+</section>
+
+<section id="deler">
+  <div class="container">
+    <div class="section-badge">Delsider</div>
+    <h2>Utforsk <em>kapittelet</em></h2>
+    <div class="subpage-list">
+      <a href="autentisering.html" class="subpage-card">
+        <div class="sp-icon">01–05</div>
+        <div class="sp-info">
+          <div class="sp-title">Autentisering</div>
+          <div class="sp-desc">Passord, MFA, OAuth 2.0, OIDC og vanlige autentiseringsfeil.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="jwt.html" class="subpage-card">
+        <div class="sp-icon">06–09</div>
+        <div class="sp-info">
+          <div class="sp-title">JWT</div>
+          <div class="sp-desc">Struktur, algoritme-forvirring, claim-validering og sikker bruk av JSON Web Tokens.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="tilgangskontroll.html" class="subpage-card">
+        <div class="sp-icon">10–13</div>
+        <div class="sp-info">
+          <div class="sp-title">Tilgangskontroll</div>
+          <div class="sp-desc">RBAC, ABAC, zero trust og least privilege i praksis.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="container">
+    <h2>Test deg <em>selv</em></h2>
+    <p class="section-intro">18 spørsmål om identitet, tokens og tilgangskontroll.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 1 · Lett</div>
+      <div class="q-text">Hva er autentisering?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Autentisering er prosessen med å bekrefte at en bruker, tjeneste eller enhet er den den hevder å være. Det gjøres via noe du <em>vet</em> (passord), noe du <em>har</em> (MFA-enhet), eller noe du <em>er</em> (biometri).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 2 · Lett</div>
+      <div class="q-text">Hva er autorisasjon?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Autorisasjon er prosessen med å avgjøre om en autentisert identitet har tillatelse til å utføre en bestemt handling på en bestemt ressurs. Skjer etter autentisering og på serversiden.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 3 · Lett</div>
+      <div class="q-text">Hva er MFA?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">MFA (Multi-Factor Authentication) krever at brukeren bekrefter identiteten via to eller flere uavhengige faktorer: noe du vet (passord), noe du har (TOTP-app, hardware-token, SMS), og/eller noe du er (fingeravtrykk, ansikt). Kompromittering av én faktor er ikke tilstrekkelig for innlogging.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 4 · Lett</div>
+      <div class="q-text">Hva er RBAC?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">RBAC (Role-Based Access Control) tildeler tillatelser til roller, og brukere tildeles roller. En «editor»-rolle kan f.eks. ha skrivetilgang, mens en «viewer»-rolle bare har lesetilgang. Enklere å administrere enn individuell tildeling, men kan lide av rolle-eksplosjon.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 5 · Lett</div>
+      <div class="q-text">Hva er JWT?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">JWT (JSON Web Token) er et kompakt, URL-sikkert format for å overføre claims (påstander) mellom parter. Det består av tre base64url-kodede deler adskilt av punktum: header (algoritme), payload (claims) og signature. Signaturen verifiserer at innholdet ikke er endret.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 6 · Lett</div>
+      <div class="q-text">Hva er OAuth 2.0?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">OAuth 2.0 er et autorisasjonsrammeverk som lar en tredjeparts-applikasjon få begrenset tilgang til en brukers ressurser på en tjeneste, uten å håndtere brukerens passord. Brukeren gir eksplisitt samtykke via en authorization server som utsteder access tokens.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 7 · Middels</div>
+      <div class="q-text">Hva er «alg: none»-angrepet i JWT?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Noen JWT-biblioteker aksepterte <code>{"alg": "none"}</code> i headeren, som instruerte serveren om å hoppe over signaturverifisering. En angriper kunne da endre payload-claims (f.eks. <code>"role": "admin"</code>), sette <code>alg: none</code>, og sende tokenet uten gyldig signatur. Serveren aksepterte det. Løsning: eksplisitt spesifiser tillatte algoritmer på serversiden — aldri stol på <code>alg</code>-feltet i tokenet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8 · Middels</div>
+      <div class="q-text">Forklar OAuth 2.0 authorization code-flyten i fire steg.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">1. Brukeren omdirigeres til authorization server med <code>client_id</code>, <code>scope</code> og <code>redirect_uri</code>. 2. Brukeren logger inn og gir samtykke — authorization server sender en <code>code</code> tilbake til redirect_uri. 3. Klient-applikasjonen bytter <code>code</code> mot access token via et server-til-server-kall med <code>client_secret</code>. 4. Klienten bruker access token for å kalle API-et på vegne av brukeren.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 9 · Middels</div>
+      <div class="q-text">Hva er FIDO2/WebAuthn?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">FIDO2/WebAuthn er en standard for passordløs autentisering basert på asymmetrisk kryptografi. Brukeren registrerer en enhet (hardware security key, telefon) som genererer et nøkkelpar: den private nøkkelen forblir på enheten, den offentlige nøkkelen lagres hos tjenesten. Innlogging skjer ved at enheten signerer en challenge fra serveren — ingen passord sendes, og angrepet er immunt mot phishing siden origin verifiseres kryptografisk.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 10 · Middels</div>
+      <div class="q-text">Hva er credential stuffing?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Credential stuffing er et angrep der angripere bruker brukernavn/passord-kombinasjoner fra tidligere databrudd for å forsøke innlogging på andre tjenester. Det er effektivt fordi mange brukere gjenbruker passord. Forsvar: MFA, rate-limiting, anomalideteksjon basert på IP og atferd, og tilby «have I been pwned»-integrasjon.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 11 · Middels</div>
+      <div class="q-text">Hva er zero trust, og hva skiller det fra tradisjonell perimeter-sikkerhet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Zero trust er et sikkerhetsparadigme basert på «never trust, always verify» — ingen bruker, enhet eller tjeneste stoles på automatisk, uavhengig av nettverksposisjon. Tradisjonell perimeter-sikkerhet («castle and moat») antar at alt innenfor brannmuren er trygt. Zero trust verifiserer identitet og kontekst for hvert tilgang — nyttig i skybaserte og distribuerte systemer der «innsiden» ikke lenger er veldefinert.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 12 · Middels</div>
+      <div class="q-text">Forklar OIDC og hvordan det bygger på OAuth 2.0.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">OIDC (OpenID Connect) er et autentiseringslag bygget på OAuth 2.0. OAuth 2.0 gir autorisasjon (access token for API-tilgang). OIDC legger til autentisering via et <strong>ID-token</strong> (et JWT med brukerinformasjon som <code>sub</code>, <code>email</code>, <code>name</code>). OIDC brukes til SSO (Single Sign-On) og «Logg inn med Google/GitHub»-knapper.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 13 · Vanskelig</div>
+      <div class="q-text">En tjeneste bruker HS256 for JWT og sender den offentlige nøkkelen til klienten. Beskriv angrepet.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">HS256 bruker en <em>symmetrisk</em> hemmelighet — den «offentlige nøkkelen» er i realiteten den hemmelige signeringsnøkkelen. Angriperen mottar den, og kan nå signere vilkårlige JWT-er som serveren vil akseptere. Dette er algoritme-forvirring: RS256 bruker asymmetriske nøkler (privat signerer, offentlig verifiserer), og offentlig nøkkel kan deles. HS256 deler ikke offentlig nøkkel fordi det ikke finnes noen — det er den samme hemmeligheten.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 14 · Vanskelig</div>
+      <div class="q-text">I et microservice-oppsett med mTLS — hvilken sikkerhetsgaranti mister du hvis du stoler blindt på JWT-er uten å verifisere nettverksidentiteten?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">mTLS gir nettverksnivå-autentisering: begge parter verifiserer hverandres sertifikat. Hvis en tjeneste stoler på et JWT uten å verifisere at kalleren er den legitime tjenesten via mTLS, mister du <strong>nettverks-identitetsgarantien</strong>. En kompromittert intern tjeneste (eller lateral movement-angrep) kan forfalske JWT-kall til andre tjenester. mTLS + JWT gir dobbel verifisering: nettverksidentitet (hvem du kommuniserer med) + brukeridentitet (hvem som handler).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 15 · Vanskelig</div>
+      <div class="q-text">En RBAC-implementasjon har 200 rettigheter i «admin»-rollen. Hva er problemet og hva er løsningen?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Problem:</strong> «admin»-rollen bryter least privilege kraftig. En kompromittert admin-konto gir tilgang til alt. Dessuten er 200 rettigheter uoverskuelig — ingen forstår hva «admin» faktisk kan gjøre. <strong>Løsning:</strong> del opp i funksjons-spesifikke roller (user-admin, billing-admin, content-admin) med de minimale rettighetene de trenger. Vurder ABAC eller policy-motor (OPA) for finkornet kontroll. Implementer JIT (Just-In-Time) tilgang for sensitive operasjoner som krever admin-rettigheter.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 16 · Vanskelig</div>
+      <div class="q-text">Beskriv et SIM-swapping-angrep mot SMS-basert MFA.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Angriperen kontakter mobiloperatøren og overbeviser kundeservice (via social engineering eller bestikkelse) om å overføre offerets telefonnummer til et SIM-kort angriperen kontrollerer. Alle SMS til offerets nummer — inkludert MFA-koder — mottas nå av angriperen. Kombinert med stjålne credentials (credential stuffing, phishing) gir det full kontokompromittering. Løsning: bruk TOTP-apper (Authenticator) eller FIDO2 i stedet for SMS-MFA.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 17 · Vanskelig</div>
+      <div class="q-text">Hva er JIT (Just-In-Time) access og hvilke angrepsvektorer reduserer det?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">JIT access betyr at privilegerte tilganger (f.eks. produksjonsdatabase, cloud-konsoll) innvilges midlertidig (minutter til timer) på forespørsel, ikke permanent. Det reduserer: (1) <strong>standing privilege-risiko</strong> — kompromitterte kontoer med permanente admin-rettigheter. (2) <strong>Credential leakage</strong> — kortlevde credentials er av liten verdi for angripere. (3) <strong>Insider threats</strong> — alle tilgangsforsøk er eksplisitte, loggede og tidsbegrensede. Verktøy: AWS IAM Identity Center, HashiCorp Vault, CyberArk.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 18 · Vanskelig</div>
+      <div class="q-text">Hvilke JWT-claims må alltid valideres på serversiden, og hva skjer hvis de ikke valideres?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong><code>exp</code> (expiry):</strong> uten validering er utløpte tokens gyldige for alltid — kompromitterte tokens er permanente. <strong><code>aud</code> (audience):</strong> uten validering kan et token utstedt for tjeneste A brukes mot tjeneste B. <strong><code>iss</code> (issuer):</strong> uten validering kan tokens fra en ondsinnet issuer aksepteres. <strong><code>alg</code>:</strong> se alg:none-angrep. Alle claims bør valideres eksplisitt — bruk et battle-tested JWT-bibliotek og ikke rull din egen verifikasjon.</div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

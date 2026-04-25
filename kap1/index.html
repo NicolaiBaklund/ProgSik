@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapittel 1 — Introduksjon og sikkerhetsprinsipper</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="../" class="nav-back">&larr; Alle kapitler</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 1: Introduksjon og sikkerhetsprinsipper">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 1 · Fundament</div>
+    <h1>Sikkerhets<em>prinsipper</em></h1>
+    <p class="lede">Hva sikkerhetsingeniørfaget egentlig er — og hvorfor «det er sikkert nok» aldri har vært en god setning å si høyt.</p>
+  </div>
+</header>
+
+<nav class="chapter-toc">
+  <div class="container">
+    <ol class="chapter-toc-list">
+      <li><span class="toc-num">01</span><a href="#overblikk">Helhetsbilde</a></li>
+      <li><span class="toc-num">02</span><a href="#deler">Delsider</a></li>
+      <li><span class="toc-num">03</span><a href="#quiz">Test deg selv</a></li>
+    </ol>
+  </div>
+</nav>
+
+<section id="overblikk">
+  <div class="container">
+    <div class="section-badge">Overblikk</div>
+    <h2>Det store <em>bildet</em></h2>
+    <p class="section-intro">Sikkerhet er ikke en tilstand du oppnår — det er en egenskap du kontinuerlig vedlikeholder mot en aktiv motstander.</p>
+    <p class="lead">Tenk deg et hus. Du kan sette inn tyverisikrede låser, sette opp alarm, installere overvåkingskamera og gi naboen en reservenøkkel. Hver enkelt tiltak hjelper. Men hvis vinduskarmen i kjelleren er råtten, eller hvis alarmen varsler et selskap som ikke sender noen, hjelper det lite. Sikkerhet er ikke summen av enkeltkomponentene — det er styrken i den svakeste lenken, og spørsmålet om hvem som leter etter den.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <!-- CIA-triaden -->
+        <circle cx="240" cy="130" r="90" fill="none" stroke="#b04428" stroke-width="2"/>
+        <circle cx="360" cy="130" r="90" fill="none" stroke="#2d4a7a" stroke-width="2"/>
+        <circle cx="300" cy="220" r="90" fill="none" stroke="#3d6b3a" stroke-width="2"/>
+        <!-- Labels -->
+        <text x="195" y="100" font-size="15" font-weight="600" fill="#b04428" text-anchor="middle">Konfidensialitet</text>
+        <text x="415" y="100" font-size="15" font-weight="600" fill="#2d4a7a" text-anchor="middle">Integritet</text>
+        <text x="300" y="268" font-size="15" font-weight="600" fill="#3d6b3a" text-anchor="middle">Tilgjengelighet</text>
+        <!-- Tension arrows -->
+        <line x1="285" y1="135" x2="315" y2="135" stroke="#a39886" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+        <defs>
+          <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#a39886"/>
+          </marker>
+        </defs>
+        <text x="300" y="128" font-size="12" font-style="italic" fill="#6b6257" text-anchor="middle">spenning</text>
+      </svg>
+      <figcaption>CIA-triaden: tre egenskaper som alle systemer balanserer — og som sjelden lar seg maksimere simultant.</figcaption>
+    </figure>
+
+    <p>Ross Anderson åpner <em>Security Engineering</em> med en observasjon som er vanskelig å bestride: de fleste sikkerhetssvikt skyldes ikke at angriperen var genial, men at forsvareren var uoppmerksom. Defense in depth, least privilege og fail-safe defaults er ikke fancy begreper — de er den intellektuelle disiplinen som gjør det mulig å bygge systemer der enkeltfeil ikke fører til katastrofe.</p>
+
+    <div class="callout callout-green">
+      <h4>Kapittelets kjerneidé</h4>
+      <p>Sikkerhetsprinsipper er ikke regler du følger etter at systemet er bygget — de er designbeslutninger du tar mens du bygger det. Retroaktiv sikkerhet er alltid dyrere og alltid mer ufullstendig.</p>
+    </div>
+  </div>
+</section>
+
+<section id="deler">
+  <div class="container">
+    <div class="section-badge">Delsider</div>
+    <h2>Utforsk <em>kapittelet</em></h2>
+    <div class="subpage-list">
+      <a href="cia-triaden.html" class="subpage-card">
+        <div class="sp-icon">01–05</div>
+        <div class="sp-info">
+          <div class="sp-title">CIA-triaden og kjerneprinsipper</div>
+          <div class="sp-desc">Konfidensialitet, integritet og tilgjengelighet som trio — pluss defense in depth, least privilege og fail-safe defaults.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="trusselbilde.html" class="subpage-card">
+        <div class="sp-icon">06–09</div>
+        <div class="sp-info">
+          <div class="sp-title">Trusselbildet</div>
+          <div class="sp-desc">Trusselaktører, angrepsvektorer, angrepsoverflate — og hva som faktisk driver sikkerhetshendelser i praksis.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="container">
+    <h2>Test deg <em>selv</em></h2>
+    <p class="section-intro">15 spørsmål — fra definisjon til dilemma.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 1 · Lett</div>
+      <div class="q-text">Hva er CIA-triaden, og hva står hvert bokstav for?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">CIA-triaden er tre grunnleggende sikkerhetsmål: <strong>Konfidensialitet</strong> (kun autoriserte parter får tilgang til informasjon), <strong>Integritet</strong> (informasjonen er korrekt og uendret) og <strong>Tilgjengelighet</strong> (systemet er tilgjengelig når det trengs).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 2 · Lett</div>
+      <div class="q-text">Hva betyr «least privilege»?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Least privilege betyr at en bruker, prosess eller tjeneste kun skal ha de tilgangene som er strengt nødvendige for å utføre sin oppgave — og ikke mer. Det begrenser skadeomfanget ved kompromittering.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 3 · Lett</div>
+      <div class="q-text">Hva er forskjellen mellom en trussel, en sårbarhet og en risiko?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En <strong>trussel</strong> er en potensiell skadelig hendelse (f.eks. SQL injection-angrep). En <strong>sårbarhet</strong> er en svakhet som gjør trusselen mulig å utnytte (f.eks. uparameterisert SQL). En <strong>risiko</strong> er kombinasjonen: sannsynligheten for at trusselen utnytter sårbarheten, multiplisert med konsekvensen.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 4 · Lett</div>
+      <div class="q-text">Hva betyr «fail-safe default»?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Fail-safe default betyr at systemet i utgangspunktet nekter tilgang («deny by default»), og at tilgang eksplisitt må innvilges. Hvis noe går galt eller en konfigurasjon mangler, faller systemet tilbake til den sikreste tilstanden.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 5 · Lett</div>
+      <div class="q-text">Gi et konkret eksempel på defense in depth.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En nettapplikasjon med defense in depth kan ha: (1) input-validering i frontenden, (2) parameteriserte spørringer i backend, (3) en database-bruker med kun SELECT-rettigheter, og (4) nettverksegmentering som hindrer databasen fra å nå internett. Hvert lag beskytter mot svikt i laget over.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 6 · Lett</div>
+      <div class="q-text">Hva er en angrepsoverflate?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Angrepsoverflaten er summen av alle inngangspunkter en angriper kan forsøke å utnytte: alle API-endepunkter, nettverksporter, brukergrensesnitt, tredjepartspakker, interne tjenester — alt som kan nås utenfra, direkte eller indirekte.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 7 · Middels</div>
+      <div class="q-text">Forklar hvordan konfidensialitet og tilgjengelighet kan stå i konflikt. Gi et eksempel.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Et strengt krypteringskrav kan gjøre data utilgjengelige hvis nøkkelen går tapt — konfidensialitet er ivaretatt, men tilgjengeligheten er ødelagt. Et annet eksempel: å kreve MFA for alle innlogginger øker konfidensialiteten, men reduserer tilgjengeligheten for brukere uten mobiltelefon eller der MFA-tjenesten er nede.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8 · Middels</div>
+      <div class="q-text">Hvorfor er «security by obscurity» utilstrekkelig som eneste forsvar?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Security by obscurity (å skjule implementasjonsdetaljer) er ikke et robust forsvar fordi: (1) hemmeligheter lekker over tid, (2) det gir ingen beskyttelse når koden er kompromittert eller offentlig, og (3) det hindrer ikke en bestemt angriper som allerede kjenner systemet. Kerckhoffs' prinsipp sier at et system skal være sikkert selv om alt unntatt nøkkelen er kjent.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 9 · Middels</div>
+      <div class="q-text">Hva er en insider threat, og hvorfor er den vanskeligere å forsvare mot enn et eksternt angrep?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En insider threat er en person med legitim tilgang (ansatt, konsulent, leverandør) som misbruker den — enten ondsinnet eller ved uaktsomhet. Det er vanskeligere å forsvare mot fordi insideren: (1) allerede er autentisert og autorisert, (2) kjenner systemets svakheter, (3) kan operere uten å utløse nettverksbaserte alarmer, og (4) har sosial kapital som demper mistanke.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 10 · Middels</div>
+      <div class="q-text">Beskriv ett scenario der safety og security prioriterer ulikt.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">I et sykehussystem: <strong>safety</strong> krever at medisinsk utstyr alltid skal være tilgjengelig, selv uten autentisering i en nødssituasjon («break-glass access»). <strong>Security</strong> krever at kun autorisert personell har tilgang for å hindre manipulering. En brannmur som blokkerer all trafikk øker security, men kan drepe en pasient hvis alarmsystemet ikke når overvåkingssentralen.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 11 · Middels</div>
+      <div class="q-text">Hva er forskjellen mellom en trusselaktør og en angriper?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En <strong>trusselaktør</strong> er en potensiell kilde til skade — det kan være en nasjonalstat, en kriminell organisasjon, en konkurrent eller en insider. En <strong>angriper</strong> er en trusselaktør som aktivt forsøker å utnytte en sårbarhet. Ikke alle trusselaktører angriper; de representerer risiko basert på kapasitet og motivasjon.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 12 · Middels</div>
+      <div class="q-text">Hva betyr «reduce attack surface» i praksis for en webtjeneste?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Konkrete tiltak: (1) skru av ubrukte endepunkter og porter, (2) fjern unødvendige avhengigheter og npm-pakker, (3) bruk private API-er der det er mulig fremfor offentlige, (4) plasser admin-grensesnitt bak VPN, (5) deaktiver debug-modus i produksjon, (6) sett opp nettverksegmentering slik at kun nødvendig kommunikasjon tillates.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 13 · Vanskelig</div>
+      <div class="q-text">Et system logger alle brukerhendelser for etterforskning. Hvilken CIA-egenskap styrker det, og hvilken kan det svekke?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Styrker integritet og tilgjengelighet</strong> (etterforskning muliggjør gjenoppretting og ansvarliggjøring). <strong>Svekker konfidensialitet</strong>: logger inneholder personopplysninger, atferdsdata og potensielt sensitiv forretninsginformasjon. Hvis loggene selv ikke er beskyttet (tilgangskontroll, kryptering, sikker overføring), er de et attraktivt mål — og en kompromittert loggtjeneste kan gi angripere full innsikt i systemets tilstand.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 14 · Vanskelig</div>
+      <div class="q-text">Et selskap deaktiverer SSH-tilgang til prod for å redusere angrepsoverflaten, men operatørene klager på manglende driftsevne. Diskuter avveiingen.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Å fjerne direkte SSH reduserer angrepsoverflaten betraktelig — SSH er en vanlig angrepsvektor (credential stuffing, key theft). Men operatørene trenger en alternativ kanal: (1) bastionhost med MFA og sesjonlogging, (2) privileged access workstation (PAW), eller (3) break-glass-mekanisme med etterfølgende audit. Målet er ikke å eliminere tilgang, men å gjøre den sporbar, autentisert og tidsbegrenset — ikke å tvinge operatørene til usikre workarounds.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 15 · Vanskelig</div>
+      <div class="q-text">Forklar hvordan «fail-open» vs. «fail-closed» påvirker safety og security ulikt.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Fail-closed</strong> (nekter tilgang ved feil): maksimerer security, men kan true safety hvis kritiske systemer blokkeres. Eksempel: en brannmur som blokkerer all trafikk ved konfigurasjonsfeil hindrer et angrep, men stopper også en nødmelding. <strong>Fail-open</strong> (tillater tilgang ved feil): ivaretar tilgjengelighet og safety (nødutstyr fungerer), men åpner for uautorisert tilgang. Riktig valg avhenger av kontekst: et atomkraftverk og et blogg-CMS har motsatte krav.</div></div>
+    </div>
+
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

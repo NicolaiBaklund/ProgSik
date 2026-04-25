@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hashing, MAC og passordhashing — Kapittel 3</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 3</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 3: Kryptografi">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 3 · Hashing og MAC</div>
+    <h1>Hashing, MAC og <em>passordhashing</em></h1>
+    <p class="lede">Integritet uten hemmelighet, autentisert integritet med hemmelighet, og det spesielle tilfellet der «treg» er en funksjon ikke en feil.</p>
+    <nav class="toc">
+      <a href="#hashfunksjoner"><span class="toc-num">01</span>Kryptografiske hashfunksjoner</a>
+      <a href="#hmac"><span class="toc-num">02</span>HMAC</a>
+      <a href="#passordhashing"><span class="toc-num">03</span>Passordhashing</a>
+      <a href="#salting"><span class="toc-num">04</span>Salting</a>
+    </nav>
+  </div>
+</header>
+
+<section id="hashfunksjoner">
+  <div class="container">
+    <div class="section-badge">01 · Hashfunksjoner</div>
+    <h2>Kryptografiske <em>hashfunksjoner</em></h2>
+    <p class="section-intro">En kryptografisk hashfunksjon er en enveisfunksjon som produserer en fast-lengde fingeravtrykk av vilkårlig data.</p>
+    <p class="lead">SHA-256 tar inn en melding av vilkårlig lengde og produserer alltid en 256-bits digest. Endre én bit i inndataen og digesten endres radikalt og uforutsigbart — dette kalles lavine-effekten. Gitt en digest, er det praktisk umulig å rekonstruere inndataen. Gitt én inndata og dens digest, er det praktisk umulig å finne en annen inndata med samme digest (kollisjonsmotstand).</p>
+    <p>Bruksområder: integritetskontroll (filhasher, commit-hasher i Git), digital signatur (signer hash av dokumentet, ikke selve dokumentet), HMAC, passordhashing (med de rette algoritmene — se under).</p>
+    <div class="callout callout-blue">
+      <h4>SHA-2 vs. SHA-3</h4>
+      <p>SHA-256/SHA-384/SHA-512 er SHA-2-familien (Merkle-Damgård-konstruksjon). SHA-3 (Keccak, Sponge-konstruksjon) er en annen konstruksjon uten de strukturelle svakhetene til SHA-2 (lengde-utvidelsesangrep). Begge er trygge for generell bruk; SHA-256 er mer utbredt.</p>
+    </div>
+  </div>
+</section>
+
+<section id="hmac">
+  <div class="container">
+    <div class="section-badge">02 · HMAC</div>
+    <h2><em>HMAC</em></h2>
+    <p class="section-intro">En hash gir integritet. HMAC gir autentisert integritet — bare den med nøkkelen kan produsere en gyldig MAC.</p>
+    <p class="lead">Tenk deg en pakkeforsendelse med et segl. Hashen er stempelet på pakken — alle kan se det, og alle kan beregne om det stemmer. HMAC er et segl med laklås — bare avsender og mottaker har lakken, og bare de kan lage eller verifisere et gyldig segl. En angriper som endrer pakken, kan ikke produsere et gyldig HMAC uten nøkkelen.</p>
+
+    <pre><code><span class="comment"># HMAC i Python</span>
+import hmac, hashlib, secrets
+
+key = secrets.token_bytes(32)  <span class="comment"># 256-bit nøkkel</span>
+msg = b"betaling:100kr:bruker42"
+
+mac = hmac.new(key, msg, hashlib.sha256).hexdigest()
+
+<span class="comment"># Verifiser (timing-safe sammenligning)</span>
+hmac.compare_digest(
+    hmac.new(key, msg, hashlib.sha256).hexdigest(),
+    mottatt_mac
+)</code></pre>
+
+    <p>Merk <code>compare_digest</code>: vanlig streng-sammenligning (<code>==</code>) er sårbar for timing-angrep der angriperen måler responstid for å gjette MAC-en byte for byte. <code>compare_digest</code> tar konstant tid uavhengig av hvor mange bytes som matcher.</p>
+  </div>
+</section>
+
+<section id="passordhashing">
+  <div class="container">
+    <div class="section-badge">03 · Passordhashing</div>
+    <h2>Passord<em>hashing</em></h2>
+    <p class="section-intro">Passord skal aldri lagres i klartekst. De skal heller ikke lagres med SHA-256. De skal hashes med algoritmer designet for å være trege.</p>
+    <p class="lead">SHA-256 er designet for å være rask — det er en dyd for integritetssjekking og signering. For passord er det en fatal svakhet. En moderne GPU beregner 10–20 milliarder SHA-256-hashes per sekund. En passordbase på 10 millioner kontoer kan cracles i løpet av timer. bcrypt, scrypt og Argon2 er designet med det motsatte målet: de er bevisst trege og ressurskrevende.</p>
+
+    <pre><code><span class="comment"># bcrypt — standard i mange web-frameworks</span>
+import bcrypt
+
+<span class="comment"># Lagre passord</span>
+hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12))
+
+<span class="comment"># Verifiser</span>
+bcrypt.checkpw(input_pw.encode(), hashed)  <span class="comment"># → True/False</span>
+
+<span class="comment"># Argon2id — anbefalt for nye systemer</span>
+from argon2 import PasswordHasher
+ph = PasswordHasher(time_cost=2, memory_cost=65536, parallelism=2)
+
+hashed = ph.hash(password)
+ph.verify(hashed, input_pw)  <span class="comment"># → True eller VerifyMismatchError</span></code></pre>
+
+    <table>
+      <thead><tr><th>Algoritme</th><th>Minne-hard</th><th>Anbefaling</th></tr></thead>
+      <tbody>
+        <tr><td>MD5 / SHA-1 / SHA-256</td><td>Nei</td><td class="mono-cell">Aldri til passord</td></tr>
+        <tr><td>bcrypt</td><td>Nei</td><td class="mono-cell">OK, rounds≥12</td></tr>
+        <tr><td>scrypt</td><td>Ja</td><td class="mono-cell">Bra</td></tr>
+        <tr><td>Argon2id</td><td>Ja</td><td class="mono-cell">Anbefalt (OWASP)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="salting">
+  <div class="container">
+    <div class="section-badge">04 · Salting</div>
+    <h2><em>Salting</em></h2>
+    <p class="section-intro">Salt er ikke ekstra sikkerhet på toppen av god hashing — det er en forutsetning for at passordhasher i det hele tatt skal ha verdi.</p>
+    <p class="lead">Uten salt gir to brukere med samme passord identiske hashes i databasen. En angriper med en database av 10 millioner hashes kan beregne en «rainbow table» — en forhåndsberegnet mapping fra passord til hash — og slå opp alle på millisekunder. Med unikt, tilfeldig salt per bruker er dette umulig: angriperen må beregne hashen separat for hvert passord, for hvert salt.</p>
+
+    <p>Moderne passordhashing-algoritmer (bcrypt, Argon2) genererer og lagrer salt automatisk — du trenger ikke håndtere det manuelt. Det er inkludert i den lagrede strengen: <code>$argon2id$v=19$m=65536,t=2,p=2$&lt;salt&gt;$&lt;hash&gt;</code>.</p>
+
+    <div class="callout callout-green">
+      <h4>Oppsummering</h4>
+      <p>Bruk Argon2id for nye systemer. Bruk bcrypt (rounds≥12) for eksisterende systemer der Argon2 ikke er tilgjengelig. Ha aldri <code>sha256(passord)</code> i produksjon. Salt inkluderes automatisk av alle anbefalte biblioteker.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

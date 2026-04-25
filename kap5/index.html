@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapittel 5 — Threat modeling</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="../" class="nav-back">&larr; Alle kapitler</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 5: Threat modeling">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 5 · Threat modeling</div>
+    <h1>Threat <em>modeling</em></h1>
+    <p class="lede">Strukturert angrep på ditt eget system — gjort før angriperne gjør det, og fortrinnsvis mens arkitekturen fortsatt lar seg endre.</p>
+  </div>
+</header>
+
+<nav class="chapter-toc">
+  <div class="container">
+    <ol class="chapter-toc-list">
+      <li><span class="toc-num">01</span><a href="#overblikk">Helhetsbilde</a></li>
+      <li><span class="toc-num">02</span><a href="#deler">Delsider</a></li>
+      <li><span class="toc-num">03</span><a href="#quiz">Test deg selv</a></li>
+    </ol>
+  </div>
+</nav>
+
+<section id="overblikk">
+  <div class="container">
+    <div class="section-badge">Overblikk</div>
+    <h2>Det store <em>bildet</em></h2>
+    <p class="section-intro">Threat modeling er ikke en pentest-rapport. Det er en designaktivitet som gjøres mens det er billig å endre noe.</p>
+    <p class="lead">Tenk deg at du er huseier og du vandrer rundt i huset ditt med en innbruddstyvs øyne. Du ser at kjellervinduer kan åpnes utenfra. Du ser at garasjeporten er synlig fra gaten og har en standard kode. Du ser at nøkkelen under dørmatta er der. Ingen av disse oppdagelsene er kompliserte. Men de krever at du bevisst tar på deg angriperens perspektiv — og det er det threat modeling er.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs><marker id="tma" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
+        <!-- Steg -->
+        <rect x="30" y="70" width="110" height="60" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="85" y="94" text-anchor="middle" font-weight="600" fill="#b04428">1. Modeller</text>
+        <text x="85" y="110" text-anchor="middle" fill="#6b6257">Lag DFD</text>
+        <text x="85" y="124" text-anchor="middle" fill="#6b6257">Identifiser assets</text>
+        <line x1="142" y1="100" x2="168" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#tma)"/>
+        <rect x="170" y="70" width="110" height="60" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="225" y="94" text-anchor="middle" font-weight="600" fill="#2d4a7a">2. Finn trusler</text>
+        <text x="225" y="110" text-anchor="middle" fill="#6b6257">STRIDE per</text>
+        <text x="225" y="124" text-anchor="middle" fill="#6b6257">DFD-element</text>
+        <line x1="282" y1="100" x2="308" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#tma)"/>
+        <rect x="310" y="70" width="110" height="60" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="365" y="94" text-anchor="middle" font-weight="600" fill="#3d6b3a">3. Analyser</text>
+        <text x="365" y="110" text-anchor="middle" fill="#6b6257">DREAD-score</text>
+        <text x="365" y="124" text-anchor="middle" fill="#6b6257">Prioriter</text>
+        <line x1="422" y1="100" x2="448" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#tma)"/>
+        <rect x="450" y="70" width="110" height="60" rx="3" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="505" y="94" text-anchor="middle" font-weight="600" fill="#c68a1f">4. Mitigeringsplan</text>
+        <text x="505" y="112" text-anchor="middle" fill="#6b6257">Kontroller per</text>
+        <text x="505" y="124" text-anchor="middle" fill="#6b6257">kategori</text>
+        <line x1="562" y1="100" x2="588" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#tma)"/>
+        <rect x="590" y="70" width="100" height="60" rx="3" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="640" y="94" text-anchor="middle" font-weight="600" fill="#b04428">5. Valider</text>
+        <text x="640" y="110" text-anchor="middle" fill="#6b6257">Test mot</text>
+        <text x="640" y="124" text-anchor="middle" fill="#6b6257">mitigasjoner</text>
+      </svg>
+      <figcaption>Threat modeling er en iterativ prosess — gjenta for hvert arkitekturer-endring, ikke bare én gang.</figcaption>
+    </figure>
+
+    <div class="callout callout-green">
+      <h4>Kapittelets kjerneidé</h4>
+      <p>Threat modeling er ikke et engangsprosjekt som leveres i en rapport. Det er en designpraksis som gjentas ved arkitekturendringer, nye features og etter hendelser. Jo tidligere det gjøres, desto billigere er endringene.</p>
+    </div>
+  </div>
+</section>
+
+<section id="deler">
+  <div class="container">
+    <div class="section-badge">Delsider</div>
+    <h2>Utforsk <em>kapittelet</em></h2>
+    <div class="subpage-list">
+      <a href="metodikk.html" class="subpage-card">
+        <div class="sp-icon">01–05</div>
+        <div class="sp-info">
+          <div class="sp-title">Metodikk og DFD</div>
+          <div class="sp-desc">Hva threat modeling er, Data Flow Diagrams, trust boundaries og PASTA-rammeverket.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="stride.html" class="subpage-card">
+        <div class="sp-icon">06–10</div>
+        <div class="sp-info">
+          <div class="sp-title">STRIDE og mitigasjoner</div>
+          <div class="sp-desc">De seks STRIDE-kategoriene, DREAD-scoring og mitigasjonsmatrise med konkrete kontroller.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="container">
+    <h2>Test deg <em>selv</em></h2>
+    <p class="section-intro">15 spørsmål om threat modeling, DFD og STRIDE.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 1 · Lett</div>
+      <div class="q-text">Hva betyr S-en i STRIDE?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Spoofing — at en angriper utgir seg for å være en annen identitet (bruker, tjeneste, IP-adresse). Mitigasjon: autentisering.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 2 · Lett</div>
+      <div class="q-text">Hva er et Data Flow Diagram (DFD)?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Et DFD er et diagram som viser prosesser (sirkler/rektangler), dataflyter (piler), datalagre (doble linjer) og eksterne entiteter (bokser) i et system — og trust boundaries (stiplede linjer) som skiller soner med ulik tillitsnivå.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 3 · Lett</div>
+      <div class="q-text">Hva er en trust boundary?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En trust boundary er en linje i DFD-et som skiller to soner med ulik tillitsnivå — f.eks. internett vs. intern tjeneste, eller bruker vs. admin. Dataflyter som krysser en trust boundary er høyrisikoflyter som trenger ekstra kontroller.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 4 · Lett</div>
+      <div class="q-text">Hva er DREAD?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">DREAD er et scoringsystem for trusler: <strong>D</strong>amage (skadeomfang), <strong>R</strong>eproducibility (gjentakbarhet), <strong>E</strong>xploitability (utnyttbarhet), <strong>A</strong>ffected users (antall berørte), <strong>D</strong>iscoverability (oppdagbarhet). Hver dimensjon scores 1–10; totalen brukes til å prioritere mitigasjoner.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 5 · Lett</div>
+      <div class="q-text">Hva er formålet med threat modeling?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Å identifisere potensielle trusler mot et system tidlig i designfasen, prioritere dem basert på risiko, og definere mitigasjoner — slik at sikkerhetsproblemer løses i arkitekturfasen fremfor i produksjon, der kost og risiko er langt høyere.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 6 · Middels</div>
+      <div class="q-text">Forklar Repudiation-trusselen (R i STRIDE) og hvilken kontroll som adresserer den.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Repudiation betyr at en bruker eller tjeneste kan nekte å ha utført en handling («jeg sendte ikke den transaksjonen»). Kontroll: uavviselig logging med kryptografisk signatur (digitale signaturer på loggoppføringer) og revisionsspor som bevarer hvem som gjorde hva og når — og som ikke kan endres i ettertid.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 7 · Middels</div>
+      <div class="q-text">Hva er forskjellen mellom STRIDE og PASTA?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>STRIDE</strong> er en trusselklassifisering — et sett kategorier du mappes trusler til for hvert DFD-element. Det er et verktøy, ikke en helhetlig prosess. <strong>PASTA</strong> (Process for Attack Simulation and Threat Analysis) er en komplett sjustegs-metodikk fra forretningsmål og applikasjon-DFD til angrepssimulering og risikoanalyse. STRIDE passer inn i steg 4–5 av PASTA.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8 · Middels</div>
+      <div class="q-text">Gi et eksempel på Elevation of Privilege i en webapplikasjon.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En vanlig bruker kaller <code>POST /api/users/42/promote</code> og endrer sin egen rolle til «admin» fordi endepunktet mangler rollesjekk på serversiden. Angriperen har eskalert privilegier uten autentiseringsfeil — kun ved å finne og kalle et endepunkt med manglende autorisasjonskontroll.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 9 · Middels</div>
+      <div class="q-text">Hva er DREAD-scoringens største svakhet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">DREAD-scoring er subjektiv — to team gir gjerne svært ulike scores for samme trussel. Den er vanskelig å kalibrere på tvers av organisasjoner og kan gi en falsk følelse av presisjon. Microsoft gikk bort fra DREAD til fordel for enklere Høy/Middels/Lav-vurderinger. CVSS er et mer standardisert alternativ for kjente sårbarheter.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 10 · Middels</div>
+      <div class="q-text">Hvorfor er threat modeling mer verdifullt gjort tidlig enn sent?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Kostnadene ved å endre en arkitektur er eksponentielt lavere under design enn under implementering eller i produksjon. En trust boundary som mangler i DFD-et kan legges til i et møte. Den samme endringen i produksjon krever infrastrukturendring, migrering og potensielt nedetid. «Defects are cheaper to fix earlier» gjelder spesielt for sikkerhetssårbarheter.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 11 · Vanskelig</div>
+      <div class="q-text">Et API-gateway videreformidler alle requests til backend-tjenester uten re-autentisering. Identifiser relevante STRIDE-kategorier og foreslå mitigasjoner.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Spoofing:</strong> en intern tjeneste kan sende forespørsler som om de kom fra en annen tjeneste. Mitigasjon: mTLS mellom gateway og backend. <strong>Tampering:</strong> en kompromittert intern tjeneste kan manipulere requests til andre tjenester. Mitigasjon: request-signering (HMAC) på sensitiv payload. <strong>Elevation of Privilege:</strong> et internt system som ikke skal ha admin-tilgang, kan kalle admin-endepunkter. Mitigasjon: gateway håndhever autorisasjon basert på kilde-identitet, ikke bare ekstern bruker-identitet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 12 · Vanskelig</div>
+      <div class="q-text">Forklar hvorfor Repudiation er vanskelig å adressere i et distribuert system uten sentralisert logging.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">I et distribuert system produserer hver tjeneste sine egne logger, potensielt i ulike formater og med ulik tidsstempelpresisjon. En angriper som kompromitterer én tjeneste, kan slette eller endre lokale logger. Uten sentralisert, immutabel logging (f.eks. SIEM, CloudTrail, append-only log store) er det umulig å rekonstruere en hendelsessekvens på tvers av tjenester. Dessuten: uten kryptografisk signering av loggoppføringer kan en angriper argumentere for at logger er manipulert.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 13 · Vanskelig</div>
+      <div class="q-text">En tjeneste bruker UUIDs som ressurs-IDer for å hindre IDOR. Er dette tilstrekkelig som eneste kontroll?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Nei. UUIDs gjør enumerering vanskeligere (tilfeldig 128-bit verdi), men de er ikke konfidensielle — de lekker i logger, URL-historikk, referrer-headere og feilmeldinger. En angriper med tilgang til én UUID (f.eks. via delt lenke) kan prøve den. Korrekt kontroll er alltid serversidekontroll av eierskap: <code>WHERE id = $1 AND owner_id = $current_user</code>. UUIDs er en defensiv forholdsregel, ikke en tilgangskontroll.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 14 · Vanskelig</div>
+      <div class="q-text">Hva er forskjellen på en trusselmodell-identifisert sårbarhet og en SAST-funnet sårbarhet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En <strong>trusselmodell-sårbarhet</strong> er en strukturell eller arkitektonisk svakhet — f.eks. manglende autentisering mellom tjenester, eller en trust boundary som krysses uten kryptering. Den finnes ved å tenke på systemet som helhet. En <strong>SAST-sårbarhet</strong> er en implementeringsfeil i koden — f.eks. SQL injection på linje 42 i en spesifikk fil. SAST finner kode-feil; threat modeling finner design-feil. Begge trengs, og de finner ulike ting.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 15 · Vanskelig</div>
+      <div class="q-text">Hva er «abuse cases» og hvorfor er de nyttige i threat modeling?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Abuse cases (eller misuse cases) er use cases skrevet fra angriperens perspektiv: «som en angriper ønsker jeg å omgå autentisering for å få tilgang til andres data». De komplementerer threat modeling ved å knytte trusler til konkrete brukerscenarier og gjøre dem lettere å kommunisere til utviklere og produkteiere. De hjelper også med å prioritere: en abuse case som rammer mange brukere er høyere prioritet enn en som rammer svært få.</div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sikkerhetstesting — Kapittel 6</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 6</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 6: Risikohåndtering og SDL">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 6 · Sikkerhetstesting</div>
+    <h1>Sikkerhets<em>testing</em></h1>
+    <p class="lede">Automatiserte verktøy og menneskelig analyse er komplementære — ingen av dem er tilstrekkelig alene.</p>
+    <nav class="toc">
+      <a href="#sast-detail"><span class="toc-num">01</span>SAST</a>
+      <a href="#dast-detail"><span class="toc-num">02</span>DAST</a>
+      <a href="#iast"><span class="toc-num">03</span>IAST</a>
+      <a href="#fuzzing"><span class="toc-num">04</span>Fuzz testing</a>
+    </nav>
+  </div>
+</header>
+
+<section id="sast-detail">
+  <div class="container">
+    <div class="section-badge">01 · SAST</div>
+    <h2><em>SAST</em></h2>
+    <p class="section-intro">Static Application Security Testing analyserer kildekoden uten å kjøre applikasjonen — rask, integrert i IDE og CI.</p>
+    <p class="lead">SAST-verktøy bygger et Abstract Syntax Tree (AST) av koden og kjører analyser over det. Taint tracking følger data fra brukerinput (source) gjennom koden til potensielt farlige operasjoner (sink) — f.eks. fra <code>request.GET['q']</code> til en SQL-spørring uten parameterisering. Hvis det finnes en flyt fra source til sink uten sanitering, rapporteres det som en sårbarhet.</p>
+
+    <table>
+      <thead><tr><th>Verktøy</th><th>Styrke</th><th>Svakhet</th></tr></thead>
+      <tbody>
+        <tr><td>SonarQube</td><td>Bredt språkstøtte, integrering i IDE og CI</td><td>Høy false positive rate uten kalibrering</td></tr>
+        <tr><td>CodeQL (GitHub)</td><td>Kraftig spørringsspråk, lav false positiv rate</td><td>Langsomt for store kodebaser</td></tr>
+        <tr><td>Semgrep</td><td>Rask, egendefinerte regler, lav barriere</td><td>Enklere analysemodell (mønstermatch)</td></tr>
+      </tbody>
+    </table>
+
+    <p>Integrering i praksis:</p>
+    <ul>
+      <li>Kjør SAST på hvert commit og PR — gi resultater som PR-kommentarer.</li>
+      <li>Blokker merge på kritiske og høy-alvorlighets funn med lav false positive rate.</li>
+      <li>Supprimer kjente falske positiver med annotasjoner i koden (<code>// nosec</code>, <code>@SuppressWarnings</code>).</li>
+      <li>Mål og forbedre false positive rate over tid.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="dast-detail">
+  <div class="container">
+    <div class="section-badge">02 · DAST</div>
+    <h2><em>DAST</em></h2>
+    <p class="section-intro">Dynamic Application Security Testing tester applikasjonen utenfra mens den kjører — simulerer en angriper uten kildekodekjennskap.</p>
+    <p class="lead">DAST-verktøy sender HTTP-forespørsler til applikasjonen, analyserer svarene og leter etter indikatorene på kjente sårbarhetsmønstre: XSS-payload i reflekterte svar, SQL-feilmeldinger ved injection, SSRF-forespørsler til interne adresser. DAST krever en kjørende staging-applikasjon og er tregere enn SAST.</p>
+
+    <p>Hva DAST finner som SAST ikke ser:</p>
+    <ul>
+      <li>Sesjonshåndteringsfeil (manglende cookie-flagg, forutsigbare session-tokens).</li>
+      <li>Eksponerte endepunkter som ikke er dokumentert i koden (admin-ruter, debug-endepunkter).</li>
+      <li>Transport-sikkerhet (TLS-konfigurasjoner, HTTP-redirect-kjedene).</li>
+      <li>Kjøretids-XSS og CSRF som avhenger av applikasjonstilstand.</li>
+    </ul>
+
+    <p>OWASP ZAP er det mest brukte open-source DAST-verktøyet. Det har en automated scan-modus for CI/CD og en interaktiv modus for manuell testing. Burp Suite er standarden for manuelle penetrasjonstester.</p>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>DAST kan ikke finne logiske tilgangskontrollfeil — det vet ikke at bruker A ikke skal se bruker Bs data. Det krever manuell testing eller business-logic-bevisst testing. Se Kapittel 2 (IDOR).</p>
+    </div>
+  </div>
+</section>
+
+<section id="iast">
+  <div class="container">
+    <div class="section-badge">03 · IAST</div>
+    <h2><em>IAST</em></h2>
+    <p class="section-intro">Interactive Application Security Testing kombinerer statisk og dynamisk analyse ved å instrumentere applikasjonen under kjøring.</p>
+    <p class="lead">IAST installerer en agent i applikasjonens runtime som overvåker kodekjøring mens funksjonelle tester kjøres. Agenten ser både input (fra tester) og kodeflyt (intern) — og kan identifisere sårbarheter med langt lavere false positive rate enn SAST, fordi den vet nøyaktig hvilken kode som faktisk kjøres under hvilke forutsetninger.</p>
+    <p>Fordelen: høy nøyaktighet og lave false positiver. Ulempen: krever en agent i applikasjonsruntimen, som ikke alltid er mulig (microservices med mange språk, produksjonsmiljøer). Passer best i test-/staging-miljøer der funksjonelle tester kjøres.</p>
+  </div>
+</section>
+
+<section id="fuzzing">
+  <div class="container">
+    <div class="section-badge">04 · Fuzz testing</div>
+    <h2>Fuzz <em>testing</em></h2>
+    <p class="section-intro">Fuzzing genererer inndata automatisk — og finner feil ingen tenkte på å teste for manuelt.</p>
+    <p class="lead">En fuzzer sender enorme mengder tilfeldig eller semi-tilfeldig inndata til et system og observerer om det krasjer, henger, lekker minne eller oppfører seg uventet. Coverage-guided fuzzing (AFL++, libFuzzer) instrumenterer koden for å måle hvilke kodestier inputen tar — og genererer nye inputs designet for å treffe ubesøkte stier. Google har brukt dette til å finne tusenvis av sårbarheter i open-source kode via OSS-Fuzz.</p>
+
+    <pre><code><span class="comment"># Strukturert fuzzing med Hypothesis (Python)</span>
+from hypothesis import given, strategies as st
+
+@given(st.text())
+def test_parser_not_crash(input_str):
+    <span class="comment"># Parseren skal ikke krasje uavhengig av input</span>
+    try:
+        parse_config(input_str)
+    except ValueError:
+        pass  <span class="comment"># Forventet feil er ok</span>
+    <span class="comment"># Uventet exception her = sårbarhet</span></code></pre>
+
+    <p>Fuzzing er spesielt effektivt for:</p>
+    <ul>
+      <li>Parsere (JSON, XML, binærformater, protokoller).</li>
+      <li>Kompressorer og kryptobiblioteker.</li>
+      <li>Input-behandling i nettapplikasjoner (filoppasting, API-endepunkter).</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>Oppsummering</h4>
+      <p>Ingen enkelt testmetode finner alt. SAST finner implementeringsfeil tidlig. DAST finner kjøretidsfeil utenfra. IAST kombinerer begge med høy nøyaktighet. Fuzzing finner det ingen tenkte på. Manuell penetrasjonstest finner logiske feil. Bruk dem lagvis.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

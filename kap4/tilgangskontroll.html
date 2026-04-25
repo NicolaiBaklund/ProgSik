@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tilgangskontroll — Kapittel 4</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 4</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 4: Autentisering og autorisasjon">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 4 · Tilgangskontroll</div>
+    <h1>Tilgangs<em>kontroll</em></h1>
+    <p class="lede">RBAC, ABAC og zero trust — tre modeller for å svare på spørsmålet «hva får du lov til?» med varierende grad av kontekstbevissthet.</p>
+    <nav class="toc">
+      <a href="#rbac"><span class="toc-num">01</span>RBAC</a>
+      <a href="#abac"><span class="toc-num">02</span>ABAC og policy-motorer</a>
+      <a href="#zero-trust"><span class="toc-num">03</span>Zero trust</a>
+      <a href="#least-privilege-praksis"><span class="toc-num">04</span>Least privilege i praksis</a>
+    </nav>
+  </div>
+</header>
+
+<section id="rbac">
+  <div class="container">
+    <div class="section-badge">01 · RBAC</div>
+    <h2><em>RBAC</em></h2>
+    <p class="section-intro">Role-Based Access Control er den mest utbredte tilgangskontrollmodellen — enkel å forstå, men kan lide av rolle-eksplosjon.</p>
+    <p class="lead">RBAC tildeler tillatelser til roller, ikke til individuelle brukere. En bruker tildeles én eller flere roller, og arver rollens tillatelser. En <em>editor</em> kan redigere innhold. En <em>viewer</em> kan bare lese. En <em>admin</em> kan gjøre alt. Dette er mye enklere å administrere enn å sette tillatelser per bruker — men «admin»-rollen vokser seg fort til å inneholde 200 tillatelser ingen har oversikt over.</p>
+
+    <p>Vanlige RBAC-problemer:</p>
+    <ul>
+      <li><strong>Rolle-eksplosjon:</strong> over tid opprettes stadig nye roller fordi eksisterende ikke passer nøyaktig nok.</li>
+      <li><strong>Privilege creep:</strong> brukere akkumulerer roller over tid uten at gamle fjernes ved jobbskifte.</li>
+      <li><strong>Grov granularitet:</strong> rollen «editor» kan kanskje redigere alle dokumenter — inkludert andres.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>RBAC løser «hvilken type bruker har tilgang?», men ikke «har denne spesifikke brukeren tilgang til dette spesifikke objektet?». Det siste krever eierskapssjekk (ABAC) eller dedikert tilgangslogikk per ressurs.</p>
+    </div>
+  </div>
+</section>
+
+<section id="abac">
+  <div class="container">
+    <div class="section-badge">02 · ABAC og policy-motorer</div>
+    <h2>ABAC og <em>policy-motorer</em></h2>
+    <p class="section-intro">ABAC lar deg uttrykke tilgangskontroll som policyregler basert på attributter — bruker, ressurs, handling og kontekst.</p>
+    <p class="lead">Tenk deg at du vil uttrykke: «En bruker kan redigere et dokument hvis de er enten eier av dokumentet, eller har rollen «senior-editor» og dokumentet er i «draft»-status». Med RBAC alene er dette vanskelig. Med ABAC er det en policy-regel: <code>user.role == "senior-editor" AND document.status == "draft" OR user.id == document.owner_id</code>.</p>
+
+    <p>To populære open-source policy-motorer:</p>
+    <ul>
+      <li><strong>OPA (Open Policy Agent):</strong> policy-motor med Rego-språk. Dekobler policy fra kode — kjøres som sidecar eller separat tjeneste. Brukes i Kubernetes admission control, API-gateway og microservices.</li>
+      <li><strong>Cedar (Amazon):</strong> purpose-built authorization policy language. Støtter formal verifikasjon av policy — du kan bevise at visse tilgangspolicyer er konsistente.</li>
+    </ul>
+
+    <pre><code><span class="comment"># OPA Rego-policy eksempel</span>
+allow {
+    input.user.role == "senior-editor"
+    input.document.status == "draft"
+}
+
+allow {
+    input.user.id == input.document.owner_id
+}</code></pre>
+  </div>
+</section>
+
+<section id="zero-trust">
+  <div class="container">
+    <div class="section-badge">03 · Zero trust</div>
+    <h2>Zero <em>trust</em></h2>
+    <p class="section-intro">«Never trust, always verify» — et paradigmeskifte fra perimeter-basert til identitetsbasert sikkerhet.</p>
+    <p class="lead">Tradisjonell nettverkssikkerhet antok at alt innenfor brannmuren var trygt. Zero trust forkaster denne antagelsen: enhver forespørsel, uavhengig av opprinnelse (intern eller ekstern), verifiseres eksplisitt. Nettverksposisjon gir ingen implisitt tillit. Dette er spesielt viktig i en verden med skybaserte systemer, remote-arbeid og microservices der «innsiden» ikke lenger er veldefinert.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Tradisjonell -->
+        <text x="180" y="20" text-anchor="middle" font-weight="600" fill="#b04428">Tradisjonell perimeter</text>
+        <ellipse cx="180" cy="120" rx="140" ry="80" fill="rgba(176,68,40,0.06)" stroke="#b04428" stroke-width="2" stroke-dasharray="6,4"/>
+        <text x="180" y="95" text-anchor="middle" font-size="11" fill="#a39886">«betrodd intern sone»</text>
+        <rect x="120" y="105" width="120" height="30" rx="2" fill="rgba(176,68,40,0.12)" stroke="#b04428" stroke-width="1"/>
+        <text x="180" y="124" text-anchor="middle" fill="#b04428">Alt internt = trygt</text>
+
+        <!-- Zero trust -->
+        <text x="540" y="20" text-anchor="middle" font-weight="600" fill="#3d6b3a">Zero trust</text>
+        <rect x="430" y="60" width="80" height="40" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="470" y="82" text-anchor="middle" font-size="11" fill="#3d6b3a">Tjeneste A</text>
+        <rect x="560" y="60" width="80" height="40" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="600" y="82" text-anchor="middle" font-size="11" fill="#3d6b3a">Tjeneste B</text>
+        <rect x="430" y="140" width="80" height="40" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="470" y="162" text-anchor="middle" font-size="11" fill="#3d6b3a">Database</text>
+        <rect x="560" y="140" width="80" height="40" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="600" y="162" text-anchor="middle" font-size="11" fill="#3d6b3a">API</text>
+        <!-- mTLS-linjer -->
+        <line x1="512" y1="80" x2="558" y2="80" stroke="#2d4a7a" stroke-width="1.5"/>
+        <line x1="470" y1="102" x2="470" y2="138" stroke="#2d4a7a" stroke-width="1.5"/>
+        <line x1="512" y1="160" x2="558" y2="160" stroke="#2d4a7a" stroke-width="1.5"/>
+        <line x1="600" y1="102" x2="600" y2="138" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="535" y="110" text-anchor="middle" font-size="10" fill="#2d4a7a" font-style="italic">mTLS / verifisert</text>
+        <text x="535" y="196" text-anchor="middle" font-size="11" fill="#3d6b3a">Hvert kall verifiseres</text>
+      </svg>
+      <figcaption>Tradisjonell perimeter-sikkerhet vs. zero trust — i zero trust verifiseres hvert enkelt kommunikasjonskall uavhengig av nettverksposisjon.</figcaption>
+    </figure>
+
+    <p>Zero trust i praksis: sterk autentisering for alle tilganger (MFA, FIDO2), kryptert kommunikasjon mellom alle tjenester (mTLS), minste nødvendige tilgang, kontinuerlig validering av enhetshelse (MDM, EDR) og logging av alle tilgangshendelser.</p>
+  </div>
+</section>
+
+<section id="least-privilege-praksis">
+  <div class="container">
+    <div class="section-badge">04 · Least privilege</div>
+    <h2>Least privilege i <em>praksis</em></h2>
+    <p class="section-intro">Least privilege er et prinsipp som lett vedtas og vanskelig håndheves — uten aktiv innsats vokser tilgangene.</p>
+    <p class="lead">En utvikler trenger produksjonstilgang én gang for å feilsøke en kritisk feil. Det opprettes en permanent admin-konto. Seks måneder senere jobber utvikleren i et annet team, men kontoen eksisterer fortsatt. Dette er privilege creep — den stille akkumuleringen av tilganger som ingen har oversikt over. Løsningen er systematisk: regelmessige access reviews, JIT-tilgang for sensitiv infrastruktur, og automatisk utløp for midlertidige tilganger.</p>
+
+    <ul>
+      <li><strong>Tjeneste-til-tjeneste:</strong> en mikrotjeneste som leser fra en database trenger ikke skriverettigheter — to separate DB-brukere.</li>
+      <li><strong>Cloud IAM:</strong> bruk resource-baserte policies fremfor tillatelse på konto-nivå. En Lambda-funksjon trenger tilgang til spesifikke S3-nøkler, ikke hele bucketen.</li>
+      <li><strong>JIT-tilgang:</strong> produksjons-SSH og cloud-konsoll-tilgang innvilges midlertidig (30 min–2 timer) via PAM-verktøy (HashiCorp Vault, AWS IAM Identity Center), med logging.</li>
+      <li><strong>Access reviews:</strong> kvartalsvise gjennomganger av hvem som har hvilke tilganger — med automatisk fjerning av ubrukte tilganger.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>Deny by default</h4>
+      <p>Start med å nekte alt. Innvilg eksplisitt og dokumentert. Det er lettere enn å prøve å trekke tilbake tilganger etter at systemet har vokst — fordi «vi vet ikke om det trengs» alltid vinner i tvistssaker.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

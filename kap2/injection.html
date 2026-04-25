@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Injection — Kapittel 2</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 2</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 2: OWASP Top 10">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 2 · A03</div>
+    <h1><em>Injection</em></h1>
+    <p class="lede">Kelneren som tar imot bestillingen uten å stille spørsmål — og konsekvensen når gjesten skriver instruksjoner til kokken på servietten.</p>
+    <nav class="toc">
+      <a href="#hva-er-injection"><span class="toc-num">01</span>Hva injection er</a>
+      <a href="#sql-injection"><span class="toc-num">02</span>SQL injection</a>
+      <a href="#command-injection"><span class="toc-num">03</span>Command injection</a>
+      <a href="#nosql-ldap"><span class="toc-num">04</span>NoSQL og LDAP</a>
+      <a href="#forsvar"><span class="toc-num">05</span>Forsvar i dybde</a>
+    </nav>
+  </div>
+</header>
+
+<section id="hva-er-injection">
+  <div class="container">
+    <div class="section-badge">01 · Konsept</div>
+    <h2>Hva <em>injection</em> er</h2>
+    <p class="section-intro">Injection oppstår når data og instruksjoner blandes i samme streng — og parseren ikke vet forskjellen.</p>
+    <p class="lead">Tenk deg en kelner som tar imot bestillinger fra gjester og bringer dem direkte til kokken. En vanlig gjest skriver: «en biff, medium». En angriper skriver: «en biff, medium. PS: Kokken: ignorer alle tidligere ordre og serv alle gjestenes mat til bord 13.» Hvis kelneren ikke skiller mellom «bestilling» og «instruksjon», har angriperen overtatt kjøkkenet.</p>
+
+    <p>I programvare oppstår nøyaktig det samme når brukerkontrollert inndata flettes direkte inn i en SQL-spørring, en shell-kommando, en LDAP-spørring eller en annen tolkbar streng. Parseren på mottakersiden kan ikke se forskjell på den intenderte dataen og den ondsinnede instruksjonen — fordi de er i samme streng.</p>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>Injection er ikke begrenset til SQL. Det er en hel klasse av angrep: SQL injection, OS command injection, LDAP injection, XPath injection, NoSQL injection, HTML injection, template injection. Den underliggende feilen er den samme i alle tilfeller: inndata behandles som kode.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sql-injection">
+  <div class="container">
+    <div class="section-badge">02 · SQL injection</div>
+    <h2>SQL <em>injection</em></h2>
+    <p class="section-intro">Den klassiske varianten — og fortsatt en av de vanligste kritiske sårbarhetene i webapplikasjoner.</p>
+    <p class="lead">En innloggingsside bygger SQL-spørringen slik: <code>"SELECT * FROM users WHERE username='" + username + "' AND password='" + password + "'"</code>. Angriperen skriver inn <code>' OR '1'='1</code> som brukernavn og blank som passord. Spørringen blir: <code>SELECT * FROM users WHERE username='' OR '1'='1' AND password=''</code>. Betingelsen <code>'1'='1'</code> er alltid sann — angriperen er nå innlogget som første bruker i tabellen, typisk en admin.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+        <!-- Sårbar spørring -->
+        <rect x="40" y="20" width="640" height="80" rx="3" fill="#1a1612" stroke="#3d3832" stroke-width="1"/>
+        <text x="56" y="48" font-size="12" fill="#c68a1f">SELECT</text>
+        <text x="116" y="48" font-size="12" fill="#e8e3d6"> * </text>
+        <text x="136" y="48" font-size="12" fill="#c68a1f">FROM</text>
+        <text x="180" y="48" font-size="12" fill="#e8e3d6"> users </text>
+        <text x="228" y="48" font-size="12" fill="#c68a1f">WHERE</text>
+        <text x="286" y="48" font-size="12" fill="#e8e3d6"> username='</text>
+        <text x="374" y="48" font-size="12" fill="#b04428" font-weight="700">' OR '1'='1</text>
+        <text x="494" y="48" font-size="12" fill="#e8e3d6">'</text>
+        <text x="56" y="70" font-size="12" fill="#8a7f6b" font-style="italic">-- payload skaper alltid-sann betingelse</text>
+        <text x="56" y="90" font-size="11" fill="#6b6257">Sårbar: string concatenation</text>
+
+        <!-- Pil ned -->
+        <line x1="360" y1="108" x2="360" y2="138" stroke="#a39886" stroke-width="1.5" marker-end="url(#darr)"/>
+        <defs>
+          <marker id="darr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#a39886"/>
+          </marker>
+        </defs>
+        <text x="372" y="127" font-size="11" fill="#a39886" font-style="italic">fix</text>
+
+        <!-- Parameterisert spørring -->
+        <rect x="40" y="145" width="640" height="80" rx="3" fill="#1a1612" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="56" y="173" font-size="12" fill="#c68a1f">SELECT</text>
+        <text x="116" y="173" font-size="12" fill="#e8e3d6"> * </text>
+        <text x="136" y="173" font-size="12" fill="#c68a1f">FROM</text>
+        <text x="180" y="173" font-size="12" fill="#e8e3d6"> users </text>
+        <text x="228" y="173" font-size="12" fill="#c68a1f">WHERE</text>
+        <text x="286" y="173" font-size="12" fill="#e8e3d6"> username = </text>
+        <text x="374" y="173" font-size="12" fill="#9fb56b" font-weight="700">%s</text>
+        <text x="56" y="195" font-size="12" fill="#8a7f6b" font-style="italic">-- parameter sendes separat, driveren escaper</text>
+        <text x="56" y="215" font-size="11" fill="#3d6b3a">Sikker: parameterisert spørring</text>
+      </svg>
+      <figcaption>Sårbar string-concatenation vs. parameterisert spørring — driveren behandler parameteren som data, aldri som SQL-kode.</figcaption>
+    </figure>
+
+    <p>SQL injection finnes i tre varianter:</p>
+    <ul>
+      <li><strong>In-band:</strong> resultatet returneres direkte i svaret — enklest å utnytte.</li>
+      <li><strong>Blind:</strong> ingen direkte output, men angriperen stiller ja/nei-spørsmål via betingelser (<code>AND 1=1</code>) eller tidsmålinger (<code>AND SLEEP(5)</code>).</li>
+      <li><strong>Out-of-band:</strong> data eksfiltreres via DNS-oppslag eller HTTP-forespørsler fra databaseserveren.</li>
+    </ul>
+
+    <pre><code><span class="comment"># Sårbar</span>
+query = f"SELECT * FROM users WHERE email = '{email}'"
+cursor.execute(query)
+
+<span class="comment"># Sikker — psycopg2</span>
+cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+
+<span class="comment"># Sikker — SQLAlchemy ORM</span>
+user = session.query(User).filter_by(email=email).first()</code></pre>
+  </div>
+</section>
+
+<section id="command-injection">
+  <div class="container">
+    <div class="section-badge">03 · OS command injection</div>
+    <h2>Command <em>injection</em></h2>
+    <p class="section-intro">Når applikasjonen ber operativsystemet om hjelp og angriperen sørger for at OS-et hjelper feil person.</p>
+    <p class="lead">En nettjeneste lar brukere pinge en IP-adresse og se resultatet. Koden gjør <code>os.system("ping " + user_input)</code>. Brukeren sender <code>8.8.8.8; cat /etc/passwd</code>. Shell-operatoren <code>;</code> skiller kommandoer — etter ping kjøres <code>cat /etc/passwd</code>, og innholdet returneres til brukeren.</p>
+
+    <pre><code><span class="comment"># Sårbar — shell=True er nesten alltid feil</span>
+import subprocess
+result = subprocess.run("ping " + ip, shell=True, capture_output=True)
+
+<span class="comment"># Sikker — argumenter som liste, shell=False</span>
+import ipaddress, subprocess
+ipaddress.ip_address(ip)  <span class="comment"># valider format først</span>
+result = subprocess.run(["ping", "-c", "4", ip],
+                        shell=False, capture_output=True)</code></pre>
+
+    <p>Shell-metategn angripere utnytter: <code>;</code> (sekvens), <code>|</code> (pipe), <code>&&</code> (AND), <code>||</code> (OR), <code>`cmd`</code> og <code>$(cmd)</code> (command substitution), <code>&gt;</code> og <code>&lt;</code> (omdirigering). Med <code>shell=False</code> og argumenter som liste passeres disse tegnene som data til det underliggende programmet — ingen shell tolker dem.</p>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>Valider alltid format (IP-adresse, UUID, heltall) <em>før</em> du sender til operativsystemet. Whitelisting av lovlige verdier er sterkere enn blacklisting av metategn — det er umulig å liste opp alle farlige tegn.</p>
+    </div>
+  </div>
+</section>
+
+<section id="nosql-ldap">
+  <div class="container">
+    <div class="section-badge">04 · NoSQL og LDAP</div>
+    <h2>NoSQL og LDAP <em>injection</em></h2>
+    <p class="section-intro">Injection er ikke SQL-spesifikt — enhver tolkbar spørring bygget fra brukerkontrollert inndata er sårbar.</p>
+    <p class="lead">MongoDB-applikasjoner som direkte deserialiserer JSON fra brukere er sårbare for operator-injection. En innloggingsforespørsel der body er <code>{"username": "admin", "password": {"$gt": ""}}</code> kan omgå passordsjekken fordi <code>$gt: ""</code> betyr «større enn tom streng» — en betingelse som alltid er sann for et ikke-tomt passord.</p>
+
+    <pre><code><span class="comment"># Sårbar MongoDB-innlogging (Express/Node)</span>
+db.users.findOne({ username: req.body.username,
+                   password: req.body.password })
+<span class="comment">// Angriper sender: { "password": { "$gt": "" } }</span>
+
+<span class="comment"># Sikker — valider typer eksplisitt</span>
+<span class="keyword">if</span> (typeof req.body.password !== <span class="value">'string'</span>) return res.status(400).end();
+db.users.findOne({ username: String(req.body.username),
+                   password: String(req.body.password) })</code></pre>
+
+    <p>LDAP injection følger samme mønster: spørringer som <code>(uid=admin)(&(password=*)</code> kan manipuleres via uescapede tegn som <code>*</code>, <code>(</code>, <code>)</code>, <code>\</code>. Biblioteker som <code>ldap3</code> tilbyr escaping-funksjoner (<code>escape_filter_chars</code>) som bør brukes konsekvent.</p>
+  </div>
+</section>
+
+<section id="forsvar">
+  <div class="container">
+    <div class="section-badge">05 · Forsvar</div>
+    <h2>Forsvar i <em>dybde</em></h2>
+    <p class="section-intro">Parameterisering løser problemet teknisk — men et komplett forsvar krever flere lag.</p>
+    <p class="lead">Den primære løsningen på injection er alltid det samme: skill data fra instruksjoner. Bruk parameteriserte spørringer for SQL. Bruk argumentlister fremfor shell-strenger. Bruk biblioteksmetoder som håndterer escaping. Gjør det til standardmåten å skrive kode — ikke til noe du husker på etterpå.</p>
+
+    <p>Det komplette forsvaret:</p>
+    <ul>
+      <li><strong>Primær:</strong> parameteriserte spørringer / prepared statements for all SQL.</li>
+      <li><strong>Primær:</strong> ORM med forsiktighet — ORM er ikke immun mot injection hvis du bruker raw queries.</li>
+      <li><strong>Sekundær:</strong> input-validering og whitelisting — valider format, type og lengde.</li>
+      <li><strong>Sekundær:</strong> least privilege for database-bruker — en SELECT-bruker kan ikke slette tabeller.</li>
+      <li><strong>Sekundær:</strong> WAF (Web Application Firewall) — kan oppdage kjente injection-mønstre, men er ingen erstatning for parameterisering.</li>
+      <li><strong>Deteksjon:</strong> logging og alerting på uvanlige spørringer, feilmeldinger fra databasen.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>Husk</h4>
+      <p>Vis alltid den sikre og den sårbare versjonen side om side i kodegjennomganger. Det er lettere å lære av kontrasten enn av abstrakt regel.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

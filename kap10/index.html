@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapittel 10 — Statisk analyse og AI-sikkerhet</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="../" class="nav-back">&larr; Alle kapitler</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 10: Statisk analyse og AI-sikkerhet">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 10 · SAST og AI</div>
+    <h1>Statisk analyse og <em>AI-sikkerhet</em></h1>
+    <p class="lede">Automatiserte verktøy finner det systematiske. Det menneskelige blikket finner resten — og AI-modeller endrer nå rollene til begge.</p>
+  </div>
+</header>
+
+<nav class="chapter-toc">
+  <div class="container">
+    <ol class="chapter-toc-list">
+      <li><span class="toc-num">01</span><a href="#overblikk">Helhetsbilde</a></li>
+      <li><span class="toc-num">02</span><a href="#deler">Delsider</a></li>
+      <li><span class="toc-num">03</span><a href="#quiz">Test deg selv</a></li>
+    </ol>
+  </div>
+</nav>
+
+<section id="overblikk">
+  <div class="container">
+    <div class="section-badge">Overblikk</div>
+    <h2>Det store <em>bildet</em></h2>
+    <p class="section-intro">SAST og AI representerer to ulike tilnærminger til automatisert sikkerhetstesting — og de har overlappende, men ikke identiske blindsoner.</p>
+    <p class="lead">SAST-verktøy som CodeQL og Semgrep analyserer kode via AST-analyse og dataflyt-tracking. De er gode på kjente sårbarhetsmønstre og systematiske feil. AI-baserte kodevurderinger er gode på kontekstuell forståelse og varianter av kjente mønstre. Ingen av dem finner logiske feil som krever forretningskontekstuell forståelse — den resten er menneskelig kodegjennomgang.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <text x="180" y="20" text-anchor="middle" font-weight="600" fill="#2d4a7a">SAST (statisk)</text>
+        <text x="540" y="20" text-anchor="middle" font-weight="600" fill="#b04428">Menneskelig gjennomgang</text>
+        <!-- Venn-diagram -->
+        <ellipse cx="260" cy="100" rx="180" ry="60" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <ellipse cx="460" cy="100" rx="180" ry="60" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <!-- Labels -->
+        <text x="150" y="96" text-anchor="middle" font-size="11" fill="#2d4a7a">Injection,</text>
+        <text x="150" y="112" text-anchor="middle" font-size="11" fill="#2d4a7a">XSS-mønstre</text>
+        <text x="360" y="89" text-anchor="middle" font-size="11" fill="#3d6b3a">Krypto-</text>
+        <text x="360" y="103" text-anchor="middle" font-size="11" fill="#3d6b3a">feil</text>
+        <text x="360" y="117" text-anchor="middle" font-size="11" fill="#3d6b3a">(begge)</text>
+        <text x="570" y="96" text-anchor="middle" font-size="11" fill="#b04428">Logiske</text>
+        <text x="570" y="112" text-anchor="middle" font-size="11" fill="#b04428">tilgangsfeil</text>
+        <text x="360" y="160" text-anchor="middle" font-size="11" fill="#a39886" font-style="italic">AI-assistert analyse overlapper begge sider</text>
+      </svg>
+      <figcaption>SAST og menneskelig gjennomgang finner ulike ting — AI-assistert analyse fyller noen gap, men ikke alle.</figcaption>
+    </figure>
+
+    <div class="callout callout-green">
+      <h4>Kapittelets kjerneidé</h4>
+      <p>SAST er ikke en erstatning for kodegjennomgang. Kodegjennomgang er ikke en erstatning for SAST. Begge trengs, og AI-assistert analyse er et tredje verktøy — ikke et som erstatter de to andre.</p>
+    </div>
+  </div>
+</section>
+
+<section id="deler">
+  <div class="container">
+    <div class="section-badge">Delsider</div>
+    <h2>Utforsk <em>kapittelet</em></h2>
+    <div class="subpage-list">
+      <a href="sast.html" class="subpage-card">
+        <div class="sp-icon">01–05</div>
+        <div class="sp-info">
+          <div class="sp-title">SAST</div>
+          <div class="sp-desc">Taint tracking, AST-analyse, SonarQube/CodeQL/Semgrep, integrering i CI/CD og håndtering av falske positiver.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="ai-sikkerhet.html" class="subpage-card">
+        <div class="sp-icon">06–09</div>
+        <div class="sp-info">
+          <div class="sp-title">AI-sikkerhet</div>
+          <div class="sp-desc">Adversarial ML, model stealing, AI i sikkerhetsvurderinger og risiko ved AI-generert kode.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="container">
+    <h2>Test deg <em>selv</em></h2>
+    <p class="section-intro">15 spørsmål om statisk analyse og AI-sikkerhet.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 1 · Lett</div>
+      <div class="q-text">Hva er SAST?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Static Application Security Testing — analyse av kildekode uten å kjøre applikasjonen. Verktøyet bygger en abstrakt representasjon av koden (AST) og søker etter kjente sårbarhetsmønstre. Kan integreres i IDE og CI/CD-pipeline.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 2 · Lett</div>
+      <div class="q-text">Hva er taint tracking?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Taint tracking er en SAST-teknikk som følger data fra brukerkontrollerte kilder (sources — f.eks. <code>request.GET['q']</code>) gjennom programflyten til potensielt farlige operasjoner (sinks — f.eks. en SQL-spørring). Hvis det finnes en sti fra source til sink uten sanitering, rapporteres det som en sårbarhet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 3 · Lett</div>
+      <div class="q-text">Hva er en falsk positiv?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En falsk positiv (false positive) i SAST er en varsling om en sårbarhet som ikke er reell — verktøyet har klassifisert trygg kode som sårbar. Høy rate av falske positiver fører til alert fatigue der utviklere ignorerer varsler, noe som gjør at ekte sårbarheter kan overses.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 4 · Lett</div>
+      <div class="q-text">Hva er adversarial ML?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Adversarial machine learning er angrep mot ML-modeller. De vanligste typene: evasion (manipuler input for å unngå deteksjon), poisoning (korrumper treningsdata), og model stealing (rekonstruer modellen via spørringer). Eksempel: et bilde av en stoppskilt modifisert med usynlige piksler slik at en autonomkjøring-modell ser det som fartsbegrensningsskilt.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 5 · Lett</div>
+      <div class="q-text">Hva gjør CodeQL?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">CodeQL (GitHub/Microsoft) er et SAST-verktøy som kompilerer kode til en relasjonsdatabase og lar deg skrive SQL-lignende spørringer (QL) for å søke etter sårbarhetsmønstre. Det er kraftigere enn enkle mønstre-baserte verktøy fordi det forstår kodekontekst og dataflyt på tvers av funksjoner og filer.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 6 · Middels</div>
+      <div class="q-text">Hva er forskjellen mellom SAST og DAST?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SAST analyserer kildekoden statisk — krever ikke kjørende applikasjon. DAST tester mot en kjørende applikasjon utenfra. SAST finner implementeringsfeil tidlig og billig. DAST finner kjøretidssårbarheter og konfigurasjonssvakheter. SAST kan ikke finne feil som bare manifesteres ved kjøretid; DAST kan ikke finne feil uten å ha kjørende app og kan ikke se kildekoden.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 7 · Middels</div>
+      <div class="q-text">Forklar taint tracking med et konkret eksempel.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Source: <code>name = request.GET['name']</code> — brukerkontrollert. Programflyten: <code>name</code> sendes til <code>render_greeting(name)</code> som lager HTML: <code>f"&lt;h1&gt;Hei {name}&lt;/h1&gt;"</code>. Sink: <code>innerHTML = html_string</code>. SAST-verktøyet sporer at <code>name</code> flyter fra source til HTML-sink uten escaping — og rapporterer potensielt XSS.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8 · Middels</div>
+      <div class="q-text">Hva er «model stealing»?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Model stealing er et angrep der angriperen rekonstruerer en ML-modell uten tilgang til treningsdataene eller modellvektene — kun via API-spørringer. Ved å sende mange input og observere output kan angriperen trene en surrogatmodell som approksimerer originalen. Brukt til: omgå rate-limiting, analysere modellens svakheter, eller stjele en kommersiell modell.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 9 · Middels</div>
+      <div class="q-text">Hva er risikoen ved AI-generert kode i sikkerhetskritiske systemer?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">LLM-er hallusinerer API-kall, bruker utdaterte sikkerhetsmønstre, og genererer kode som ser korrekt ut syntaktisk men har subtile sikkerhetssvakheter. Forskning (Pearce et al. 2022) viser at GitHub Copilot genererte sårbar kode i ~40 % av testede scenarier. Løsning: behandle AI-generert kode som uklarert kode — krev SAST og kodegjennomgang på linje med menneskeskrevet kode.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 10 · Middels</div>
+      <div class="q-text">Hva er EU AI Act og hvilke kategorier definerer det?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">EU AI Act (trådte i kraft 2024) er EUs rammeverk for regulering av kunstig intelligens. Det deler AI-systemer i fire risikoklasser: <strong>Uakseptabel risiko</strong> (forbud — f.eks. real-time biometrisk overvåking), <strong>Høy risiko</strong> (strenge krav — f.eks. medisinsk diagnose, kredittvurdering, kritisk infrastruktur), <strong>Begrenset risiko</strong> (transparenskrav — f.eks. chatboter), og <strong>Minimal risiko</strong> (ingen krav — f.eks. spam-filter).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 11 · Vanskelig</div>
+      <div class="q-text">Et team innfører CodeQL i CI, men varsler havner i en backlog ingen ser på. Beskriv organisatorisk og teknisk løsning.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Teknisk:</strong> (1) Blokkér merge-til-main på kritiske funn (high confidence, high severity) — ikke bare advare. (2) Poster CodeQL-funn direkte som PR-kommentarer — synlig der utvikleren er. (3) Integrer med issue-trackeren (GitHub Issues, Jira) med automatisk opprettelse av tasks for kritiske funn. <strong>Organisatorisk:</strong> (1) Definer en remediation SLA: kritisk = 3 dager, høy = 7 dager. (2) Eierskap: hvert team eier sine varsler. (3) Suppresjon av kjente falske positiver — slik at det som gjenstår er reelt. (4) Ukentlig gjennomgang av security debt som en metrikk teamet rapporterer på.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 12 · Vanskelig</div>
+      <div class="q-text">Forklar et evasion attack mot en ML-basert malware-detektor og beskriv ett forsvarstiltak.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Angrep:</strong> en malware-variant er opprinnelig detektert av ML-modellen. Angriperen legger til tilfeldig data (ufarlige bytes, benign kode-snippets) til malwaren for å endre dens feature-vektor slik at den klassifiseres som benign. Modellen ser fortsatt skadelig oppførsel, men feature-vektoren er utenfor trekningssonen. <strong>Forsvarstiltak:</strong> adversarial training — inkluder adversarielle eksempler i treningsdataene slik at modellen lærer å klassifisere dem korrekt. Alternativt: bruk atferdsbasert (dynamisk) deteksjon fremfor statisk feature-analyse — vanskeligere å evade fordi angriperen ikke kan maskere faktisk kjøretidsatferd.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 13 · Vanskelig</div>
+      <div class="q-text">En SAST-scanner rapporterer SQL injection-risiko i en metode som aldri kalles fra ekstern input. Hva er riktig handling?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">1. <strong>Verifiser:</strong> bekreft at metoden virkelig aldri mottar ekstern input — spor alle kallkjeder fra API-lag til metoden. 2. <strong>Vurder fremtidsrisiko:</strong> selv om den ikke er tilgjengelig nå, kan den bli det etter en refaktorering. 3. <strong>Fiks uansett:</strong> parametrisér SQL — det koster lite og eliminerer risikoen. 4. Hvis du ikke fikser: <strong>supprimer med forklaring</strong> i koden (<code># nosec: SQL kun kalt fra intern admin, input er ikke brukerkontrollert</code>) og legg til en test som verifiserer at metoden ikke er kalltbar fra ekstern input. Stille ignorering er aldri riktig svar.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 14 · Vanskelig</div>
+      <div class="q-text">Hva er «data poisoning» i en ML-kontekst og hvilke forsvarstiltak finnes?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Data poisoning er manipulering av treningsdataene for å påvirke modellens atferd: (1) <strong>Backdoor poisoning:</strong> legge til «trigger»-mønstre i treningsdata slik at modellen oppfører seg korrekt normalt, men feil når triggeret er tilstede. (2) <strong>Targeted poisoning:</strong> få modellen til å feilklassifisere spesifikke input. <strong>Forsvarstiltak:</strong> (1) Verifiser datakildene og etabler en pålitelig datainnsamlingskjede. (2) Anomalideteksjon i treningsdata (outlier detection). (3) Differensial privat trening (reduserer påvirkning av enkelteksempler). (4) Robust aggregering ved federated learning. (5) Evaluér modellen jevnlig mot et rensket test-set.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 15 · Vanskelig</div>
+      <div class="q-text">Hva er forskjellen mellom en SAST-funnet sårbarhet og en pentest-funnet sårbarhet, og hva sier det om testmetodenes komplementaritet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En <strong>SAST-sårbarhet</strong> er identifisert ved å analysere kodestruktur og dataflyt — typisk implementeringsfeil (injection, hardkodede hemmeligheter, usikre API-kall). Den er funnet uten å kjøre applikasjonen og uten å kreve autentisert tilgang. En <strong>pentest-funnet sårbarhet</strong> er identifisert ved å faktisk forsøke angrep mot en kjørende applikasjon — typisk logiske feil, feilkonfigurasjoner, kjøretidsfeil og forretningslogikksvakheter. SAST finner systematiske feil i implementasjonen; pentest finner feil i den samlede systemoppførselen. Begge er nødvendige: SAST er skalérbar og gjøres kontinuerlig; pentest er dyp og gjøres periodisk for kritiske systemer.</div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

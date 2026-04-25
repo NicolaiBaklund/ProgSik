@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-sikkerhet — Kapittel 10</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 10</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 10: Statisk analyse og AI-sikkerhet">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 10 · AI-sikkerhet</div>
+    <h1>AI-<em>sikkerhet</em></h1>
+    <p class="lede">Maskinlæringsmodeller har sine egne sårbarhetsmønstre — og AI-verktøy endrer nå måten vi driver sikkerhetsvurderinger på.</p>
+    <nav class="toc">
+      <a href="#adversarial-ml"><span class="toc-num">01</span>Adversarial machine learning</a>
+      <a href="#ai-i-sikkerhet"><span class="toc-num">02</span>AI i sikkerhetsvurderinger</a>
+      <a href="#ai-generert-kode"><span class="toc-num">03</span>Risiko ved AI-generert kode</a>
+      <a href="#regulering"><span class="toc-num">04</span>Regulering og ansvar</a>
+    </nav>
+  </div>
+</header>
+
+<section id="adversarial-ml">
+  <div class="container">
+    <div class="section-badge">01 · Adversarial ML</div>
+    <h2>Adversarial <em>machine learning</em></h2>
+    <p class="section-intro">ML-modeller er ikke robuste mot målrettede angrep — de kan lures av input som er usynlig for mennesker.</p>
+    <p class="lead">Adversarielle eksempler er input designet for å lure en ML-modell: et bilde av en panda modifisert med usynlig støy som modellen klassifiserer som gibbon med 99,9 % konfidensgrad. Prinsippet gjelder ikke bare bilder: en DNS-forespørsel kan konstrueres for å unngå ML-basert malware-deteksjon, og en e-post kan skrives for å omgå spam-filter.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs><marker id="adva" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
+        <!-- Original -->
+        <rect x="40" y="50" width="120" height="60" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="100" y="78" text-anchor="middle" fill="#3d6b3a">Original input</text>
+        <text x="100" y="94" text-anchor="middle" font-size="10" fill="#6b6257">Panda</text>
+        <!-- Perturbation -->
+        <line x1="162" y1="80" x2="218" y2="80" stroke="#b04428" stroke-width="1.5" marker-end="url(#adva)"/>
+        <text x="190" y="73" text-anchor="middle" font-size="10" fill="#b04428">+ støy ε</text>
+        <!-- Adversarial -->
+        <rect x="220" y="50" width="120" height="60" rx="3" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="280" y="78" text-anchor="middle" fill="#b04428">Advers. input</text>
+        <text x="280" y="94" text-anchor="middle" font-size="10" fill="#6b6257">Ser lik ut</text>
+        <!-- Klassifikasjon -->
+        <line x1="342" y1="80" x2="398" y2="80" stroke="#b04428" stroke-width="1.5" marker-end="url(#adva)"/>
+        <text x="370" y="73" text-anchor="middle" font-size="10" fill="#b04428">modell</text>
+        <!-- Output -->
+        <rect x="400" y="50" width="200" height="60" rx="3" fill="rgba(176,68,40,0.2)" stroke="#b04428" stroke-width="2"/>
+        <text x="500" y="75" text-anchor="middle" font-weight="600" fill="#b04428">Klassifisert: Gibbon</text>
+        <text x="500" y="90" text-anchor="middle" font-size="10" fill="#b04428">konfidensgrad: 99.3 %</text>
+        <text x="500" y="105" text-anchor="middle" font-size="10" fill="#6b6257" font-style="italic">Menneskelig observatør: Panda</text>
+      </svg>
+      <figcaption>Adversariell perturbering: en usynlig endring av pixelverdiene lurer modellen, men ikke øyet.</figcaption>
+    </figure>
+
+    <p>Tre primære adversarial ML-angrepskategorier:</p>
+    <ul>
+      <li><strong>Evasion attacks:</strong> manipuler input for å unngå deteksjon (malware, spam, deepfake-detektorer).</li>
+      <li><strong>Poisoning attacks:</strong> korrumper treningsdataene for å påvirke modellens atferd.</li>
+      <li><strong>Model stealing:</strong> rekonstruer modellen via API-spørringer uten tilgang til vekter.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="ai-i-sikkerhet">
+  <div class="container">
+    <div class="section-badge">02 · AI i sikkerhetsvurderinger</div>
+    <h2>AI i <em>sikkerhetsvurderinger</em></h2>
+    <p class="section-intro">AI-assistert sikkerhetsarbeid er her allerede — spørsmålet er hvordan det brukes forsvarlig.</p>
+    <p class="lead">AI-verktøy endrer nå tre sikkerhetsdomener: kodegjennomgang, sårbarhetsspanning og hendelsesrespons. De er ikke erstatninger — de er kraftforsterkere. En sikkerhetsingeniør som bruker AI til å analysere 10 000 linjer kode på 10 minutter, gjør fortsatt det kognitive arbeidet — AI-en hjelper til med søket etter mønstre og varianter.</p>
+
+    <p>Brukstilfeller med god effekt:</p>
+    <ul>
+      <li><strong>AI-assistert kodegjennomgang:</strong> finne varianter av kjente sårbarhetsmønstre, generere forklaringer av kompleks kode, flagge mistenkelige mønstre for menneskelig vurdering.</li>
+      <li><strong>Trusselintelligens:</strong> analysere store mengder CVE-beskrivelser og sikkerhetsrådgivninger for å identifisere relevante for din stakk.</li>
+      <li><strong>IR-assistanse:</strong> analysere logger og artefakter under en hendelsesrespons — AI kan hjelpe med å korrelere indikatorer på tvers av store datamengder.</li>
+      <li><strong>Sårbarhetsspanning:</strong> automatisert søk etter kjente sårbarhetsmønstre i store kodebaser.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Viktig begrensning</h4>
+      <p>AI-verktøy hallusinerer i sikkerhetsdomenet like mye som i andre domener. En AI som «finner en sårbarhet» kan ha funnet noe som ikke eksisterer, eller oversett kontekst som gjør det ikke-utnyttbart. Verifiser alltid AI-genererte sikkerhetsfunn manuelt.</p>
+    </div>
+  </div>
+</section>
+
+<section id="ai-generert-kode">
+  <div class="container">
+    <div class="section-badge">03 · AI-generert kode</div>
+    <h2>Risiko ved AI-generert <em>kode</em></h2>
+    <p class="section-intro">AI-er skriver kode som ser korrekt ut — men «ser korrekt ut» er ikke det samme som «er sikker».</p>
+    <p class="lead">GitHub Copilot, Claude, ChatGPT og lignende verktøy genererer kode fra store korpus av eksisterende kode — inkludert sårbar kode. De ser mønstre, men forstår ikke sikkerhetsimplikasjonene av hvert mønster. En studie (Pearce et al., 2022) fant at Copilot genererte sårbar kode i ~40 % av sikkerhetssensitive scenarier.</p>
+
+    <p>Vanlige sikkerhetssvakheter i AI-generert kode:</p>
+    <ul>
+      <li><strong>Utdaterte krypto-mønstre:</strong> MD5 for hashing, DES for kryptering, svake nøkkelstørrelser.</li>
+      <li><strong>Usikre API-kall:</strong> <code>pickle.loads()</code>, <code>shell=True</code> i subprocess, unserialized YAML.</li>
+      <li><strong>Manglende validering:</strong> bruker input brukes direkte uten sanitering.</li>
+      <li><strong>Hallusinerte biblioteker:</strong> AI-en refererer til ikke-eksisterende funksjoner — eller eksisterende funksjoner med subtilt feil signaturer.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>Anbefaling</h4>
+      <p>Behandle AI-generert kode som uklarert kode — kjør SAST, gjennomgå den manuelt med fokus på sikkerhet, og still de samme kravene som til menneskeskrevet kode. AI er en produktivitetshjelp, ikke en sikkerhetsrevisor.</p>
+    </div>
+  </div>
+</section>
+
+<section id="regulering">
+  <div class="container">
+    <div class="section-badge">04 · Regulering</div>
+    <h2>Regulering og <em>ansvar</em></h2>
+    <p class="section-intro">EU AI Act og andre reguleringer begynner å forme hva som er tillatt og hva som krever dokumentasjon for AI-systemer i sikkerhetskritiske sammenhenger.</p>
+    <p class="lead">EU AI Act (2024) klassifiserer AI-systemer i risikoklasser med tilhørende krav. Høyrisikoklassen er særlig relevant for sikkerhetsdomenet: AI som brukes i kritisk infrastruktur, biometrisk identifisering, tilgangsstyring til kritiske ressurser, og strafferettslig kontekst faller inn her — og krever risikovurdering, dokumentasjon, transparens og menneskelig tilsyn.</p>
+
+    <table>
+      <thead><tr><th>Risikoklasse</th><th>Eksempler</th><th>Krav</th></tr></thead>
+      <tbody>
+        <tr><td>Uakseptabel (forbud)</td><td>Real-time biometrisk overvåking av offentligheten, social scoring</td><td>Forbudt</td></tr>
+        <tr><td>Høy risiko</td><td>Kritisk infrastruktur, medisin, rettsvesen, biometri, tilgangskontroll</td><td>Risikovurdering, logging, transparens, menneskelig tilsyn</td></tr>
+        <tr><td>Begrenset risiko</td><td>Chatboter, deepfake-generering</td><td>Opplysningsplikt om AI-bruk</td></tr>
+        <tr><td>Minimal risiko</td><td>Spam-filter, anbefalingssystem</td><td>Ingen spesifikke krav</td></tr>
+      </tbody>
+    </table>
+
+    <p>For programvareutviklere: vurder om systemet du bygger benytter AI-komponenter som faller i høyrisikoklassen — og planlegg for dokumentasjonskravene fra start, ikke som en etterkant.</p>
+
+    <div class="callout callout-blue">
+      <h4>Ansvarsattribusjon</h4>
+      <p>Når et AI-system gjør en feil med alvorlige konsekvenser — hvem er ansvarlig? Modell-leverandøren? Applikasjonsutvikleren? Sluttbrukeren? EU AI Act plasserer ansvaret primært hos den som deployer AI-systemet i en høyrisikokontekst — uavhengig av hvem som bygde den underliggende modellen.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

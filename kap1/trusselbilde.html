@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trusselbildet — Kapittel 1</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 1</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 1: Introduksjon og sikkerhetsprinsipper">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 1 · Trusler</div>
+    <h1>Trussel<em>bildet</em></h1>
+    <p class="lede">Hvem angriper, hvorfor, og gjennom hvilke innganger — det er spørsmålene ethvert forsvar starter med.</p>
+    <nav class="toc">
+      <a href="#aktorer"><span class="toc-num">01</span>Trusselaktører</a>
+      <a href="#angrepsoverflate"><span class="toc-num">02</span>Angrepsoverflate</a>
+      <a href="#angrepsvektorer"><span class="toc-num">03</span>Angrepsvektorer</a>
+      <a href="#risikolandskap"><span class="toc-num">04</span>Risikolandskapet i 2026</a>
+    </nav>
+  </div>
+</header>
+
+<section id="aktorer">
+  <div class="container">
+    <div class="section-badge">01 · Hvem</div>
+    <h2>Trussel<em>aktører</em></h2>
+    <p class="section-intro">Å forstå hvem som angriper deg — og hvorfor — er forutsetningen for å prioritere riktige forsvarstiltak.</p>
+    <p class="lead">Det er lett å forestille seg angriperen som en hettekledde figur foran en skjerm full av grønn kode. Virkeligheten er mer prosaisk og mer mangfoldig. En stor andel sikkerhetsbrudd skyldes opportunistiske aktører som utnytter kjente sårbarheter automatisk — de velger ikke deg spesifikt, de velger den som er eksponert.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <!-- Akse: kapasitet (x), motivasjon (y) -->
+        <line x1="80" y1="270" x2="660" y2="270" stroke="#c9c0ae" stroke-width="1.5"/>
+        <line x1="80" y1="270" x2="80" y2="40" stroke="#c9c0ae" stroke-width="1.5"/>
+        <text x="370" y="300" font-size="12" fill="#a39886" text-anchor="middle">Teknisk kapasitet →</text>
+        <text x="35" y="155" font-size="12" fill="#a39886" text-anchor="middle" transform="rotate(-90 35 155)">Motivasjon →</text>
+        <!-- Aktørpunkter -->
+        <!-- Script kiddies: lav kapasitet, lav motivasjon -->
+        <circle cx="160" cy="220" r="18" fill="rgba(176,68,40,0.15)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="160" y="224" font-size="11" fill="#b04428" text-anchor="middle">Script</text>
+        <text x="160" y="237" font-size="11" fill="#b04428" text-anchor="middle">kiddies</text>
+        <!-- Org. kriminalitet: høy kapasitet, høy motivasjon -->
+        <circle cx="480" cy="90" r="22" fill="rgba(176,68,40,0.2)" stroke="#b04428" stroke-width="2"/>
+        <text x="480" y="85" font-size="11" fill="#b04428" text-anchor="middle">Org.</text>
+        <text x="480" y="98" font-size="11" fill="#b04428" text-anchor="middle">kriminalitet</text>
+        <!-- Nasjonalstat: svært høy kapasitet, svært høy motivasjon -->
+        <circle cx="600" cy="65" r="26" fill="rgba(45,74,122,0.18)" stroke="#2d4a7a" stroke-width="2"/>
+        <text x="600" y="60" font-size="11" fill="#2d4a7a" text-anchor="middle">Nasjonal-</text>
+        <text x="600" y="73" font-size="11" fill="#2d4a7a" text-anchor="middle">stat</text>
+        <!-- Insider: medium kapasitet, varierende motivasjon -->
+        <circle cx="310" cy="160" r="20" fill="rgba(198,138,31,0.18)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="310" y="155" font-size="11" fill="#c68a1f" text-anchor="middle">Insider</text>
+        <text x="310" y="168" font-size="11" fill="#c68a1f" text-anchor="middle">threat</text>
+        <!-- Konkurrent: medium kapasitet, medium motivasjon -->
+        <circle cx="370" cy="190" r="18" fill="rgba(61,107,58,0.15)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="370" y="185" font-size="11" fill="#3d6b3a" text-anchor="middle">Konkur-</text>
+        <text x="370" y="198" font-size="11" fill="#3d6b3a" text-anchor="middle">rent</text>
+      </svg>
+      <figcaption>Trusselaktører plassert etter teknisk kapasitet og motivasjon — de farligste kombinerer begge.</figcaption>
+    </figure>
+
+    <table>
+      <thead>
+        <tr><th>Aktør</th><th>Motivasjon</th><th>Typiske angrep</th><th>Ressurser</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Script kiddies</td><td>Prestisje, moro</td><td>Eksisterende exploits, DDoS</td><td>Lav</td></tr>
+        <tr><td>Org. kriminalitet</td><td>Penger</td><td>Ransomware, phishing, svindel</td><td>Høy</td></tr>
+        <tr><td>Nasjonalstat</td><td>Spionasje, sabotasje</td><td>APT, supply chain, zero-days</td><td>Svært høy</td></tr>
+        <tr><td>Insider threat</td><td>Penger, hevn, ideologi</td><td>Datatyveri, sabotasje</td><td>Intern tilgang</td></tr>
+        <tr><td>Konkurrent</td><td>Forretningsfordel</td><td>Industrispionasje, social engineering</td><td>Variabel</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>For de fleste organisasjoner er opportunistisk organisert kriminalitet den reelle trusselen — ikke nasjonalstater. Å dimensjonere forsvaret mot APT-angrep uten å ha grunnleggende sikkerhetshygiene på plass er å prioritere feil.</p>
+    </div>
+  </div>
+</section>
+
+<section id="angrepsoverflate">
+  <div class="container">
+    <div class="section-badge">02 · Eksponeringspunkter</div>
+    <h2>Angreps<em>overflate</em></h2>
+    <p class="section-intro">Alt en angriper kan nå, direkte eller indirekte, er en del av angrepsoverflaten — og den er alltid større enn du tror.</p>
+    <p class="lead">Angrepsoverflaten er ikke bare det som er bevisst eksponert. Det er alle inngangspunktene en angriper kan forsøke: API-endepunkter, nettverksporter, importerte pakker, konfigurasjonsgrensesnitt, ansattes e-postadresser og telefonnumre. En organisasjon som tror den bare har en webtjeneste eksponert, overser gjerne ti indirekte innganger.</p>
+
+    <p>Typiske komponenter i angrepsoverflaten til en moderne nettapplikasjon:</p>
+    <ul>
+      <li><strong>Nettverksgrensesnitt:</strong> alle åpne porter og protokoller synlig fra internett.</li>
+      <li><strong>API-er:</strong> hvert endepunkt, inkludert udokumenterte og eldre versjoner.</li>
+      <li><strong>Tredjepartspakker:</strong> avhengigheter med kjente sårbarheter (<code>npm</code>, <code>pip</code>, Maven).</li>
+      <li><strong>Konfigurasjonsgrensesnitt:</strong> admin-paneler, SSH, RDP, databaseklienter.</li>
+      <li><strong>Menneskelig angrepsoverflate:</strong> ansatte som kan målrettes med phishing eller social engineering.</li>
+      <li><strong>Skytjenester:</strong> feilkonfigurerte S3-bøtter, offentlige Kubernetes-porter, overrettigheter i IAM.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>Reduksjon av angrepsoverflate</h4>
+      <p>Skru av det som ikke brukes. Fjern pakker som ikke trengs. Plasser admin-grensesnitt bak VPN. Del opp systemer i nettverkssegmenter. Hvert tiltak fjerner én inngangsmulighet — og den angriperen ikke finner, kan ikke utnyttes.</p>
+    </div>
+  </div>
+</section>
+
+<section id="angrepsvektorer">
+  <div class="container">
+    <div class="section-badge">03 · Hvordan</div>
+    <h2>Angreps<em>vektorer</em></h2>
+    <p class="section-intro">Samme mål, ulike ruter — en angrepsvektor er veien inn, og de fleste velger den med minst motstand.</p>
+    <p class="lead">Angripere er rasjonelle. De velger den enkleste veien til målet. Derfor er phishing — som utnytter menneskelig tillit fremfor teknisk sårbarhet — den klart vanligste inngangsvektoren for databrudd. Det betyr ikke at tekniske angrep ikke forekommer, men at menneskelige og organisatoriske svakheter gir bedre avkastning per innsats.</p>
+
+    <p>De viktigste angrepsvektorene:</p>
+    <ul>
+      <li><strong>Nettverksvektorer:</strong> utnyttelse av tjenester eksponert mot internett — SQL injection, RCE i webapplikasjoner, eksponerte API-er.</li>
+      <li><strong>Menneskelige vektorer:</strong> phishing, spear phishing, vishing (telefon), pretexting.</li>
+      <li><strong>Forsyningskjede-vektorer:</strong> kompromittering av avhengigheter, byggesystemer eller underleverandørers tilgang.</li>
+      <li><strong>Fysiske vektorer:</strong> tilgang til maskinvare, USB-angrep, tailgating.</li>
+      <li><strong>Innsidevektorer:</strong> misbruk av legitim tilgang, enten ondsinnet eller uaktsomt.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="risikolandskap">
+  <div class="container">
+    <div class="section-badge">04 · Kontekst 2026</div>
+    <h2>Risiko<em>landskapet</em></h2>
+    <p class="section-intro">Trusselbildet er ikke statisk — det former seg etter teknologiske skift, geopolitikk og kriminell økonomi.</p>
+    <p class="lead">I 2026 dominerer tre trender trusselbildet: ransomware som tjeneste (RaaS) senker terskelen for kriminelle aktører dramatisk. Supply chain-angrep — der angriperen kompromitterer en pålitelig tredjepartsleverandør for å nå hundrevis av ofre — er blitt den foretrukne strategien for sofistikerte aktører. Og LLM-er gjør phishing og social engineering billigere og mer overbevisende enn noensinne.</p>
+
+    <ul>
+      <li><strong>Ransomware-as-a-Service:</strong> kriminelle kjøper tilgang til verktøy og infrastruktur, og betaler en andel av løsepengene. Teknisk kompetanse er ikke lenger en forutsetning.</li>
+      <li><strong>Supply chain-angrep:</strong> SolarWinds (2020), XZ Utils (2024) og lignende viser at angrep via pålitelige leverandører kan gi bred, vedvarende tilgang.</li>
+      <li><strong>AI-assisterte angrep:</strong> automatisert sårbarhetsspanning, LLM-generert phishing-innhold og AI-assistert kodeanalyse senker kostnadene for angripere.</li>
+      <li><strong>Geopolitisk motiverte angrep:</strong> statlige aktører retter seg mot kritisk infrastruktur, forsvarssektoren og akademia.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>Det viktigste i møte med et skiftende trusselbilde er ikke å jage den nyeste trusselen, men å ha et solid grunnlag: oppdatert programvare, MFA overalt, least privilege og logging. De fleste angrep utnytter kjente svakheter, ikke zero-days.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

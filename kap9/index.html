@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapittel 9 — Personvern og databeskyttelse</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="../" class="nav-back">&larr; Alle kapitler</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 9: Personvern og databeskyttelse">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 9 · Personvern</div>
+    <h1>Personvern og <em>databeskyttelse</em></h1>
+    <p class="lede">Personvern er ikke et juridisk skjema som fylles ut — det er et sett designvalg som tas tidlig og er kostbare å reversere.</p>
+  </div>
+</header>
+
+<nav class="chapter-toc">
+  <div class="container">
+    <ol class="chapter-toc-list">
+      <li><span class="toc-num">01</span><a href="#overblikk">Helhetsbilde</a></li>
+      <li><span class="toc-num">02</span><a href="#deler">Delsider</a></li>
+      <li><span class="toc-num">03</span><a href="#quiz">Test deg selv</a></li>
+    </ol>
+  </div>
+</nav>
+
+<section id="overblikk">
+  <div class="container">
+    <div class="section-badge">Overblikk</div>
+    <h2>Det store <em>bildet</em></h2>
+    <p class="section-intro">GDPR er ikke primært en regulatorisk byrde — det er en kodifisering av grunnleggende respekt for individers kontroll over sine egne data.</p>
+    <p class="lead">Personvern og sikkerhet er beslektede, men ikke identiske. Sikkerhet handler om å beskytte data mot uautorisert tilgang — det innebærer å beskytte data en tjeneste legitimt samler inn. Personvern handler om å avgjøre om data bør samles inn i utgangspunktet, og på hvilke vilkår. Privacy by design integrerer disse vurderingene i arkitekturen fra start.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- GDPR-prinsipper som sirkler -->
+        <text x="360" y="18" text-anchor="middle" font-weight="600" fill="#1a1612">De syv GDPR-prinsippene (artikkel 5)</text>
+        <circle cx="130" cy="100" r="55" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="130" y="93" text-anchor="middle" font-size="10" font-weight="600" fill="#2d4a7a">Lovlighet,</text>
+        <text x="130" y="107" text-anchor="middle" font-size="10" fill="#2d4a7a">rettferdighet,</text>
+        <text x="130" y="120" text-anchor="middle" font-size="10" fill="#2d4a7a">åpenhet</text>
+        <circle cx="245" cy="100" r="55" fill="rgba(45,74,122,0.06)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="245" y="95" text-anchor="middle" font-size="10" font-weight="600" fill="#2d4a7a">Formåls-</text>
+        <text x="245" y="109" text-anchor="middle" font-size="10" fill="#2d4a7a">begrensning</text>
+        <circle cx="360" cy="100" r="55" fill="rgba(61,107,58,0.07)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="360" y="95" text-anchor="middle" font-size="10" font-weight="600" fill="#3d6b3a">Data-</text>
+        <text x="360" y="109" text-anchor="middle" font-size="10" fill="#3d6b3a">minimering</text>
+        <circle cx="475" cy="100" r="55" fill="rgba(61,107,58,0.06)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="475" y="100" text-anchor="middle" font-size="10" font-weight="600" fill="#3d6b3a">Nøyaktighet</text>
+        <circle cx="590" cy="100" r="55" fill="rgba(198,138,31,0.07)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="590" y="95" text-anchor="middle" font-size="10" font-weight="600" fill="#c68a1f">Lagrings-</text>
+        <text x="590" y="109" text-anchor="middle" font-size="10" fill="#c68a1f">begrensning</text>
+        <!-- To siste under -->
+        <text x="250" y="168" text-anchor="middle" font-size="11" fill="#b04428" font-weight="600">+ Integritet og konfidensialitet (sikkerhet)</text>
+        <text x="510" y="168" text-anchor="middle" font-size="11" fill="#b04428" font-weight="600">+ Ansvarlighet</text>
+      </svg>
+      <figcaption>De syv GDPR-prinsippene — dataminimering og formålsbegrensning er de viktigste designprinsippene for utviklere.</figcaption>
+    </figure>
+
+    <div class="callout callout-green">
+      <h4>Kapittelets kjerneidé</h4>
+      <p>Dataminimering er den viktigste designprinsippet for personvern: samle kun det du trenger, hold det bare så lenge du trenger det, og gi brukeren kontroll. Data du aldri samler inn, kan aldri lekke.</p>
+    </div>
+  </div>
+</section>
+
+<section id="deler">
+  <div class="container">
+    <div class="section-badge">Delsider</div>
+    <h2>Utforsk <em>kapittelet</em></h2>
+    <div class="subpage-list">
+      <a href="gdpr.html" class="subpage-card">
+        <div class="sp-icon">01–05</div>
+        <div class="sp-info">
+          <div class="sp-title">GDPR</div>
+          <div class="sp-desc">Prinsipper, behandlingsgrunnlag, databehandleravtaler, DPIA og den registrertes rettigheter.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="privacy-engineering.html" class="subpage-card">
+        <div class="sp-icon">06–09</div>
+        <div class="sp-info">
+          <div class="sp-title">Privacy engineering</div>
+          <div class="sp-desc">Privacy by design, dataminimering, pseudonymisering, anonymisering og logging med personvern.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="container">
+    <h2>Test deg <em>selv</em></h2>
+    <p class="section-intro">15 spørsmål om GDPR og privacy engineering.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 1 · Lett</div>
+      <div class="q-text">Hva er GDPR?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">General Data Protection Regulation — EUs personvernforordning som trådte i kraft i 2018. Den regulerer behandling av personopplysninger om EU-borgere, uavhengig av hvor behandlingen skjer. Gir individer rettigheter og stiller krav til organisasjoner om behandlingsgrunnlag, informasjonssikkerhet og åpenhet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 2 · Lett</div>
+      <div class="q-text">Hva er en personopplysning?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Enhver opplysning som kan knyttes til en identifisert eller identifiserbar fysisk person. Inkluderer navn, e-post, IP-adresse, pseudonymiserte data, cookie-ID-er, lokasjonsdata, biometri. Anonymiserte data faller utenfor dersom de ikke kan re-identifiseres.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 3 · Lett</div>
+      <div class="q-text">Hva er dataminimering?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Dataminimering (GDPR artikkel 5(1)(c)) betyr at kun de personopplysningene som er nødvendige for det spesifikke formålet skal samles inn — ikke mer. Det er et designprinsipp: ikke samle inn data «i tilfelle det kan være nyttig».</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 4 · Lett</div>
+      <div class="q-text">Hva er en DPIA?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Data Protection Impact Assessment — en forhåndsvurdering av personvernkonsekvensene ved en behandlingsaktivitet. Påkrevet av GDPR ved behandling som sannsynligvis medfører høy risiko: profilering, storstilt behandling av sensitive data, systematisk overvåking. Identifiserer risikoer og tiltak.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 5 · Lett</div>
+      <div class="q-text">Hva er pseudonymisering?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Pseudonymisering betyr å erstatte identifiserende opplysninger med en pseudonym (f.eks. et tilfeldig ID). Koblingen mellom pseudonym og identitet lagres separat. Data er fremdeles personopplysninger etter GDPR siden re-identifisering er mulig med koblingsnøkkelen — men pseudonymisering reduserer risikoen ved databrudd.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 6 · Middels</div>
+      <div class="q-text">Forklar de syv GDPR-prinsippene.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">1. <strong>Lovlighet, rettferdighet, åpenhet</strong> — behandling må ha grunnlag, skje rettferdig og åpent. 2. <strong>Formålsbegrensning</strong> — innsamlet for spesifikke formål, ikke viderebehandlet for uforenlige formål. 3. <strong>Dataminimering</strong> — kun nødvendige opplysninger. 4. <strong>Nøyaktighet</strong> — holde opplysningene korrekte. 5. <strong>Lagringsbegrensning</strong> — slette/anonymisere når formålet er oppnådd. 6. <strong>Integritet og konfidensialitet</strong> — passende sikkerhet. 7. <strong>Ansvarlighet</strong> — dokumentere og bevise etterlevelse.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 7 · Middels</div>
+      <div class="q-text">Hva er forskjellen mellom en behandlingsansvarlig og en databehandler?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Behandlingsansvarlig:</strong> bestemmer formålene med og midlene for behandlingen. Er primært ansvarlig overfor Datatilsynet. <strong>Databehandler:</strong> behandler personopplysninger på vegne av den behandlingsansvarlige. Eksempel: en skytjeneste (AWS, Google) er databehandler for sin kunde (behandlingsansvarlig). De to reguleres av en databehandleravtale (DPA).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8 · Middels</div>
+      <div class="q-text">Hva er «privacy by design»?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Privacy by design er et prinsipp (og GDPR-krav, artikkel 25) der personvern integreres i systemdesignet fra begynnelsen — ikke legges til etterpå. Det innebærer: dataminimering som standard, brukerkontroll, transparens, og privacy innebygd i arkitekturen fremfor som et eksternt tillegg. Ann Cavoukian formulerte syv prinsipper for PbD.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 9 · Middels</div>
+      <div class="q-text">Hva er k-anonymitet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">k-anonymitet er et anonymiseringsparadigme der et datasett anonymiseres ved å sikre at hvert individ ikke kan skilles fra minst k-1 andre individer. Generalisering og suppresjon brukes for å oppnå dette. Eksempel: i stedet for å lagre nøyaktig alder og postnummer, lagre aldersgruppe og region. Svakhet: sårbar for bakgrunnskunnskap-angrep.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 10 · Middels</div>
+      <div class="q-text">Når kreves en DPIA?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">GDPR artikkel 35 krever DPIA når behandlingen sannsynligvis medfører høy risiko: (1) systematisk og storstilt profilering, (2) storstilt behandling av sensitive kategorier (helse, straff, biometri), (3) systematisk overvåking av offentlig tilgjengelige områder. Datatilsynet kan publisere lister over behandlingstyper som alltid/aldri krever DPIA.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 11 · Vanskelig</div>
+      <div class="q-text">Et system logger IP-adresser og brukeragenter «for driftshensyn». Er dette en personopplysningsbehandling etter GDPR?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Ja. IP-adresser er personopplysninger etter GDPR (EU-domstolens avgjørelse C-582/14, Breyer). Selv dynamiske IP-adresser er personopplysninger dersom leverandøren kan knytte dem til en identitet. Konsekvens: det må finnes et behandlingsgrunnlag (f.eks. berettiget interesse), dataene bør slettes etter en begrenset periode (typisk 30–90 dager), og det bør opplyses om behandlingen i personvernerklæringen.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 12 · Vanskelig</div>
+      <div class="q-text">Forklar hvorfor aggregert data kan re-identifiseres. Gi et konkret eksempel.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Aggregert data kan kombineres med andre datasett for å unikt identifisere individer — et angrep kjent som «linkage attack». Konkret eksempel: AOL publiserte «anonymiserte» søkeloggdata i 2006. NYT-journalister identifiserte brukernummer 4417749 som Thelma Arnold ved å kombinere søkemønstre (medisinnavn, stedsnavn, familiemedlemmer). 87 % av amerikanere er unikt identifiserbare fra postnummer, fødselsdato og kjønn alene (Sweeney, 2000).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 13 · Vanskelig</div>
+      <div class="q-text">En mobilapp samler inn lokasjonsdata «for å forbedre tjenesten». Vurder behandlingsgrunnlag og dataminimering.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Behandlingsgrunnlag:</strong> «Forbedre tjenesten» er ikke et lovlig behandlingsgrunnlag i seg selv. Mulige grunnlag: samtykke (men må være spesifikt, informert, fritt og tilbaketkallelig) eller berettiget interesse (men krever interesseavveining der brukerens interesser og rettigheter ikke overstyres). <strong>Dataminimering:</strong> Trengs nøyaktig GPS-posisjon (meter-presisjon) eller holder det med by/region? Trengs kontinuerlig sporing eller enkeltpunkter? Retensjonstid: hvor lenge lagres historisk lokasjon? Design for minste nødvendige — ikke for maks mulig nytte.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 14 · Vanskelig</div>
+      <div class="q-text">Hva er differential privacy og i hvilke tilfeller er det bedre enn k-anonymitet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Differential privacy (DP) er en matematisk garanti om at en individuell persons bidrag til et datasett ikke kan avleses fra output — oppnådd ved å legge til kalibirt statistisk støy (Laplace- eller Gaussian-støy). DP er bedre enn k-anonymitet når: (1) data behandles iterativt (k-anonymitet brytes ned ved multiple queries), (2) du trenger en formell, matematisk målbar personverngaranti, (3) data eksponeres via et API med mange spørringer. Apple (iPhone telemetri) og Google (Chrome usage statistics) bruker DP. Ulempe: DP reduserer nøyaktigheten til aggregatstatistikken.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 15 · Vanskelig</div>
+      <div class="q-text">Hva er de fem registrertes rettigheter under GDPR og hva er konsekvensene for systemdesign?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>1. Innsyn (art. 15):</strong> brukeren kan be om hvilke data som er lagret — systemet må kunne eksportere alt om én bruker. <strong>2. Retting (art. 16):</strong> korrigere uriktige opplysninger. <strong>3. Sletting («retten til å bli glemt», art. 17):</strong> systemet må kunne slette alle data om én bruker — inkludert fra logger, backups og datalagre. <strong>4. Portabilitet (art. 20):</strong> eksportere data i maskinlesbart format (JSON, CSV). <strong>5. Protest (art. 21):</strong> nekte behandling basert på berettiget interesse. <strong>Designkonsekvenser:</strong> bygg støtte for disse rettighetene fra start — det er langt vanskeligere å legge til en «slett bruker komplett»-funksjon i et system som ble designet uten den.</div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

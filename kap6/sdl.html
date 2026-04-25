@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Development Lifecycle — Kapittel 6</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 6</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 6: Risikohåndtering og SDL">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 6 · SDL</div>
+    <h1>Secure Development <em>Lifecycle</em></h1>
+    <p class="lede">Sikkerhet er ikke en funksjon du skrur på etter at applikasjonen er bygget — det er en ingeniørdisiplin integrert fra dag én.</p>
+    <nav class="toc">
+      <a href="#microsoft-sdl"><span class="toc-num">01</span>Microsoft SDL</a>
+      <a href="#owasp-samm"><span class="toc-num">02</span>OWASP SAMM</a>
+      <a href="#devsecops"><span class="toc-num">03</span>DevSecOps</a>
+      <a href="#sikkerhetskrav"><span class="toc-num">04</span>Sikkerhetskrav</a>
+      <a href="#sca-sbom"><span class="toc-num">05</span>SCA og SBOM</a>
+    </nav>
+  </div>
+</header>
+
+<section id="microsoft-sdl">
+  <div class="container">
+    <div class="section-badge">01 · Microsoft SDL</div>
+    <h2>Microsoft <em>SDL</em></h2>
+    <p class="section-intro">Microsoft SDL ble utviklet etter Trustworthy Computing-initiativet i 2002 — og er blitt industristandarden for strukturert sikker utvikling.</p>
+    <p class="lead">I 2002 stoppet Microsoft all Windows-utvikling for å drive obligatorisk sikkerhetsopplæring og gjennomgå eksisterende kode. Det resulterte i det som ble kjent som Trustworthy Computing og la grunnlaget for Security Development Lifecycle. SDL er ikke et statisk dokument — det har blitt oppdatert og tilpasset til agile og DevOps-arbeidsflyt.</p>
+    <p>De syv fasene med tilhørende aktiviteter:</p>
+    <ol>
+      <li><strong>Opplæring:</strong> alle utviklere gjennomfører sikkerhetskurs relevant for sin rolle og teknologistakk.</li>
+      <li><strong>Krav:</strong> definer sikkerhetskrav og personvernkrav; identifiser misuse cases; sett minimumssikkerhetsstandarder.</li>
+      <li><strong>Design:</strong> threat modeling per nytt designvalg; reduser angrepsoverflaten; bruk sikre designprinsipper.</li>
+      <li><strong>Implementering:</strong> bruk godkjente kryptobiblioteker og sikre kodestandard; kjør SAST.</li>
+      <li><strong>Verifisering:</strong> DAST, fuzz testing, penetrasjonstest av høyrisikokomponenter.</li>
+      <li><strong>Frigivelse:</strong> gjennomfør en endelig sikkerhetsgjennomgang; definere en incident response-plan; lag en patch-prosess.</li>
+      <li><strong>Respons:</strong> motta og behandle sikkerhetsrapporter (responsible disclosure); patch og releas hurtig.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="owasp-samm">
+  <div class="container">
+    <div class="section-badge">02 · OWASP SAMM</div>
+    <h2>OWASP <em>SAMM</em></h2>
+    <p class="section-intro">SAMM gir en modenhetsskala fremfor en sjekkliste — det er mer ærlig om virkeligheten.</p>
+    <p class="lead">OWASP Software Assurance Maturity Model definerer fem forretningsfunksjoner, hver med tre praksiser og tre modningsnivåer. En organisasjon på nivå 1 gjør grunnleggende aktiviteter. Nivå 3 er state-of-the-art. SAMM er designet for realistisk vurdering: de fleste organisasjoner er på nivå 1–2 for de fleste praksiser — og det er et godt utgangspunkt for en forbedringsplan.</p>
+    <table>
+      <thead><tr><th>Forretningsfunksjon</th><th>Praksiser</th></tr></thead>
+      <tbody>
+        <tr><td>Governance</td><td>Strategi og metrikker, policyer og compliance, opplæring og veiledning</td></tr>
+        <tr><td>Design</td><td>Trusselmodellering, sikkerhetskrav, sikker arkitektur</td></tr>
+        <tr><td>Implementation</td><td>Sikker koding, kodegjennomgang, dependency management</td></tr>
+        <tr><td>Verification</td><td>Arkitekturvurdering, requirements testing, sikkerhetstesting</td></tr>
+        <tr><td>Operations</td><td>Hendelseshåndtering, miljøhåndtering, operasjonell administrasjon</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="devsecops">
+  <div class="container">
+    <div class="section-badge">03 · DevSecOps</div>
+    <h2>Dev<em>SecOps</em></h2>
+    <p class="section-intro">DevSecOps er ikke en ny metodologi — det er DevOps der sikkerhet er en del av pipelines, ikke en separat gate.</p>
+    <p class="lead">Tradisjonelt var sikkerhet en avsluttende sjekk: bygg applikasjonen, send til sikkerhetsteam for gjennomgang, vent på godkjenning, deploy. I et DevOps-miljø der deploys skjer mange ganger per dag, er denne modellen umulig å skalere. DevSecOps integrerer sikkerhetstesting i CI/CD-pipelinen — automatisert, rask og blokkerende.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <defs><marker id="dsa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
+        <!-- Pipeline -->
+        <rect x="20" y="60" width="90" height="40" rx="2" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="65" y="85" text-anchor="middle" fill="#2d4a7a">Commit</text>
+        <line x1="112" y1="80" x2="128" y2="80" stroke="#b04428" stroke-width="1.5" marker-end="url(#dsa)"/>
+        <rect x="130" y="60" width="90" height="40" rx="2" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="175" y="78" text-anchor="middle" fill="#b04428">SAST</text>
+        <text x="175" y="92" text-anchor="middle" font-size="10" fill="#6b6257">Secrets scan</text>
+        <line x1="222" y1="80" x2="238" y2="80" stroke="#b04428" stroke-width="1.5" marker-end="url(#dsa)"/>
+        <rect x="240" y="60" width="90" height="40" rx="2" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="285" y="78" text-anchor="middle" fill="#b04428">SCA</text>
+        <text x="285" y="92" text-anchor="middle" font-size="10" fill="#6b6257">Dep. scan</text>
+        <line x1="332" y1="80" x2="348" y2="80" stroke="#b04428" stroke-width="1.5" marker-end="url(#dsa)"/>
+        <rect x="350" y="60" width="90" height="40" rx="2" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="395" y="78" text-anchor="middle" fill="#3d6b3a">Build</text>
+        <text x="395" y="92" text-anchor="middle" font-size="10" fill="#6b6257">Image scan</text>
+        <line x1="442" y1="80" x2="458" y2="80" stroke="#b04428" stroke-width="1.5" marker-end="url(#dsa)"/>
+        <rect x="460" y="60" width="90" height="40" rx="2" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="505" y="78" text-anchor="middle" fill="#b04428">DAST</text>
+        <text x="505" y="92" text-anchor="middle" font-size="10" fill="#6b6257">Staging</text>
+        <line x1="552" y1="80" x2="568" y2="80" stroke="#b04428" stroke-width="1.5" marker-end="url(#dsa)"/>
+        <rect x="570" y="60" width="120" height="40" rx="2" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="630" y="78" text-anchor="middle" fill="#3d6b3a">Deploy</text>
+        <text x="630" y="92" text-anchor="middle" font-size="10" fill="#6b6257">+ monitoring</text>
+        <!-- Security gates -->
+        <text x="65" y="130" text-anchor="middle" font-size="10" fill="#a39886">kode inn</text>
+        <text x="175" y="130" text-anchor="middle" font-size="10" fill="#b04428">← blokkering</text>
+        <text x="285" y="130" text-anchor="middle" font-size="10" fill="#b04428">← blokkering</text>
+        <text x="505" y="130" text-anchor="middle" font-size="10" fill="#b04428">← blokkering</text>
+      </svg>
+      <figcaption>DevSecOps CI/CD-pipeline med automatiserte sikkerhetsgater som blokkerer builds ved kritiske funn.</figcaption>
+    </figure>
+
+    <p>Nøkkelprinsipper for DevSecOps:</p>
+    <ul>
+      <li><strong>Security as code:</strong> sikkerhetspolicyer, IaC-konfigurasjoner og compliance-regler lagres i versjonskontroll.</li>
+      <li><strong>Blokkering vs. advisory:</strong> kritiske funn blokkerer deployet; lavere alvorlighetsgrad rapporteres som advarsler.</li>
+      <li><strong>Feedback loop:</strong> utviklere ser sikkerhetsresultater i PR-kommentarer, ikke i en rapport de ikke leser.</li>
+      <li><strong>Måling:</strong> tid fra sårbarhet oppdaget til patchet (Mean Time to Remediate) er en nøkkelmetrikk.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="sikkerhetskrav">
+  <div class="container">
+    <div class="section-badge">04 · Sikkerhetskrav</div>
+    <h2>Sikkerhets<em>krav</em></h2>
+    <p class="section-intro">Sikkerhetskrav er funksjonelle krav for hva systemet ikke skal tillate — og de er like gyldige som krav om hva det skal tillate.</p>
+    <p class="lead">«Systemet skal ha innlogging» er et funksjonelt krav. «Systemet skal begrense innloggingsforsøk til 5 per minutt per konto og 20 per minutt per IP-adresse» er et sikkerhetskrav. Begge er legitime brukerkrav. Misuse cases er et verktøy for å systematisk identifisere sikkerhetskrav fra angriperperspektivet.</p>
+
+    <p>Formater for sikkerhetskrav i agile prosesser:</p>
+    <ul>
+      <li><strong>Security user story:</strong> «Som sikkerhetsteam ønsker vi at alle passordforsøk rate-limites for å forhindre credential stuffing.»</li>
+      <li><strong>Acceptance criterion:</strong> «Gitt at en bruker har forsøkt innlogging 5 ganger feil, skal neste forsøk gi 429 Too Many Requests og en forsinkelse på 15 sekunder.»</li>
+      <li><strong>Definition of Done:</strong> «Alle nye API-endepunkter er dokumentert med autentiserings- og autorisasjonskrav, og OWASP Top 10 er vurdert.»</li>
+    </ul>
+  </div>
+</section>
+
+<section id="sca-sbom">
+  <div class="container">
+    <div class="section-badge">05 · SCA og SBOM</div>
+    <h2>SCA og <em>SBOM</em></h2>
+    <p class="section-intro">Du skriver kanskje 5 % av koden i applikasjonen din — de resterende 95 % er avhengigheter, og de er ditt ansvar.</p>
+    <p class="lead">SCA (Software Composition Analysis) analyserer direkte og transitive avhengigheter mot kjente sårbarhetsdatabaser (NVD, OSV, GitHub Advisory). En moderne webapplikasjon kan ha tusenvis av transitive avhengigheter. SCA identifiserer hvilke av dem som har kjente CVEer og hvilken versjon som fikser dem.</p>
+    <ul>
+      <li><strong>Verktøy:</strong> GitHub Dependabot (automatisk PR for sikkerhetsoppdateringer), Snyk, OWASP Dependency-Check.</li>
+      <li><strong>SBOM-formater:</strong> SPDX (Linux Foundation), CycloneDX (OWASP) — begge støttes av de fleste verktøy.</li>
+      <li><strong>US EO 14028:</strong> Executive Order fra 2021 krever SBOM fra leverandører til den amerikanske regjeringen — signalet er tydelig for resten av industrien.</li>
+    </ul>
+
+    <pre><code><span class="comment"># Generer SBOM med syft (Anchore)</span>
+syft scan . -o cyclonedx-json > sbom.json
+
+<span class="comment"># Sjekk SBOM mot kjente CVEer med grype</span>
+grype sbom:sbom.json --fail-on high</code></pre>
+
+    <div class="callout callout-green">
+      <h4>Pinning vs. auto-update</h4>
+      <p>Pinning til eksakte versjoner gir reproduserbare builds, men betyr manuell oppdatering for sikkerhetspatches. Dependabot løser dette: den lager automatisk PR-er for sikkerhetsoppdateringer, lar CI kjøre og viser om det er trygt å merge.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

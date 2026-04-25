@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autentisering — Kapittel 4</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 4</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 4: Autentisering og autorisasjon">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 4 · Autentisering</div>
+    <h1><em>Autentisering</em></h1>
+    <p class="lede">Passord alene er ikke lenger tilstrekkelig — men kombinert med MFA, FIDO2 og riktig sesjonshåndtering er det fullt mulig å bygge robust autentisering.</p>
+    <nav class="toc">
+      <a href="#passord"><span class="toc-num">01</span>Passord</a>
+      <a href="#mfa"><span class="toc-num">02</span>MFA</a>
+      <a href="#oauth"><span class="toc-num">03</span>OAuth 2.0</a>
+      <a href="#oidc"><span class="toc-num">04</span>OIDC</a>
+      <a href="#authn-feil"><span class="toc-num">05</span>Vanlige feil</a>
+    </nav>
+  </div>
+</header>
+
+<section id="passord">
+  <div class="container">
+    <div class="section-badge">01 · Passord</div>
+    <h2><em>Passord</em></h2>
+    <p class="section-intro">NIST SP 800-63B gir evidensbaserte anbefalinger som bryter med mange konvensjonelle råd.</p>
+    <p class="lead">Den klassiske «passordpolitikken» — minst 8 tegn, stor bokstav, tall og spesialtegn, bytt hvert 90. dag — er motbevist av forskning. Brukere velger forutsigbare mønstre (<em>Passord1!</em>) og bytter til <em>Passord2!</em> etter 90 dager. NIST SP 800-63B anbefaler heller: lang passfrase, ingen kompleksitetskrav, ingen periodisk rotasjon med mindre det er kompromittert, og sjekk mot kjente lekkede passord.</p>
+    <ul>
+      <li><strong>Minste lengde:</strong> 8 tegn (maks 64+). Lengde er viktigere enn kompleksitet.</li>
+      <li><strong>Sjekk mot lekket passorddatabaser:</strong> integrer HaveIBeenPwned API (k-anonymitet) ved registrering og innlogging.</li>
+      <li><strong>Rate-limiting:</strong> begrens innloggingsforsøk. Lockout etter N forsøk med progressiv forsinkelse.</li>
+      <li><strong>Passordlagring:</strong> Argon2id eller bcrypt — aldri reversibel kryptering eller rå hash.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="mfa">
+  <div class="container">
+    <div class="section-badge">02 · MFA</div>
+    <h2><em>MFA</em></h2>
+    <p class="section-intro">MFA er den enkeltkontrollen som gir størst reduksjon i kontokompromittering — Microsoft anslår 99,9 % reduksjon.</p>
+    <p class="lead">MFA krever to eller flere faktorer: noe du vet, noe du har, noe du er. Den vanligste andre faktoren er TOTP (Time-based One-Time Password) via apper som Google Authenticator eller Authy. TOTP genererer en 6-sifret kode som utløper hvert 30. sekund basert på en delt hemmelighet og gjeldende tidsstempel (RFC 6238).</p>
+
+    <table>
+      <thead><tr><th>MFA-type</th><th>Phishing-motstand</th><th>Anbefaling</th></tr></thead>
+      <tbody>
+        <tr><td>SMS OTP</td><td>Lav (SIM-swapping, SS7)</td><td class="mono-cell">Unngå for sensitivt</td></tr>
+        <tr><td>TOTP (app)</td><td>Middels (kan phishes)</td><td class="mono-cell">OK for de fleste</td></tr>
+        <tr><td>Push (Duo, Okta)</td><td>Middels (MFA fatigue)</td><td class="mono-cell">OK med number matching</td></tr>
+        <tr><td>FIDO2/WebAuthn</td><td>Høy (origin-bundet)</td><td class="mono-cell">Anbefalt</td></tr>
+        <tr><td>Hardware token (YubiKey)</td><td>Høy</td><td class="mono-cell">Anbefalt for privilegerte</td></tr>
+      </tbody>
+    </table>
+
+    <p>FIDO2/WebAuthn er phishing-resistent fordi autentiseringssvaret er bundet til origin — en phishing-side på <em>bank-login.evil.com</em> vil ikke motta et gyldig svar for <em>bank.no</em>. TOTP er ikke phishing-resistent — en real-time phishing-proxy kan videresende koden.</p>
+  </div>
+</section>
+
+<section id="oauth">
+  <div class="container">
+    <div class="section-badge">03 · OAuth 2.0</div>
+    <h2>OAuth <em>2.0</em></h2>
+    <p class="section-intro">OAuth 2.0 løser delegert autorisasjon — en applikasjon får begrenset tilgang til brukerens data uten å kjenne brukerens passord.</p>
+    <p class="lead">Authorization code-flyten er standardvalget for webapplikasjoner: brukeren autentiserer seg hos authorization server, som utsteder en engangskode til applikasjonen. Applikasjonen bytter koden mot et access token i et server-til-server-kall. Access token brukes mot ressursserveren. Nøkkelpunktet: brukerens passord deles aldri med tredjepartsapplikasjonen.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <defs>
+          <marker id="oa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2d4a7a"/></marker>
+          <marker id="ob" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#3d6b3a"/></marker>
+        </defs>
+        <text x="80" y="20" text-anchor="middle" font-weight="600" fill="#b04428">Bruker</text>
+        <text x="300" y="20" text-anchor="middle" font-weight="600" fill="#2d4a7a">Klient-app</text>
+        <text x="520" y="20" text-anchor="middle" font-weight="600" fill="#3d6b3a">Auth Server</text>
+        <text x="660" y="20" text-anchor="middle" font-weight="600" fill="#a39886">Ressurs-API</text>
+        <line x1="80" y1="25" x2="80" y2="250" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="300" y1="25" x2="300" y2="250" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="520" y1="25" x2="520" y2="250" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="660" y1="25" x2="660" y2="250" stroke="#c9c0ae" stroke-width="1"/>
+        <!-- Steg 1 -->
+        <line x1="82" y1="50" x2="298" y2="50" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#oa)"/>
+        <text x="190" y="44" text-anchor="middle" fill="#2d4a7a">1. Klikker «Logg inn med X»</text>
+        <!-- Steg 2 -->
+        <line x1="298" y1="75" x2="82" y2="90" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#oa)"/>
+        <text x="190" y="72" text-anchor="middle" fill="#2d4a7a">2. Redirect til Auth Server</text>
+        <!-- Steg 3 -->
+        <line x1="82" y1="115" x2="518" y2="115" stroke="#3d6b3a" stroke-width="1.5" marker-end="url(#ob)"/>
+        <text x="300" y="109" text-anchor="middle" fill="#3d6b3a">3. Bruker logger inn + gir samtykke</text>
+        <!-- Steg 4 -->
+        <line x1="518" y1="140" x2="82" y2="155" stroke="#3d6b3a" stroke-width="1.5" marker-end="url(#ob)"/>
+        <text x="300" y="137" text-anchor="middle" fill="#3d6b3a">4. Redirect tilbake med code</text>
+        <!-- Steg 5 -->
+        <line x1="302" y1="178" x2="518" y2="178" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#oa)"/>
+        <text x="410" y="172" text-anchor="middle" fill="#2d4a7a">5. Bytt code → access_token</text>
+        <!-- Steg 6 -->
+        <line x1="302" y1="210" x2="658" y2="210" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#oa)"/>
+        <text x="480" y="204" text-anchor="middle" fill="#2d4a7a">6. API-kall med access_token</text>
+      </svg>
+      <figcaption>OAuth 2.0 authorization code-flyt — brukerens passord håndteres kun av auth server, aldri av klientapplikasjonen.</figcaption>
+    </figure>
+
+    <p><strong>PKCE (Proof Key for Code Exchange)</strong> er obligatorisk for native apps og SPAs: klienten genererer en code_verifier, sender en hash (code_challenge) i authorization request, og beviser eierskap ved code exchange. Dette forhindrer at authorization code stjeles av en ondsinnet app.</p>
+  </div>
+</section>
+
+<section id="oidc">
+  <div class="container">
+    <div class="section-badge">04 · OIDC</div>
+    <h2>OpenID <em>Connect</em></h2>
+    <p class="section-intro">OIDC er autentiseringslaget som mangler i OAuth 2.0 — det legger til hvem brukeren er, ikke bare hva de har tilgang til.</p>
+    <p class="lead">OAuth 2.0 svarer på «har denne brukeren gitt tilgang til scope X?» — det er autorisasjon. OIDC svarer på «hvem er denne brukeren?» — det er autentisering. OIDC gjør det ved å legge til et ID-token (en signert JWT) som inneholder brukerens identitet: <code>sub</code> (unik identifikator), <code>email</code>, <code>name</code>, <code>iss</code> (issuer), og <code>aud</code> (audience).</p>
+    <p>OIDC er grunnlaget for «Logg inn med Google», «Logg inn med GitHub» og enterprise SSO. Applikasjonen verifiserer ID-tokenets signatur mot autoritetens JWKS-endepunkt, validerer <code>iss</code>, <code>aud</code> og <code>exp</code>, og bruker <code>sub</code> som brukeridentifikator i sin egen database.</p>
+  </div>
+</section>
+
+<section id="authn-feil">
+  <div class="container">
+    <div class="section-badge">05 · Fallgruver</div>
+    <h2>Vanlige autentiserings<em>feil</em></h2>
+    <p class="section-intro">De fleste autentiseringsfeil er prosess- og implementeringsfeil, ikke kryptografiske feil.</p>
+    <p class="lead">Credential stuffing er den vanligste årsaken til kontokompromittering i 2026. En angriper bruker millioner av brukernavn/passord-par fra tidligere databrudd og prøver dem systematisk mot din tjeneste. Forsvar: rate-limiting, MFA, og integrasjon mot lekkede passord-databaser ved innlogging.</p>
+    <ul>
+      <li><strong>Manglende rate-limiting:</strong> ingen grense gir fritt spillerom for credential stuffing og brute force.</li>
+      <li><strong>Permanent sesjon:</strong> sesjonskoder som aldri utløper er like problematiske som lagrede passord.</li>
+      <li><strong>Session fixation:</strong> generer alltid ny session-ID etter vellykket autentisering.</li>
+      <li><strong>Utlogging som bare sletter cookie:</strong> invalider sesjonen på serversiden — ellers er den fortsatt gyldig.</li>
+      <li><strong>MFA fatigue:</strong> push-MFA uten number matching er sårbar for bombarding-angrep der brukeren til slutt godtar.</li>
+    </ul>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

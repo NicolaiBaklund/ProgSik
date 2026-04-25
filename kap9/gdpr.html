@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GDPR — Kapittel 9</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 9</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 9: Personvern og databeskyttelse">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 9 · GDPR</div>
+    <h1><em>GDPR</em></h1>
+    <p class="lede">Den europeiske personvernforordningen — ikke som et compliance-krav å stryke av, men som et sett prinsipper med reelle konsekvenser for systemdesign.</p>
+    <nav class="toc">
+      <a href="#prinsipper"><span class="toc-num">01</span>GDPR-prinsipper</a>
+      <a href="#grunnlag"><span class="toc-num">02</span>Behandlingsgrunnlag</a>
+      <a href="#dpa"><span class="toc-num">03</span>Databehandleravtaler</a>
+      <a href="#dpia"><span class="toc-num">04</span>DPIA</a>
+      <a href="#rettigheter"><span class="toc-num">05</span>Den registrertes rettigheter</a>
+    </nav>
+  </div>
+</header>
+
+<section id="prinsipper">
+  <div class="container">
+    <div class="section-badge">01 · Prinsipper</div>
+    <h2>GDPR-<em>prinsipper</em></h2>
+    <p class="section-intro">Syv prinsipper i artikkel 5 — de er ikke råd, de er juridisk bindende krav.</p>
+    <p class="lead">GDPR etablerer personvern som en grunnleggende rettighet. De syv prinsippene er ikke en sjekkliste å huke av, men grunnprinsippene som all databehandling må vurderes mot. De tre viktigste for utviklere i praksis: formålsbegrensning (samle kun for spesifikt formål), dataminimering (kun nødvendig data), og lagringsbegrensning (slett når formålet er oppnådd).</p>
+    <table>
+      <thead><tr><th>Prinsipp</th><th>Hva det betyr i praksis</th></tr></thead>
+      <tbody>
+        <tr><td>Lovlighet, rettferdighet, åpenhet</td><td>Ha behandlingsgrunnlag; informer brukeren i klartekst</td></tr>
+        <tr><td>Formålsbegrensning</td><td>Ikke bruk data til andre formål enn det de ble samlet for</td></tr>
+        <tr><td>Dataminimering</td><td>Samle kun det som er nødvendig for formålet</td></tr>
+        <tr><td>Nøyaktighet</td><td>Hold data oppdatert; gi brukeren mulighet til å korrigere</td></tr>
+        <tr><td>Lagringsbegrensning</td><td>Definer og håndhev retensjonsperioder; slett/anonymiser etterpå</td></tr>
+        <tr><td>Integritet og konfidensialitet</td><td>Passende sikkerhetstiltak (kryptering, tilgangskontroll, logging)</td></tr>
+        <tr><td>Ansvarlighet</td><td>Dokumenter behandlingen; bevis etterlevelse ved tilsyn</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="grunnlag">
+  <div class="container">
+    <div class="section-badge">02 · Behandlingsgrunnlag</div>
+    <h2>Behandlings<em>grunnlag</em></h2>
+    <p class="section-intro">Uten behandlingsgrunnlag er behandlingen ulovlig — og det er seks mulige grunnlag.</p>
+    <p class="lead">Et behandlingsgrunnlag er den rettslige hjemmelen for å behandle personopplysninger. Du trenger ett av seks grunnlag for hvert formål. Samtykke høres enkelt ut, men er det strengeste: det må være spesifikt, informert, fritt gitt og tilbaketkallelig. «Jeg godtar vilkårene» er ikke gyldig samtykke til sporing.</p>
+    <ul>
+      <li><strong>Samtykke:</strong> frivillig, spesifikt, informert og utvetydig. Tilbaketkalling må være like enkel som tilgivelse.</li>
+      <li><strong>Kontrakt:</strong> nødvendig for å oppfylle en kontrakt med den registrerte. Eksempel: leveringsadresse for netthandel.</li>
+      <li><strong>Rettslig forpliktelse:</strong> lovpålagt behandling. Eksempel: bokføring, skatteinnberetning.</li>
+      <li><strong>Vitale interesser:</strong> for å beskytte livet til den registrerte. Sjelden aktuelt.</li>
+      <li><strong>Allmennhetens interesse:</strong> utøvelse av offentlig myndighet. Aktuelt for offentlig sektor.</li>
+      <li><strong>Berettiget interesse:</strong> veie organisasjonens interesse mot den registrertes rettigheter. Hyppig brukt, men krever dokumentert interesseavveining.</li>
+    </ul>
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>«Berettiget interesse» er ikke en hvit sjekk. Det krever en interesseavveinings-test: er interessen reell? Er behandlingen nødvendig for interessen? Overstyrer den registrertes interesser eller rettigheter organisasjonens interesse?</p>
+    </div>
+  </div>
+</section>
+
+<section id="dpa">
+  <div class="container">
+    <div class="section-badge">03 · DPA</div>
+    <h2>Databehandler<em>avtaler</em></h2>
+    <p class="section-intro">Når du bruker en skytjeneste til å behandle kunders personopplysninger, er du behandlingsansvarlig og tjenesten er din databehandler.</p>
+    <p class="lead">En databehandleravtale (DPA) er obligatorisk etter GDPR artikkel 28 når du lar en tredjepart behandle personopplysninger på dine vegne. AWS, Google Cloud, Heroku, Stripe — alle er databehandlere for sin kunde. Avtalen skal definere: hva som behandles, på hvilke instruksjoner, hvilke sikkerhetstiltak som kreves, og rutiner for brudd.</p>
+    <p>Vanlige krav i en DPA:</p>
+    <ul>
+      <li>Behandle kun på behandlingsansvarliges instruksjoner.</li>
+      <li>Implementere passende tekniske og organisatoriske sikkerhetstiltak.</li>
+      <li>Varsle om databrudd innen 72 timer.</li>
+      <li>Slette eller returnere data ved avtalens slutt.</li>
+      <li>Tillate revisjon og inspeksjon.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="dpia">
+  <div class="container">
+    <div class="section-badge">04 · DPIA</div>
+    <h2><em>DPIA</em></h2>
+    <p class="section-intro">Data Protection Impact Assessment — forhåndsvurdering av personvernrisiko for høyrisiko-behandling.</p>
+    <p class="lead">DPIA er GDPR's versjon av threat modeling for personvern. Før du implementerer behandling som medfører høy risiko, skal du vurdere: hva er risikoen for de registrerte, hvilke tiltak reduserer risikoen, og er risikoen etter tiltak akseptabel? Resultatet dokumenteres og er tilgjengelig for tilsynsmyndigheten.</p>
+    <p>Innhold i en DPIA:</p>
+    <ol>
+      <li>Beskrivelse av behandlingen og dens formål.</li>
+      <li>Vurdering av nødvendighet og proporsjonalitet.</li>
+      <li>Identifisering av risikoer for de registrerte.</li>
+      <li>Planlagte tiltak for å adressere risiko.</li>
+      <li>Vurdering av gjenværende risiko.</li>
+    </ol>
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>En DPIA er ikke en engangsøvelse — den skal oppdateres ved vesentlige endringer i behandlingen. Og hvis DPIA viser høy residualrisiko, skal Datatilsynet konsulteres.</p>
+    </div>
+  </div>
+</section>
+
+<section id="rettigheter">
+  <div class="container">
+    <div class="section-badge">05 · Rettigheter</div>
+    <h2>Den registrertes <em>rettigheter</em></h2>
+    <p class="section-intro">GDPR gir individer konkrete rettigheter — og systemet ditt må kunne håndheve dem.</p>
+    <p class="lead">«Slett meg» er ikke bare en brukeranmodning — det er et juridisk krav som systemet ditt må støtte teknisk. Og det er langt vanskeligere å implementere i et system som ble designet uten tanke på det: data finnes i databaser, logger, backups, analytics-systemer og tredjepartstjenester. Start med å tegne opp en datakartlegging.</p>
+    <table>
+      <thead><tr><th>Rettighet</th><th>Art.</th><th>Designimplikasjon</th></tr></thead>
+      <tbody>
+        <tr><td>Innsyn</td><td>15</td><td>Eksporter alt om én bruker i lesbart format</td></tr>
+        <tr><td>Retting</td><td>16</td><td>Brukere kan endre sine opplysninger</td></tr>
+        <tr><td>Sletting</td><td>17</td><td>Slett data fra alle systemer — inkl. backups</td></tr>
+        <tr><td>Begrensning av behandling</td><td>18</td><td>Mulighet til å «fryse» behandling av en brukers data</td></tr>
+        <tr><td>Dataportabilitet</td><td>20</td><td>Eksport i maskinlesbart format (JSON, CSV)</td></tr>
+        <tr><td>Protest</td><td>21</td><td>Opt-out fra behandling basert på berettiget interesse</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

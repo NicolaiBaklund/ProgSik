@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risikohåndtering — Kapittel 6</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 6</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 6: Risikohåndtering og SDL">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 6 · Risikohåndtering</div>
+    <h1>Risiko<em>håndtering</em></h1>
+    <p class="lede">Risiko kan ikke elimineres — men den kan forstås, kvantifiseres og behandles med åpne øyne og en eksplisitt plan.</p>
+    <nav class="toc">
+      <a href="#risikobegrep"><span class="toc-num">01</span>Risikobegrepet</a>
+      <a href="#cvss"><span class="toc-num">02</span>CVSS-scoring</a>
+      <a href="#risikobehandling"><span class="toc-num">03</span>Risikobehandling</a>
+      <a href="#tredjepart"><span class="toc-num">04</span>Tredjepartsrisiko</a>
+      <a href="#risikoregister"><span class="toc-num">05</span>Risikoregisteret</a>
+    </nav>
+  </div>
+</header>
+
+<section id="risikobegrep">
+  <div class="container">
+    <div class="section-badge">01 · Grunnlag</div>
+    <h2>Risiko<em>begrepet</em></h2>
+    <p class="section-intro">Risiko er ikke det samme som trussel eller sårbarhet — det er kombinasjonen av dem, vektet mot konsekvens.</p>
+    <p class="lead">En låst dør i en avsidesliggende hytte der ingen vet hva som er der inne, har lav risiko selv om låsen er svak — sannsynligheten for at noen forsøker å bryte seg inn er minimal. Den samme svake låsen på hoveddøren til en bank i sentrum er høy risiko. Risiko = sannsynlighet × konsekvens — og begge faktorer teller.</p>
+    <ul>
+      <li><strong>Trussel:</strong> en potensiell skadelig hendelse (f.eks. ransomware-angrep).</li>
+      <li><strong>Sårbarhet:</strong> en svakhet som gjør trusselen mulig å realisere (f.eks. ukryptert backup).</li>
+      <li><strong>Eksponering:</strong> i hvilken grad systemet er tilgjengelig for trusselaktøren (f.eks. eksponert mot internett).</li>
+      <li><strong>Iboende risiko:</strong> risikoen uten kontroller.</li>
+      <li><strong>Gjenværende risiko:</strong> risikoen etter kontroller er implementert.</li>
+    </ul>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Risikomatrise -->
+        <text x="360" y="20" text-anchor="middle" font-weight="600" fill="#1a1612">Risikomatrise</text>
+        <!-- Y-akse -->
+        <text x="20" y="130" text-anchor="middle" transform="rotate(-90 20 130)" fill="#6b6257">Sannsynlighet →</text>
+        <!-- X-akse -->
+        <text x="390" y="225" text-anchor="middle" fill="#6b6257">Konsekvens →</text>
+        <!-- Rader -->
+        <rect x="60" y="160" width="100" height="50" rx="2" fill="rgba(61,107,58,0.2)" stroke="#3d6b3a" stroke-width="1"/>
+        <text x="110" y="189" text-anchor="middle" font-size="10" fill="#3d6b3a">Lav</text>
+        <rect x="165" y="160" width="100" height="50" rx="2" fill="rgba(198,138,31,0.2)" stroke="#c68a1f" stroke-width="1"/>
+        <text x="215" y="189" text-anchor="middle" font-size="10" fill="#c68a1f">Middels</text>
+        <rect x="270" y="160" width="100" height="50" rx="2" fill="rgba(176,68,40,0.2)" stroke="#b04428" stroke-width="1"/>
+        <text x="320" y="189" text-anchor="middle" font-size="10" fill="#b04428">Høy</text>
+        <rect x="375" y="160" width="100" height="50" rx="2" fill="rgba(176,68,40,0.4)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="425" y="189" text-anchor="middle" font-size="10" font-weight="600" fill="#b04428">Kritisk</text>
+
+        <rect x="60" y="105" width="100" height="50" rx="2" fill="rgba(61,107,58,0.2)" stroke="#3d6b3a" stroke-width="1"/>
+        <text x="110" y="134" text-anchor="middle" font-size="10" fill="#3d6b3a">Lav</text>
+        <rect x="165" y="105" width="100" height="50" rx="2" fill="rgba(198,138,31,0.2)" stroke="#c68a1f" stroke-width="1"/>
+        <text x="215" y="134" text-anchor="middle" font-size="10" fill="#c68a1f">Middels</text>
+        <rect x="270" y="105" width="100" height="50" rx="2" fill="rgba(176,68,40,0.3)" stroke="#b04428" stroke-width="1"/>
+        <text x="320" y="134" text-anchor="middle" font-size="10" fill="#b04428">Høy</text>
+        <rect x="375" y="105" width="100" height="50" rx="2" fill="rgba(176,68,40,0.35)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="425" y="134" text-anchor="middle" font-size="10" font-weight="600" fill="#b04428">Kritisk</text>
+
+        <rect x="60" y="50" width="100" height="50" rx="2" fill="rgba(61,107,58,0.15)" stroke="#3d6b3a" stroke-width="1"/>
+        <text x="110" y="79" text-anchor="middle" font-size="10" fill="#3d6b3a">Lav</text>
+        <rect x="165" y="50" width="100" height="50" rx="2" fill="rgba(61,107,58,0.2)" stroke="#3d6b3a" stroke-width="1"/>
+        <text x="215" y="79" text-anchor="middle" font-size="10" fill="#3d6b3a">Lav</text>
+        <rect x="270" y="50" width="100" height="50" rx="2" fill="rgba(198,138,31,0.2)" stroke="#c68a1f" stroke-width="1"/>
+        <text x="320" y="79" text-anchor="middle" font-size="10" fill="#c68a1f">Middels</text>
+        <rect x="375" y="50" width="100" height="50" rx="2" fill="rgba(176,68,40,0.2)" stroke="#b04428" stroke-width="1"/>
+        <text x="425" y="79" text-anchor="middle" font-size="10" fill="#b04428">Høy</text>
+
+        <!-- Akselabels -->
+        <text x="110" y="215" text-anchor="middle" font-size="10" fill="#a39886">Ubetydelig</text>
+        <text x="215" y="215" text-anchor="middle" font-size="10" fill="#a39886">Begrenset</text>
+        <text x="320" y="215" text-anchor="middle" font-size="10" fill="#a39886">Alvorlig</text>
+        <text x="425" y="215" text-anchor="middle" font-size="10" fill="#a39886">Katastrofal</text>
+        <text x="50" y="185" text-anchor="end" font-size="10" fill="#a39886">Lav</text>
+        <text x="50" y="130" text-anchor="end" font-size="10" fill="#a39886">Middels</text>
+        <text x="50" y="75" text-anchor="end" font-size="10" fill="#a39886">Høy</text>
+      </svg>
+      <figcaption>En enkel risikomatrise — risikoen er produktet av sannsynlighet og konsekvens.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="cvss">
+  <div class="container">
+    <div class="section-badge">02 · CVSS</div>
+    <h2>CVSS-<em>scoring</em></h2>
+    <p class="section-intro">CVSS gir en standardisert score for kjente sårbarheter — men scoren forteller ikke hele historien.</p>
+    <p class="lead">CVSS Base Score beregnes fra seks faktorer: Attack Vector (AV), Attack Complexity (AC), Privileges Required (PR), User Interaction (UI), og konsekvensene for Confidentiality, Integrity og Availability (C/I/A). En sårbarhet med AV:Network, AC:Low, PR:None, UI:None og full C/I/A-konsekvens gir Base Score 10.0 — det høyeste.</p>
+
+    <table>
+      <thead><tr><th>Score</th><th>Alvorlighetsgrad</th><th>Typisk responstid</th></tr></thead>
+      <tbody>
+        <tr><td>0.1–3.9</td><td>Lav</td><td>Neste planlagte patch-syklus</td></tr>
+        <tr><td>4.0–6.9</td><td>Middels</td><td>Innen 30 dager</td></tr>
+        <tr><td>7.0–8.9</td><td>Høy</td><td>Innen 7 dager</td></tr>
+        <tr><td>9.0–10.0</td><td>Kritisk</td><td>Innen 24–72 timer</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>Hva CVSS ikke sier</h4>
+      <p>CVSS Base Score reflekterer ikke om din spesifikke konfigurasjon er sårbar, om en exploit eksisterer i naturen, eller om den sårbare funksjonaliteten faktisk brukes. Temporal Score (patch tilgjengelighet, exploit modenhets) og Environmental Score (din konfigurasjon) justerer dette — men brukes sjelden. Behandle CVSS som et utgangspunkt for vurdering, ikke som en endelig dom.</p>
+    </div>
+  </div>
+</section>
+
+<section id="risikobehandling">
+  <div class="container">
+    <div class="section-badge">03 · Behandling</div>
+    <h2>Risiko<em>behandling</em></h2>
+    <p class="section-intro">Fire strategier for å håndtere identifisert risiko — og en av dem er «gjøre ingenting», men da eksplisitt og dokumentert.</p>
+    <p class="lead">Etter at en risiko er identifisert og scoret, må du ta en av fire beslutninger. Det eneste som ikke er akseptabelt, er å ignorere den — det er å ubevisst akseptere den uten å forstå konsekvensene.</p>
+    <ul>
+      <li><strong>Redusere (mitigere):</strong> implementer kontroller som senker sannsynligheten eller konsekvensen. Eksempel: patch sårbarheten, legg til MFA, krypter databasen.</li>
+      <li><strong>Akseptere:</strong> risikoen er for lav eller kontrollkostnaden for høy — dokumenter eksplisitt at risikoen er kjent og akseptert av ansvarlig part.</li>
+      <li><strong>Overføre:</strong> flytt risikoen til en tredjepart. Eksempel: cyberforsikring, outsource betalingshåndtering til PCI-DSS-sertifisert tredjepart.</li>
+      <li><strong>Unngå:</strong> slutt med aktiviteten. Eksempel: slutt å lagre kortdata direkte — bruk en betalingstilbyder som tar ansvaret.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="tredjepart">
+  <div class="container">
+    <div class="section-badge">04 · Tredjeparter</div>
+    <h2>Tredjeparts<em>risiko</em></h2>
+    <p class="section-intro">Din sikkerhet er ikke sterkere enn den svakeste leverandøren som har tilgang til ditt system eller dine data.</p>
+    <p class="lead">SolarWinds-angrepet i 2020 kompromitterte tusenvis av organisasjoner — ikke ved å angripe dem direkte, men ved å kompromittere en felles leverandør. Organisasjonene hadde god intern sikkerhet, men en tredjepart med privilegert tilgang var inngangsporten. Tredjepartsrisiko er reell, voksende og vanskelig å kontrollere.</p>
+    <ul>
+      <li><strong>Åpen kildekode-avhengigheter:</strong> transitive avhengigheter du ikke kjenner til. SCA og SBOM er nøkkelen.</li>
+      <li><strong>Skyleverandører:</strong> shared responsibility model — hva er ditt ansvar vs. leverandørens?</li>
+      <li><strong>Underleverandører:</strong> vurder sikkerhetspraksis (ISO 27001, SOC 2) som del av leverandørvalg.</li>
+      <li><strong>Tilgangsstyring:</strong> begrens tredjeparters tilgang til det minimum de trenger — og fjern tilgangen når kontrakten utløper.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="risikoregister">
+  <div class="container">
+    <div class="section-badge">05 · Register</div>
+    <h2>Risiko<em>registeret</em></h2>
+    <p class="section-intro">Et risikoregister er ikke et dokument du skriver én gang og legger i en skuff — det er et levende verktøy for styring.</p>
+    <p class="lead">Et godt risikoregister er enkelt nok til å oppdateres regelmessig, komplett nok til å gi oversikt, og strukturert nok til å kommunisere til ledelse. Det viktigste er at det faktisk brukes — et perfekt ubrukt risikoregister er verdiløst.</p>
+
+    <table>
+      <thead><tr><th>ID</th><th>Risiko</th><th>Sannsynlighet</th><th>Konsekvens</th><th>Score</th><th>Behandling</th><th>Eier</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>R-01</td><td>Credential stuffing mot innlogging</td><td>Høy</td><td>Alvorlig</td><td>Høy</td><td>Redusere</td><td>Dev Lead</td><td>Pågår — MFA under implementering</td></tr>
+        <tr><td>R-02</td><td>Ukryptert backup i sky-storage</td><td>Middels</td><td>Kritisk</td><td>Høy</td><td>Redusere</td><td>Ops</td><td>Ferdig — AES-256 aktivert</td></tr>
+        <tr><td>R-03</td><td>Sårbar Node.js-avhengighet (CVSS 6.5)</td><td>Lav</td><td>Begrenset</td><td>Lav</td><td>Akseptere</td><td>Dev Lead</td><td>Ingen exploit i naturen — overvåkes</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-green">
+      <h4>Oppdateringssyklus</h4>
+      <p>Gjennomgå risikoregisteret kvartalsvis, ved større arkitekturendringer og etter sikkerhetshendelser. Akseptert risiko bør re-evalueres regelmessig — kontekst endrer seg.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

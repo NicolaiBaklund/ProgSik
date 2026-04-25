@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapittel 8 — Mikrotjenester og supply chain</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="../" class="nav-back">&larr; Alle kapitler</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 8: Mikrotjenester og supply chain">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 8 · Distribuerte systemer</div>
+    <h1>Mikrotjenester og <em>supply chain</em></h1>
+    <p class="lede">Moderne systemer er ikke én applikasjon — de er titalls tjenester, hundrevis av pakker og et tillitsnettverk som strekker seg langt utenfor din egen kode.</p>
+  </div>
+</header>
+
+<nav class="chapter-toc">
+  <div class="container">
+    <ol class="chapter-toc-list">
+      <li><span class="toc-num">01</span><a href="#overblikk">Helhetsbilde</a></li>
+      <li><span class="toc-num">02</span><a href="#deler">Delsider</a></li>
+      <li><span class="toc-num">03</span><a href="#quiz">Test deg selv</a></li>
+    </ol>
+  </div>
+</nav>
+
+<section id="overblikk">
+  <div class="container">
+    <div class="section-badge">Overblikk</div>
+    <h2>Det store <em>bildet</em></h2>
+    <p class="section-intro">I et microservice-arkitektur multipliseres angrepsoverflaten — hvert tjeneste-til-tjeneste-kall er en potensiell angrepsvektor.</p>
+    <p class="lead">En monolittisk applikasjon hadde én angrepsoverflate mot internett. Et microservice-arkitektur med 50 tjenester har 50 potensielle inngangspunkter, hundrevis av interne kommunikasjonskanaler, og et tillitstorg der én kompromittert tjeneste kan bevege seg sidelengs til andre. Og under alle disse tjenestene: tusenvis av avhengigheter du kanskje aldri har lest kildekoden til.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <defs><marker id="msa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2d4a7a"/></marker></defs>
+        <!-- Internett -->
+        <rect x="20" y="90" width="80" height="40" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="60" y="115" text-anchor="middle" fill="#b04428">Internett</text>
+        <line x1="102" y1="110" x2="138" y2="110" stroke="#b04428" stroke-width="1.5" marker-end="url(#msa)"/>
+        <!-- API Gateway -->
+        <rect x="140" y="80" width="100" height="60" rx="3" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="2"/>
+        <text x="190" y="105" text-anchor="middle" font-weight="600" fill="#2d4a7a">API</text>
+        <text x="190" y="120" text-anchor="middle" fill="#2d4a7a">Gateway</text>
+        <text x="190" y="133" text-anchor="middle" font-size="10" fill="#3d6b3a">mTLS →</text>
+        <!-- Tjenester -->
+        <rect x="300" y="30" width="90" height="40" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="345" y="55" text-anchor="middle" fill="#3d6b3a">Bruker-svc</text>
+        <rect x="300" y="90" width="90" height="40" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="345" y="115" text-anchor="middle" fill="#3d6b3a">Ordre-svc</text>
+        <rect x="300" y="150" width="90" height="40" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="345" y="175" text-anchor="middle" fill="#3d6b3a">Betaling-svc</text>
+        <line x1="242" y1="100" x2="298" y2="50" stroke="#2d4a7a" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#msa)"/>
+        <line x1="242" y1="110" x2="298" y2="110" stroke="#2d4a7a" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#msa)"/>
+        <line x1="242" y1="120" x2="298" y2="170" stroke="#2d4a7a" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#msa)"/>
+        <!-- Database -->
+        <rect x="460" y="90" width="90" height="40" rx="3" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="505" y="115" text-anchor="middle" fill="#c68a1f">DB (privat)</text>
+        <line x1="392" y1="110" x2="458" y2="110" stroke="#3d6b3a" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#msa)"/>
+        <!-- Secrets -->
+        <rect x="460" y="150" width="90" height="40" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="505" y="170" text-anchor="middle" fill="#b04428">Vault</text>
+        <text x="505" y="184" text-anchor="middle" font-size="10" fill="#6b6257">secrets</text>
+        <!-- Lateral movement arrow -->
+        <path d="M 345,72 Q 345,82 345,88" fill="none" stroke="#b04428" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#msa)"/>
+        <text x="358" y="82" font-size="10" fill="#b04428">lateral</text>
+        <text x="358" y="93" font-size="10" fill="#b04428">movement</text>
+      </svg>
+      <figcaption>Et microservice-oppsett — mTLS mellom tjenester, secrets manager for nøkler, og isolerte databaser per tjeneste.</figcaption>
+    </figure>
+
+    <div class="callout callout-green">
+      <h4>Kapittelets kjerneidé</h4>
+      <p>I mikroservices er tillit ikke implisitt basert på nettverksposisjon. Hver tjeneste må autentisere seg for andre tjenester, og alle hemmeligheter håndteres utenfor koden. Supply chain-angrep kompromitterer tilliten til kode du ikke har skrevet — og er nå den dominerende angrepsstrategien for sofistikerte aktører.</p>
+    </div>
+  </div>
+</section>
+
+<section id="deler">
+  <div class="container">
+    <div class="section-badge">Delsider</div>
+    <h2>Utforsk <em>kapittelet</em></h2>
+    <div class="subpage-list">
+      <a href="mikrotjenester.html" class="subpage-card">
+        <div class="sp-icon">01–05</div>
+        <div class="sp-info">
+          <div class="sp-title">Mikrotjenester</div>
+          <div class="sp-desc">mTLS, service mesh, secrets management, container security og zero trust i microservices.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="supply-chain.html" class="subpage-card">
+        <div class="sp-icon">06–10</div>
+        <div class="sp-info">
+          <div class="sp-title">Supply chain-sikkerhet</div>
+          <div class="sp-desc">SolarWinds, XZ Utils, dependency confusion, typosquatting, SBOM og Sigstore.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="container">
+    <h2>Test deg <em>selv</em></h2>
+    <p class="section-intro">18 spørsmål om mikrotjenester og supply chain-sikkerhet.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 1 · Lett</div>
+      <div class="q-text">Hva er mTLS?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">mTLS (mutual TLS) er en variant av TLS der begge parter verifiserer hverandres sertifikater — klient og server. I microservices brukes mTLS til tjeneste-til-tjeneste-autentisering: hver tjeneste har et sertifikat, og bare tjenester med gyldig sertifikat kan kommunisere.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 2 · Lett</div>
+      <div class="q-text">Hva er et supply chain-angrep?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Et supply chain-angrep kompromitterer en pålitelig tredjepart i stedet for målet direkte — en leverandørs programvare, et open-source-bibliotek, en byggesystem-komponent. Angriperen nyttiggjør seg den tilliten målet allerede har til leverandøren for å komme inn.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 3 · Lett</div>
+      <div class="q-text">Hva er en SBOM?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Software Bill of Materials — en komplett liste over alle komponenter, avhengigheter og versjoner i en programvare. Gjør det mulig å raskt identifisere om et nytt CVE rammer din programvare, og er et krav i stadig flere regulatoriske sammenhenger.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 4 · Lett</div>
+      <div class="q-text">Hva er dependency confusion?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Dependency confusion er et angrep der angriperen publiserer en pakke med samme navn som en intern privat pakke på et offentlig register (npm, PyPI), men med et høyere versjonsnummer. Pakkemanageren velger den offentlige versjonen fordi den har høyest version — og kjører angriper-koden.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 5 · Lett</div>
+      <div class="q-text">Hva er Sigstore?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Sigstore er et åpent infrastrukturprosjekt for kodesignering. Det gjør det mulig å signere og verifisere programvareartefakter (container images, pakker, binærer) via Cosign (verktøy), Fulcio (sertifikatutsteder) og Rekor (transparency log). Målet: gjøre «sign what you run» standardpraksis.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 6 · Middels</div>
+      <div class="q-text">Hva er forskjellen mellom mTLS og vanlig TLS?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Vanlig TLS: kun server autentiserer seg med sertifikat — klienten verifiserer serveren. mTLS: begge parter autentiserer seg — klienten presenterer også et sertifikat som serveren verifiserer. I microservices betyr mTLS at en kompromittert tjeneste ikke automatisk kan kalle andre tjenester — den trenger et gyldig sertifikat.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 7 · Middels</div>
+      <div class="q-text">Forklar dependency confusion-angrepet steg for steg.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">1. Organisasjonen har en intern pakke kalt <code>@acme/utils</code> i et privat npm-register. 2. Angriperen oppdager pakkenavnet (via leaked config, jobbannonser o.l.) og publiserer <code>@acme/utils</code> på det offentlige npm-registeret med versjon 99.0.0. 3. Utviklerens maskin (eller CI/CD) konfigurert til å hente fra begge registre, velger versjon 99.0.0 fordi den er høyest. 4. Angriperens kode kjøres i organisasjonens bygg- eller kjøremiljø.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8 · Middels</div>
+      <div class="q-text">Hva er XZ Utils-angrepet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">XZ Utils (CVE-2024-3094): en tålmodig angriper bidro til xz-kompressjonsbiblioteket i to år for å oppnå tillit som vedlikeholder. Deretter introduserte de en bakdør i en release (5.6.0–5.6.1) som målrettet sshd-autentisering på systemer med systemd. Angrepet ble oppdaget av en Microsoft-ingeniør som la merke til unormal CPU-bruk. Det er et eksempelcase på langsiktig, planlagt supply chain-angrep.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 9 · Middels</div>
+      <div class="q-text">Hva er en service mesh og hva bidrar den med sikkerhetsmessig?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En service mesh (Istio, Linkerd) er et infrastrukturlag som håndterer tjeneste-til-tjeneste-kommunikasjon. Sikkerhetsmessige bidrag: automatisk mTLS mellom alle tjenester, observabilitet (logg alle kall), trafikk-policyer (denne tjenesten kan kun kalle disse tjenestene), sertifikatrotasjon uten applikasjonskode-endring.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 10 · Middels</div>
+      <div class="q-text">Hva er secrets management og hvorfor er miljøvariabler utilstrekkelige?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Secrets management er sentralisert lagring og distribusjon av hemmeligheter (API-nøkler, DB-passord, sertifikater). Miljøvariabler er problematiske: de lekker i prosesslister, feilmeldinger, logger, og child-prosesser; de roteres ikke automatisk; de er svake mot misconfiguration (kommit til Git). Secrets managers (Vault, AWS Secrets Manager) gir revokasjon, rotasjon, revisjonsspor og least-privilege-tilgang.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 11 · Middels</div>
+      <div class="q-text">Hva er typosquatting i pakkeregisterkontekst?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Typosquatting er publisering av pakker med navn som ligner populære pakker med stavefeil: <code>reqeusts</code> for <code>requests</code>, <code>colourama</code> for <code>colorama</code>. Utviklere som skriver feil pakkenavn installerer ondsinnet kode. Forsvar: SCA-verktøy som varsler om ukjente pakker, privat register med allowlist.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 12 · Middels</div>
+      <div class="q-text">Hva er container image scanning?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Container image scanning analyserer et Docker/OCI-image for kjente CVEer i OS-pakker, programmeringsspråk-avhengigheter og systembiblioteker. Verktøy: Trivy, Grype, Snyk Container. Gjøres som del av CI/CD-pipeline — images med kritiske CVEer blokkeres fra deploy.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 13 · Vanskelig</div>
+      <div class="q-text">I et microservice-oppsett med mTLS — hva skjer ved sertifikatutløp uten automatisk rotasjon?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Alle tjeneste-til-tjeneste-kommunikasjonskanaler som bruker det utløpte sertifikatet begynner å feile med TLS-feil. Uten automatisk rotasjon betyr dette manuell intervensjon under en muligens kritisk produksjonsfeil. En service mesh (Istio, Linkerd) håndterer automatisk sertifikatrotasjon — typisk med korte levetider (24 timer) og rotasjon før utløp. Uten mesh: bruk Cert-Manager i Kubernetes for automatisk rotasjon.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 14 · Vanskelig</div>
+      <div class="q-text">Forklar XZ Utils-angrepet trinn for trinn og hvilken SDL-kontroll kunne ha oppdaget det tidlig.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Trinn:</strong> 1. Angriper (Jia Tan) starter å bidra til xz-utils i 2021 under et konstruert navn. 2. Over to år bygger de tillit via legitime bidrag og sosial manipulasjon av eksisterende vedlikeholder (stress/utbrenthet). 3. I Feb 2024: introduserer bakdør via obfuskert kode i en testskriptfil. 4. Bakdøren instrumenterte sshd via libsystemd. <strong>SDL-kontroll:</strong> (1) Reproduserbart bygg-krav: alle release-artifacts skal reproduseres fra kildekode. (2) Tofaktor-kodegjennomgang for kritiske endringer. (3) Verifiserte release-signatur mot kjent nøkkel. (4) Binary diff mellom versjoner for uforklarlige størrelseøkninger.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 15 · Vanskelig</div>
+      <div class="q-text">Et team pinner alle npm-avhengigheter til eksakte versjoner. Er dette tilstrekkelig for supply chain-sikkerhet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Nei. Pinning til eksakte versjoner gir reproduserbare builds, men beskytter ikke mot: (1) en allerede kompromittert versjon som ble pinnet. (2) Transitive avhengigheter som ikke er pinnet i konsumenten. (3) Registry-jacking: pakken med det pinnede navne/versjonen kan fjernes og erstattes. Komplett forsvar: eksakte versjoner + lock fil med integritetshash (package-lock.json sha512) + signaturnverifisering (npm provenance) + privat registry mirror + SCA-scanning.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 16 · Vanskelig</div>
+      <div class="q-text">Hva er «phantom dependency»-problemet i monorepos?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">I monorepos med hoisting av node_modules kan en pakke bruke en avhengighet den ikke har deklarert i sin package.json, fordi avhengigheten er installert av en annen pakke i monorepoet. Denne «phantom dependency» er tilgjengelig i runtime. Problemet: (1) det er usynlig i SBOM siden det ikke er deklarert, (2) å fjerne eller oppgradere den «ekte» eieren bryter phantom-avhengigheten, og (3) det kan maskere supply chain-risk. Løsning: bruk strict package managers (pnpm med --shamefully-hoist=false, eller Yarn PnP) som blokkerer phantom dependencies.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 17 · Vanskelig</div>
+      <div class="q-text">Hva gjør Sigstore/Rekor transparency log og hvilken tillit skaper det?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Rekor er en offentlig, append-only transparency log der kodesigneringsoperasjoner registreres. For hvert signert artefakt lagres et certifikat, metadata og tidsstempel i Rekor. Dette skaper: (1) <strong>Etterprøvbarhet:</strong> signaturens eksistens og tidspunkt kan verifiseres av hvem som helst. (2) <strong>Tamper-evidens:</strong> loggen er Merkle-tre-basert — manipulasjon detekteres. (3) <strong>Ansvarlighet:</strong> signeringer kan ikke skje i det stille — de er offentlig synlige (som Certificate Transparency for kodesignering). En konsument som verifiserer en artefakt mot Rekor, vet at signeringen ble utført av en identitet som kontrollerte den angitte e-postadressen på signeringstidspunktet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 18 · Vanskelig</div>
+      <div class="q-text">Hva er lateral movement i et microservice-oppsett og hvilke kontroller begrenser det?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Lateral movement betyr at en kompromittert tjeneste beveger seg til andre tjenester i infrastrukturen. I microservices: en kompromittert front-end-tjeneste forsøker å kalle database-tjenesten direkte, lese secrets fra Vault, eller overta identiteten til en annen tjeneste. Kontroller: (1) mTLS — tjenesten trenger et gyldig sertifikat for å kommunisere. (2) Nettverkspolicyer (Kubernetes NetworkPolicy) — blokkerer trafikk mellom tjenester som ikke skal kommunisere. (3) Service mesh trafikk-policyer — eksplisitt tillatelse for hvert tjeneste-par. (4) Secrets management med least privilege — tjenesten kan bare lese sine egne secrets. (5) Auditlogg av alle API-kall internt.</div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

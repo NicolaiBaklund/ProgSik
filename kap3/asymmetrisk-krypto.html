@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asymmetrisk kryptografi og TLS — Kapittel 3</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 3</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 3: Kryptografi">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 3 · Asymmetrisk krypto</div>
+    <h1>Asymmetrisk kryptografi og <em>TLS</em></h1>
+    <p class="lede">To nøkler som løser problemet ingen symmetrisk kryptografi kan løse alene: hvordan utveksler to parter en hemmelighet uten å ha møttes på forhånd?</p>
+    <nav class="toc">
+      <a href="#rsa"><span class="toc-num">01</span>RSA</a>
+      <a href="#ecc"><span class="toc-num">02</span>Elliptisk kurvekryptografi</a>
+      <a href="#tls13"><span class="toc-num">03</span>TLS 1.3</a>
+      <a href="#pki"><span class="toc-num">04</span>PKI og sertifikater</a>
+      <a href="#pqc"><span class="toc-num">05</span>Post-kvantum-kryptografi</a>
+    </nav>
+  </div>
+</header>
+
+<section id="rsa">
+  <div class="container">
+    <div class="section-badge">01 · RSA</div>
+    <h2><em>RSA</em></h2>
+    <p class="section-intro">RSA løste nøkkelfordelingsproblemet i 1977 — og er fortsatt i utbredt bruk, selv om ECC er mer effektivt.</p>
+    <p class="lead">RSA bygger på det matematiske faktum at det er enkelt å multiplisere to store primtall, men ekstremt vanskelig å faktorisere produktet. Nøkkelparet genereres ved å velge to store primtall <em>p</em> og <em>q</em> — produktet <em>n = p×q</em> er den offentlige modulusen. Den private nøkkelen er derivert fra <em>p</em> og <em>q</em>; den offentlige nøkkelen er <em>n</em> og eksponenten <em>e</em>.</p>
+    <p>RSA-2048 er minimumsstandarden i dag. RSA-4096 brukes for langsomme, sjeldne operasjoner som å signere sertifikater. RSA er sårbar for kvantedatamaskiner via Shors algoritme — overgang til post-kvantum-kryptografi pågår.</p>
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>RSA brukes i praksis nesten aldri til direkte kryptering av data — det er for tregt og har begrensninger på meldingsstørrelse. I stedet brukes RSA til å kryptere en symmetrisk nøkkel (hybrid kryptering) eller til signaturer.</p>
+    </div>
+  </div>
+</section>
+
+<section id="ecc">
+  <div class="container">
+    <div class="section-badge">02 · Elliptisk kurvekryptografi</div>
+    <h2>Elliptisk kurve<em>kryptografi</em></h2>
+    <p class="section-intro">ECC gir samme sikkerhetsnivå som RSA med vesentlig kortere nøkler — og er standard i moderne kryptografi.</p>
+    <p class="lead">Elliptisk kurvekryptografi baserer seg på det diskrete logaritmeproblemet over elliptiske kurver: gitt et punkt P og resultatet Q = kP, er det praktisk umulig å finne heltallet k. En 256-bits ECC-nøkkel gir tilsvarende sikkerhet som RSA-3072. Dette gjør ECC spesielt verdifullt på ressursbegrensede enheter.</p>
+
+    <p>To ECC-algoritmer er særlig viktige:</p>
+    <ul>
+      <li><strong>ECDH (Elliptic Curve Diffie-Hellman):</strong> nøkkelutveksling. Brukes i TLS 1.3 for å etablere en delt hemmelighet uten at den overføres over nettverket. Med ephemeral ECDH (ECDHE) kastes nøklene etter sesjonen — forward secrecy.</li>
+      <li><strong>ECDSA (Elliptic Curve Digital Signature Algorithm):</strong> digitale signaturer. Raskere og kortere signaturer enn RSA. Brukes i TLS-sertifikater og code signing.</li>
+    </ul>
+    <p>Standard kurver: P-256 (NIST), P-384, Curve25519 (Ed25519/X25519 — Bernstein, foretrukket i moderne protokoller).</p>
+  </div>
+</section>
+
+<section id="tls13">
+  <div class="container">
+    <div class="section-badge">03 · TLS 1.3</div>
+    <h2>TLS <em>1.3</em></h2>
+    <p class="section-intro">TLS 1.3 er en komplett redesign av protokollen — raskere, enklere og uten de svake cipher suites som plaget TLS 1.2.</p>
+    <p class="lead">TLS 1.3 handshake tar én rundtur (1-RTT) i stedet for TLS 1.2 sin to rundturer. Alle cipher suites er AEAD; RC4, 3DES og andre svake algoritmer er fjernet. Alle asymmetriske operasjoner bruker forward secrecy (ECDHE eller DHE) — det finnes ingen cipher suites uten forward secrecy i TLS 1.3.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs>
+          <marker id="ta" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2d4a7a"/></marker>
+          <marker id="tb" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#3d6b3a"/></marker>
+        </defs>
+        <text x="160" y="25" text-anchor="middle" font-weight="600" fill="#b04428">Klient</text>
+        <text x="560" y="25" text-anchor="middle" font-weight="600" fill="#b04428">Server</text>
+        <line x1="160" y1="30" x2="160" y2="270" stroke="#c9c0ae" stroke-width="1.5"/>
+        <line x1="560" y1="30" x2="560" y2="270" stroke="#c9c0ae" stroke-width="1.5"/>
+
+        <!-- ClientHello -->
+        <line x1="162" y1="60" x2="558" y2="80" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#ta)"/>
+        <text x="360" y="62" text-anchor="middle" fill="#2d4a7a">ClientHello (key_share, cipher suites)</text>
+
+        <!-- ServerHello + Certificate + Finished -->
+        <line x1="558" y1="100" x2="162" y2="140" stroke="#3d6b3a" stroke-width="1.5" marker-end="url(#tb)"/>
+        <text x="360" y="112" text-anchor="middle" fill="#3d6b3a">ServerHello + Certificate + CertVerify + Finished</text>
+
+        <!-- Klient verifiserer og sender Finished -->
+        <line x1="162" y1="165" x2="558" y2="185" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#ta)"/>
+        <text x="360" y="168" text-anchor="middle" fill="#2d4a7a">Finished</text>
+
+        <!-- Applikasjonsdata -->
+        <line x1="162" y1="210" x2="558" y2="230" stroke="#a39886" stroke-width="1.5" marker-end="url(#ta)"/>
+        <text x="360" y="212" text-anchor="middle" fill="#a39886" font-style="italic">Krypterte applikasjonsdata</text>
+
+        <!-- 1-RTT label -->
+        <rect x="610" y="55" width="70" height="100" rx="2" fill="none" stroke="#c9c0ae" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="645" y="108" text-anchor="middle" font-size="11" fill="#a39886">1-RTT</text>
+      </svg>
+      <figcaption>TLS 1.3 handshake: én rundtur til krypterte applikasjonsdata er mulig. ServerHello inneholder key_share for ECDHE.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="pki">
+  <div class="container">
+    <div class="section-badge">04 · PKI</div>
+    <h2>PKI og <em>sertifikater</em></h2>
+    <p class="section-intro">Et TLS-sertifikat binder en offentlig nøkkel til et domenenavn via en tillitskjede — men tilliten avhenger av at CA-systemet ikke er kompromittert.</p>
+    <p class="lead">PKI (Public Key Infrastructure) løser spørsmålet: «Hvem garanterer for at denne offentlige nøkkelen virkelig tilhører bank.no?» Svaret er en Certificate Authority (CA) — en betrodd tredjepart som signerer sertifikater. Nettleseren stoler på et forhåndsdefinert sett av root CA-er, og validerer tillitskjeden fra leafsertifikatet til root CA.</p>
+    <ul>
+      <li><strong>DV (Domain Validation):</strong> CA verifiserer bare domeneeierskapet. Raskest, billigst.</li>
+      <li><strong>OV (Organization Validation):</strong> CA verifiserer organisasjonens identitet.</li>
+      <li><strong>EV (Extended Validation):</strong> grundig verifisering. Vises som grønn bar i eldre nettlesere.</li>
+      <li><strong>Certificate Transparency:</strong> alle sertifikater logges offentlig — muliggjør oppdagelse av feilutstedte sertifikater.</li>
+      <li><strong>Certificate pinning:</strong> applikasjonen forventer et spesifikt sertifikat — beskytter mot kompromitterte CA-er, men vanskelig å vedlikeholde.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="pqc">
+  <div class="container">
+    <div class="section-badge">05 · Post-kvantum</div>
+    <h2>Post-kvantum-<em>kryptografi</em></h2>
+    <p class="section-intro">«Harvest now, decrypt later» — angripere samler inn kryptert trafikk i dag for å dekryptere den når kvantemaskiner er tilgjengelige.</p>
+    <p class="lead">Kvantemaskiner truer RSA og ECC via Shors algoritme. NIST standardiserte i 2024 de første post-kvantum-algoritmene: ML-KEM (CRYSTALS-Kyber) for nøkkelinnkapsling og ML-DSA (CRYSTALS-Dilithium) for signaturer. Begge baserer seg på gittersikkerhet («lattice problems»). TLS 1.3 og nettlesere begynner å støtte hybride handshaker som kombinerer ECDH og ML-KEM.</p>
+    <div class="callout callout-blue">
+      <h4>Tidslinje</h4>
+      <p>For systemer som håndterer data med lang konfidensialitetshorisont (statslagret informasjon, medisinske data, finansdata) — vurder migrasjon til post-kvantum-kryptografi allerede nå. For resten: hold deg informert og planlegg for migrering innen 5–10 år.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

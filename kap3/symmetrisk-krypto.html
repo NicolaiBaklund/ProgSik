@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symmetrisk kryptografi — Kapittel 3</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 3</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 3: Kryptografi">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 3 · Symmetrisk krypto</div>
+    <h1>Symmetrisk <em>kryptografi</em></h1>
+    <p class="lede">Rask, effektiv, og full av fallgruver som ikke handler om matematikken men om hvordan du bruker den.</p>
+    <nav class="toc">
+      <a href="#aes"><span class="toc-num">01</span>AES og blokkchiffer</a>
+      <a href="#driftsmodus"><span class="toc-num">02</span>Driftsmodus</a>
+      <a href="#stromchiffer"><span class="toc-num">03</span>Strømchiffer</a>
+      <a href="#nokkelhandtering"><span class="toc-num">04</span>Nøkkelhåndtering</a>
+      <a href="#vanlige-feil"><span class="toc-num">05</span>Vanlige feil</a>
+    </nav>
+  </div>
+</header>
+
+<section id="aes">
+  <div class="container">
+    <div class="section-badge">01 · AES</div>
+    <h2>AES og <em>blokkchiffer</em></h2>
+    <p class="section-intro">AES er industristandarden for symmetrisk kryptering — valgt av NIST i 2001 etter en åpen konkurranse og fortsatt kryptografisk solid.</p>
+    <p class="lead">Et blokkchiffer tar en fast-lengde blokk med klartekst og en nøkkel, og produserer en chiffreblokk av samme lengde. AES opererer på 128-bits blokker og støtter nøkkellengder på 128, 192 og 256 bits. Algoritmen kjører klarteksten gjennom en serie transformasjoner (SubBytes, ShiftRows, MixColumns, AddRoundKey) — 10 runder for AES-128, 14 runder for AES-256.</p>
+    <p>AES-128 er fortsatt kryptografisk sikker for de fleste formål. Det finnes ingen praktisk angrep raskere enn brute force mot en korrekt implementert AES. AES-256 foretrekkes i høysikkerhets- og militære kontekster, og anbefales for post-kvantum-robusthet (Grovers algoritme halverer effektiv nøkkellengde).</p>
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>AES i seg selv er ikke «sikker kryptering» — det er en byggekloss. Sikkerheten avhenger av driftsmodus, IV-håndtering og autentisering. Et blokkchiffer uten autentisering gir konfidensialitet, ikke integritet.</p>
+    </div>
+  </div>
+</section>
+
+<section id="driftsmodus">
+  <div class="container">
+    <div class="section-badge">02 · Driftsmodus</div>
+    <h2>Drifts<em>modus</em></h2>
+    <p class="section-intro">Siden AES opererer på 128-bits blokker, trengs en driftsmodus for å håndtere meldinger av vilkårlig lengde — og valget av modus er kritisk.</p>
+    <p class="lead">ECB (Electronic Codebook) er den naive løsningen: kryptér hver blokk uavhengig. Problemet: identiske klartekstblokker gir identiske chiffreblokker. Mønstre i dataene er synlige i chifferteksten. Bruk aldri ECB for meningsfull data.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- ECB: identiske blokker -->
+        <text x="60" y="25" font-weight="600" fill="#b04428">ECB — farlig</text>
+        <rect x="40" y="35" width="80" height="35" rx="2" fill="rgba(176,68,40,0.15)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="80" y="57" text-anchor="middle" fill="#b04428">«HELLO»</text>
+        <rect x="140" y="35" width="80" height="35" rx="2" fill="rgba(176,68,40,0.15)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="180" y="57" text-anchor="middle" fill="#b04428">«HELLO»</text>
+        <text x="240" y="57" fill="#a39886">→</text>
+        <rect x="260" y="35" width="80" height="35" rx="2" fill="rgba(176,68,40,0.3)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="300" y="57" text-anchor="middle" fill="#b04428" font-size="11">x4f2a…</text>
+        <rect x="360" y="35" width="80" height="35" rx="2" fill="rgba(176,68,40,0.3)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="400" y="57" text-anchor="middle" fill="#b04428" font-size="11">x4f2a…</text>
+        <text x="460" y="57" fill="#b04428" font-size="11" font-style="italic">identiske!</text>
+
+        <!-- GCM: tilfeldig nonce -->
+        <text x="60" y="110" font-weight="600" fill="#3d6b3a">AES-GCM — riktig</text>
+        <rect x="40" y="120" width="80" height="35" rx="2" fill="rgba(61,107,58,0.12)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="80" y="142" text-anchor="middle" fill="#3d6b3a">«HELLO»</text>
+        <rect x="140" y="120" width="80" height="35" rx="2" fill="rgba(61,107,58,0.12)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="180" y="142" text-anchor="middle" fill="#3d6b3a">«HELLO»</text>
+        <text x="240" y="142" fill="#a39886">→</text>
+        <rect x="260" y="120" width="80" height="35" rx="2" fill="rgba(61,107,58,0.25)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="300" y="142" text-anchor="middle" fill="#3d6b3a" font-size="11">a1c9…</text>
+        <rect x="360" y="120" width="80" height="35" rx="2" fill="rgba(61,107,58,0.25)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="400" y="142" text-anchor="middle" fill="#3d6b3a" font-size="11">f73b…</text>
+        <text x="460" y="142" fill="#3d6b3a" font-size="11" font-style="italic">ulike (unik nonce)</text>
+      </svg>
+      <figcaption>ECB avslører mønstre; AES-GCM med unik nonce per krypteringsoperasjon gjør chifferteksten uforutsigbar.</figcaption>
+    </figure>
+
+    <table>
+      <thead><tr><th>Modus</th><th>Autentisering</th><th>Parallelisme</th><th>Anbefaling</th></tr></thead>
+      <tbody>
+        <tr><td>ECB</td><td>Nei</td><td>Ja</td><td class="mono-cell">Aldri</td></tr>
+        <tr><td>CBC</td><td>Nei</td><td>Nei (kryptering)</td><td class="mono-cell">Kun med separat MAC</td></tr>
+        <tr><td>CTR</td><td>Nei</td><td>Ja</td><td class="mono-cell">Kun med separat MAC</td></tr>
+        <tr><td>GCM</td><td>Ja (AEAD)</td><td>Ja</td><td class="mono-cell">Anbefalt standardvalg</td></tr>
+      </tbody>
+    </table>
+
+    <p>AES-GCM er AEAD (Authenticated Encryption with Associated Data): krypterer og autentiserer i én operasjon. En unik 96-bits nonce (number used once) må genereres for hvert kall — gjenbruk av nonce er katastrofalt og ødelegger både konfidensialitet og autentisering.</p>
+  </div>
+</section>
+
+<section id="stromchiffer">
+  <div class="container">
+    <div class="section-badge">03 · Strømchiffer</div>
+    <h2>Strøm<em>chiffer</em></h2>
+    <p class="section-intro">ChaCha20-Poly1305 er det moderne alternativet til AES-GCM — spesielt relevant på enheter uten AES-maskinvarestøtte.</p>
+    <p class="lead">ChaCha20 er et strømchiffer designet av Daniel Bernstein. Det kombineres med Poly1305 MAC til en AEAD-konstruksjon: ChaCha20-Poly1305. TLS 1.3 støtter begge AES-256-GCM og ChaCha20-Poly1305 som cipher suites. På mobile enheter og IoT-enheter uten dedikert AES-akselerasjon er ChaCha20 raskere og like sikker.</p>
+    <div class="callout callout-green">
+      <h4>Praktisk valg</h4>
+      <p>Bruk AES-256-GCM på server med maskinvare-AES (alle moderne x86). Bruk ChaCha20-Poly1305 på mobile enheter og IoT. Begge er kryptografisk robuste; valget handler om ytelse.</p>
+    </div>
+  </div>
+</section>
+
+<section id="nokkelhandtering">
+  <div class="container">
+    <div class="section-badge">04 · Nøkkelhåndtering</div>
+    <h2>Nøkkel<em>håndtering</em></h2>
+    <p class="section-intro">Nøkkelen er hemmeligheten — og den er ofte det svakeste leddet, ikke algoritmen.</p>
+    <p class="lead">En krypteringsnøkkel lagret i kildekoden er ikke en hemmelighet. Den er tilgjengelig for alle med tilgang til kodebasen, alle CI/CD-systemer og alle som kloner repositoriet. Nøkkelen er ikke lenger hemmelig — og dermed er krypteringen meningsløs mot enhver som kjenner kodebasen.</p>
+    <ul>
+      <li><strong>Lagring:</strong> bruk en secrets manager (HashiCorp Vault, AWS Secrets Manager, Azure Key Vault). Aldri hard-kod i kildekode eller miljøvariabler som committes.</li>
+      <li><strong>Rotasjon:</strong> nøkler skal roteres regelmessig. Planlegg for rotasjon fra start — retrofit er kostbart.</li>
+      <li><strong>HSM (Hardware Security Module):</strong> for kritiske nøkler (root CA, master krypteringsnøkler) — den private nøkkelen forlater aldri maskinvaren.</li>
+      <li><strong>Key derivation:</strong> bruk HKDF eller PBKDF2 for å derivere nøkler fra masterpassord, ikke bruk passord direkte som krypteringsnøkkel.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="vanlige-feil">
+  <div class="container">
+    <div class="section-badge">05 · Fallgruver</div>
+    <h2>Vanlige <em>feil</em></h2>
+    <p class="section-intro">De vanligste feilene i symmetrisk kryptografi er ikke matematiske — de er implementeringsfeil.</p>
+    <p class="lead">Nonce-gjenbruk i AES-GCM er det alvorligste. Hvis samme nonce brukes to ganger med samme nøkkel, kan angriperen XOR-e de to chiffertekstene og eliminere nøkkelen — begge klartekster avsløres, og autentiseringen ødelegges. I TLS 1.3 håndteres dette automatisk; i manuell kode er du selv ansvarlig.</p>
+
+    <table>
+      <thead><tr><th>Feil</th><th>Konsekvens</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>ECB-modus</td><td>Mønstre avsløres</td><td class="mono-cell">Bruk GCM</td></tr>
+        <tr><td>Nonce-gjenbruk (GCM)</td><td>Konfidensialitet og autentisering ødelagt</td><td class="mono-cell">Random nonce per kall</td></tr>
+        <tr><td>Hard-kodet nøkkel</td><td>Alle med kodelesing kjenner nøkkelen</td><td class="mono-cell">Secrets manager</td></tr>
+        <tr><td>Padding oracle (CBC)</td><td>Klartekst dekrypteres via feilmeldinger</td><td class="mono-cell">Bruk GCM (AEAD)</td></tr>
+        <tr><td>Kryptering uten autentisering</td><td>Chiffertekst kan manipuleres</td><td class="mono-cell">Bruk AEAD-modus</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

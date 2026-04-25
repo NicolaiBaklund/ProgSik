@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIA-triaden og kjerneprinsipper — Kapittel 1</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 1</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 1: Introduksjon og sikkerhetsprinsipper">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 1 · Fundament</div>
+    <h1>CIA-triaden og <em>kjerneprinsipper</em></h1>
+    <p class="lede">Konfidensialitet, integritet og tilgjengelighet er ikke tre separate mål — de er tre sider av samme designbeslutning.</p>
+    <nav class="toc">
+      <a href="#cia"><span class="toc-num">01</span>CIA-triaden</a>
+      <a href="#defense-in-depth"><span class="toc-num">02</span>Defense in depth</a>
+      <a href="#least-privilege"><span class="toc-num">03</span>Least privilege</a>
+      <a href="#fail-safe"><span class="toc-num">04</span>Fail-safe defaults</a>
+      <a href="#security-vs-safety"><span class="toc-num">05</span>Security vs. safety</a>
+    </nav>
+  </div>
+</header>
+
+<section id="cia">
+  <div class="container">
+    <div class="section-badge">01 · Grunnlag</div>
+    <h2>CIA-<em>triaden</em></h2>
+    <p class="section-intro">Tre egenskaper som alle informasjonssystemer balanserer — og som sjelden lar seg maksimere samtidig.</p>
+    <p class="lead">Tenk deg en medisinsk journal. Den skal ikke røpes til uvedkommende — det er <strong>konfidensialitet</strong>. Den skal ikke kunne endres uten spor — det er <strong>integritet</strong>. Og legen som behandler en bevisstløs pasient må kunne slå den opp — det er <strong>tilgjengelighet</strong>. I det øyeblikket en brannmur krypterer alt for å beskytte konfidensialiteten, men dermed forsinker en kritisk alarm, ser du triaden i konflikt.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <defs>
+          <marker id="a1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#a39886"/>
+          </marker>
+        </defs>
+        <!-- Tre sirkler -->
+        <circle cx="240" cy="140" r="95" fill="rgba(176,68,40,0.07)" stroke="#b04428" stroke-width="2"/>
+        <circle cx="480" cy="140" r="95" fill="rgba(45,74,122,0.07)" stroke="#2d4a7a" stroke-width="2"/>
+        <circle cx="360" cy="240" r="95" fill="rgba(61,107,58,0.07)" stroke="#3d6b3a" stroke-width="2"/>
+        <!-- Titler -->
+        <text x="185" y="90" font-size="14" font-weight="600" fill="#b04428">Konfidensialitet</text>
+        <text x="430" y="90" font-size="14" font-weight="600" fill="#2d4a7a">Integritet</text>
+        <text x="310" y="295" font-size="14" font-weight="600" fill="#3d6b3a">Tilgjengelighet</text>
+        <!-- Eksempler -->
+        <text x="170" y="155" font-size="12" fill="#6b6257" font-style="italic">Kryptering</text>
+        <text x="170" y="172" font-size="12" fill="#6b6257" font-style="italic">Tilgangskontroll</text>
+        <text x="470" y="155" font-size="12" fill="#6b6257" font-style="italic">Hashsummer</text>
+        <text x="470" y="172" font-size="12" fill="#6b6257" font-style="italic">Signaturer</text>
+        <text x="305" y="260" font-size="12" fill="#6b6257" font-style="italic">Redundans</text>
+        <text x="305" y="277" font-size="12" fill="#6b6257" font-style="italic">SLA</text>
+        <!-- Spenningspil -->
+        <line x1="330" y1="148" x2="370" y2="148" stroke="#a39886" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a1)"/>
+        <text x="350" y="140" font-size="11" fill="#a39886" text-anchor="middle" font-style="italic">spenning</text>
+      </svg>
+      <figcaption>CIA-triaden: sirkler som overlapper, men spenner mot hverandre. Å styrke én egenskap svekker gjerne en annen.</figcaption>
+    </figure>
+
+    <p>Konfidensialitet handler om å hindre uautorisert innsyn. Kryptering, tilgangskontroll og behovsbasert datadeling er de viktigste verktøyene. Integritet handler om at data er korrekte og uendret — kryptografiske hashsummer, digitale signaturer og revisjonslogger er mekanismene. Tilgjengelighet handler om at systemet er oppe og tilgjengelig når det trengs — gjennom redundans, feiltoleranse og kapasitetsplanlegging.</p>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>I praksis prioriteres CIA ulikt avhengig av domene. Et etterretningssystem prioriterer konfidensialitet. Et finanssystem prioriterer integritet. Et nødetatssystem prioriterer tilgjengelighet. Å forstå domenet er forutsetningen for å prioritere riktig.</p>
+    </div>
+  </div>
+</section>
+
+<section id="defense-in-depth">
+  <div class="container">
+    <div class="section-badge">02 · Lagdelt forsvar</div>
+    <h2>Defense in <em>depth</em></h2>
+    <p class="section-intro">Ingen enkelt sikkerhetskontroll er ugjennomtrengelig. Defense in depth er prinsippet om at kompromittering av ett lag ikke skal gi tilgang til alt.</p>
+    <p class="lead">Et middelalderslott hadde vollgraven, muren, portene, vakttårnene og borgmesteren bak sin egen dør. Ikke fordi hvert lag var uovervinnelig, men fordi angriperen måtte bryte gjennom alle av dem — og for hvert lag øker prisen på angrepet og sjansen for at forsvaret rekker å reagere.</p>
+
+    <p>I programvaresystemer ser defense in depth slik ut:</p>
+    <ul>
+      <li><strong>Nettverkslaget:</strong> brannmur, nettverksegmentering, IDS/IPS.</li>
+      <li><strong>Applikasjonslaget:</strong> input-validering, parameteriserte spørringer, output-escaping.</li>
+      <li><strong>Datalaget:</strong> tilgangskontroll på databasenivå, kryptering i hvile.</li>
+      <li><strong>Identitetslaget:</strong> MFA, sterk autentisering, kortlevde sesjonskoder.</li>
+      <li><strong>Overvåkingslaget:</strong> logging, alerting, anomalideteksjon.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>Defense in depth er ikke det samme som å stable kontroller tilfeldig. Hvert lag skal adressere en spesifikk trussel mot et spesifikt sårbarhetsnivå. Fem lag av brannmurer uten applikasjonssikkerhet er ikke defense in depth — det er security theater.</p>
+    </div>
+  </div>
+</section>
+
+<section id="least-privilege">
+  <div class="container">
+    <div class="section-badge">03 · Minimal tilgang</div>
+    <h2>Least <em>privilege</em></h2>
+    <p class="section-intro">Gi enhver bruker, prosess og tjeneste nøyaktig de tilgangene de trenger — ingenting mer, ingenting mindre.</p>
+    <p class="lead">Et selskaps HR-system bruker en databasekonto for å hente ut ansattopplysninger. Kontoen har SELECT, INSERT, UPDATE og DELETE på alle tabeller — inkludert lønnstabellen, loggene og admin-tabellen. Når applikasjonen kompromitteres, har angriperen nøkkelen til hele bygget. Med least privilege ville kontoen kun hatt SELECT på de tabellene HR-appen faktisk leser.</p>
+
+    <p>Prinsippet gjelder i alle lag:</p>
+    <ul>
+      <li><strong>Brukertilganger:</strong> ansatte har kun tilgang til det de trenger for sin rolle.</li>
+      <li><strong>Tjeneste-til-tjeneste:</strong> en mikrotjeneste som leser data fra en annen tjeneste trenger ikke skriverettigheter.</li>
+      <li><strong>Systemtilganger:</strong> en webserverprosess skal ikke kjøre som root.</li>
+      <li><strong>Cloud IAM:</strong> en Lambda-funksjon som leser fra S3 trenger ikke tilgang til hele AWS-kontoen.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>I praksis</h4>
+      <p>Start med å nekte alt, og innvilg eksplisitt. Det er lettere enn å innvilge bredt og forsøke å trekke tilbake — fordi «vi trenger det kanskje» alltid vinner over «vi bruker det ikke».</p>
+    </div>
+  </div>
+</section>
+
+<section id="fail-safe">
+  <div class="container">
+    <div class="section-badge">04 · Sikre standarder</div>
+    <h2>Fail-safe <em>defaults</em></h2>
+    <p class="section-intro">Når systemet ikke vet hva det skal gjøre, skal det gjøre det sikreste — ikke det enkleste.</p>
+    <p class="lead">En ny bruker opprettes i et system. Hva er standardtilgangen? Ingen. En ny API-rute defineres. Er den åpen for alle? Nei — lukket inntil eksplisitt åpnet. En konfigurasjonsfil mangler. Systemet nekter å starte fremfor å gjette seg frem til usikre innstillinger.</p>
+
+    <p>Fail-safe defaults er nært beslektet med least privilege, men handler spesifikt om <em>hva som skjer når beslutningen mangler</em>. Eksempler:</p>
+    <ul>
+      <li>En CORS-konfigurasjon som mangler skal ikke sende <code>Access-Control-Allow-Origin: *</code> som default.</li>
+      <li>En feilhåndtering som ikke vet hva den skal gjøre skal ikke returnere stack traces til brukeren.</li>
+      <li>En sesjon som utløper skal ikke automatisk fornyes uten ny autentisering.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Fail-open vs. fail-closed</h4>
+      <p>Fail-open (tillat ved feil) prioriterer tilgjengelighet. Fail-closed (nekt ved feil) prioriterer sikkerhet. Valget avhenger av kontekst: medisinsk nødutstyr kan trenge fail-open; en finanstransaksjon trenger fail-closed.</p>
+    </div>
+  </div>
+</section>
+
+<section id="security-vs-safety">
+  <div class="container">
+    <div class="section-badge">05 · To disipliner</div>
+    <h2>Security vs. <em>safety</em></h2>
+    <p class="section-intro">Begge handler om å hindre skade — men aktøren er forskjellig, og prioriteringene kolliderer.</p>
+    <p class="lead">Safety handler om å beskytte mennesker mot systemfeil — utilsiktede hendelser. Security handler om å beskytte systemer mot ondsinnede aktører — tilsiktede hendelser. En autopilot som stenger seg av ved motstridende sensordata er god safety-design. Den samme autopiloten som stenger seg av fordi en angriper sender falske sensordata, er et security-problem som nå også er et safety-problem.</p>
+
+    <p>De to fagene deler mange verktøy — risikoanalyse, redundans, feiltolerans — men har grunnleggende ulik tilnærming:</p>
+
+    <table>
+      <thead>
+        <tr><th>Egenskap</th><th>Safety</th><th>Security</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Motpart</td><td>Naturen, menneskelig feil</td><td>En aktiv, intelligent motstander</td></tr>
+        <tr><td>Feilmodus</td><td>Tilfeldig og uavhengig</td><td>Målrettet og koordinert</td></tr>
+        <tr><td>Typisk svar på feil</td><td>Åpne kanaler, varsle</td><td>Stenge kanaler, isolere</td></tr>
+        <tr><td>Testmetode</td><td>Feilinjeksjon, FMEA</td><td>Penetrasjonstesting, red team</td></tr>
+      </tbody>
+    </table>
+
+    <div class="margin-note">
+      <strong>Eksempel på konflikt:</strong> Et industrielt kontrollsystem (ICS) for vannforsyning designer en nødkobling som stenger pumpene ved sensorsvikt (god safety). En angriper sender falske sensordata for å aktivere nødkoblingen og stanse vannforsyningen (security bryter safety).
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

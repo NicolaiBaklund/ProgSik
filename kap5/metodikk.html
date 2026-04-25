@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metodikk og DFD — Kapittel 5</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 5</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 5: Threat modeling">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 5 · Metodikk</div>
+    <h1>Metodikk og <em>DFD</em></h1>
+    <p class="lede">Hva threat modeling faktisk er — og ikke er — og hvordan Data Flow Diagrams setter ord på hva systemet gjør.</p>
+    <nav class="toc">
+      <a href="#hva-er-tm"><span class="toc-num">01</span>Hva threat modeling er</a>
+      <a href="#dfd"><span class="toc-num">02</span>Data Flow Diagrams</a>
+      <a href="#pasta"><span class="toc-num">03</span>PASTA</a>
+      <a href="#naar-hvem"><span class="toc-num">04</span>Når og hvem</a>
+      <a href="#output"><span class="toc-num">05</span>Output</a>
+    </nav>
+  </div>
+</header>
+
+<section id="hva-er-tm">
+  <div class="container">
+    <div class="section-badge">01 · Definisjon</div>
+    <h2>Hva threat modeling <em>er</em></h2>
+    <p class="section-intro">Threat modeling er ikke en pentest, ikke et engangsprosjekt, og ikke noe som gjøres etter at koden er skrevet.</p>
+    <p class="lead">Threat modeling er øvelsen med å stille spørsmålet: «Hva kan gå galt?» — systematisk, strukturert, dokumentert. Det er en designaktivitet der du modellerer systemet ditt, identifiserer potensielle trusler mot det, vurderer dem og planlegger mitigasjoner. Det kan gjøres på en time for et lite system, eller ta uker for et komplekst distribuert system.</p>
+    <p>Hva threat modeling ikke er:</p>
+    <ul>
+      <li><strong>En pentest:</strong> en pentest prøver å utnytte kjente svakheter. Threat modeling identifiserer mulige svakheter på designnivå.</li>
+      <li><strong>En compliance-sjekkliste:</strong> det er en analytisk prosess, ikke et skjema som fylles ut.</li>
+      <li><strong>Noe som gjøres én gang:</strong> systemet endrer seg. Truslene endrer seg. Threat modeling gjentas.</li>
+    </ul>
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>Adam Shostack (forfatter av «Threat Modeling: Designing for Security») formulerer prosessen som fire spørsmål: Hva bygger vi? Hva kan gå galt? Hva gjør vi med det? Har vi gjort en god jobb?</p>
+    </div>
+  </div>
+</section>
+
+<section id="dfd">
+  <div class="container">
+    <div class="section-badge">02 · DFD</div>
+    <h2>Data Flow <em>Diagrams</em></h2>
+    <p class="section-intro">Et DFD visualiserer systemet slik det faktisk fungerer — prosesser, data, grenser og flyt — og gjør det mulig å peke på konkrete trusler.</p>
+    <p class="lead">Et DFD har fire elementer: <strong>prosesser</strong> (behandler data — runde bokser), <strong>dataflyter</strong> (beveger data — piler), <strong>datalagre</strong> (lagrer data — doble horisontale linjer) og <strong>eksterne entiteter</strong> (utenfor systemets kontroll — firkanter). I tillegg markeres <strong>trust boundaries</strong> med stiplede linjer mellom soner med ulik tillitsnivå.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs>
+          <marker id="dfa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2d4a7a"/></marker>
+        </defs>
+        <!-- Trust boundary: internett -->
+        <rect x="20" y="10" width="180" height="280" rx="4" fill="rgba(176,68,40,0.03)" stroke="#b04428" stroke-width="1.5" stroke-dasharray="8,5"/>
+        <text x="110" y="30" text-anchor="middle" font-size="11" fill="#b04428" font-style="italic">Internett (ikke betrodd)</text>
+
+        <!-- Trust boundary: intern sone -->
+        <rect x="220" y="10" width="480" height="280" rx="4" fill="rgba(61,107,58,0.03)" stroke="#3d6b3a" stroke-width="1.5" stroke-dasharray="8,5"/>
+        <text x="460" y="30" text-anchor="middle" font-size="11" fill="#3d6b3a" font-style="italic">Intern sone (betrodd)</text>
+
+        <!-- Ekstern entitet: Bruker -->
+        <rect x="40" y="100" width="100" height="45" rx="2" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="90" y="127" text-anchor="middle" font-weight="600" fill="#b04428">Bruker</text>
+
+        <!-- Prosess: Webserver -->
+        <ellipse cx="360" cy="122" rx="70" ry="35" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="118" text-anchor="middle" font-weight="600" fill="#2d4a7a">Webserver</text>
+        <text x="360" y="133" text-anchor="middle" font-size="11" fill="#6b6257">(authn/authz)</text>
+
+        <!-- Datalager: DB -->
+        <line x1="530" y1="108" x2="630" y2="108" stroke="#3d6b3a" stroke-width="1.5"/>
+        <line x1="530" y1="136" x2="630" y2="136" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="580" y="127" text-anchor="middle" font-weight="600" fill="#3d6b3a">Database</text>
+
+        <!-- Prosess: Auth service -->
+        <ellipse cx="360" cy="230" rx="70" ry="35" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1"/>
+        <text x="360" y="226" text-anchor="middle" fill="#2d4a7a">Auth Service</text>
+        <text x="360" y="241" text-anchor="middle" font-size="11" fill="#6b6257">(JWT, OAuth)</text>
+
+        <!-- Piler -->
+        <line x1="142" y1="122" x2="288" y2="122" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#dfa)"/>
+        <text x="215" y="115" text-anchor="middle" fill="#2d4a7a">HTTPS request</text>
+        <line x1="432" y1="122" x2="528" y2="122" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#dfa)"/>
+        <text x="480" y="115" text-anchor="middle" fill="#2d4a7a">SQL query</text>
+        <line x1="360" y1="157" x2="360" y2="193" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#dfa)"/>
+        <text x="375" y="178" fill="#2d4a7a">verifiser token</text>
+      </svg>
+      <figcaption>DFD for en enkel webapplikasjon — trust boundaries (stiplet) markerer overgangene mellom ikke-betrodd og betrodd sone.</figcaption>
+    </figure>
+
+    <p>Trust boundaries er de viktigste delene av DFD-et for sikkerhet: enhver dataflytkryssing over en trust boundary er et potensielt angrepspunkt. Identifiser alle slike kryssinger og spør: er denne flyten autentisert? Er den kryptert? Er inndataen validert?</p>
+  </div>
+</section>
+
+<section id="pasta">
+  <div class="container">
+    <div class="section-badge">03 · PASTA</div>
+    <h2><em>PASTA</em></h2>
+    <p class="section-intro">Process for Attack Simulation and Threat Analysis er en helhetlig syvstegs-metodikk for risikobasert threat modeling.</p>
+    <p class="lead">PASTA starter ikke med tekniske detaljer — det starter med forretningsmål. Hva er det vi egentlig prøver å beskytte, og hvilke konsekvenser har et brudd? Denne forankringen gjør threat modeling relevant for ledelse og produkteiere, ikke bare sikkerhetsfolk.</p>
+    <ol>
+      <li><strong>Definer forretningsmål og sikkerhetskrav</strong> — hva er kritisk for virksomheten?</li>
+      <li><strong>Definer teknisk omfang</strong> — infrastruktur, applikasjonskomponenter, avhengigheter.</li>
+      <li><strong>Applikasjonsdekonstruksjon</strong> — DFD, use cases, trust levels.</li>
+      <li><strong>Trusselanalyse</strong> — trusselaktører, angrepsvektorer, STRIDE-mapping.</li>
+      <li><strong>Sårbarhetssanalyse</strong> — kobling mellom trusler og eksisterende svakheter.</li>
+      <li><strong>Angrepssimulering</strong> — angrepstre, sannsynlighetsvurdering.</li>
+      <li><strong>Risikoanalyse og mitigasjonsplan</strong> — residualrisiko, kontrolltiltak.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="naar-hvem">
+  <div class="container">
+    <div class="section-badge">04 · Timing</div>
+    <h2>Når og <em>hvem</em></h2>
+    <p class="section-intro">Threat modeling gir størst verdi tidlig — men er verdifullt i alle faser.</p>
+    <p class="lead">Ideelt starter threat modeling i arkitekturfasen, når kostnaden for å endre designbeslutninger er minimal. I praksis gjøres det i sprintplanlegging (for nye features), arkitekturgjennomganger (for store endringer) og etter hendelser (for å forstå hva som burde vært fanget opp).</p>
+    <p>Hvem bør delta:</p>
+    <ul>
+      <li><strong>Utviklere:</strong> kjenner implementasjonsdetaljene og fallgruvene.</li>
+      <li><strong>Arkitekt:</strong> forstår systemets helhet og avhengigheter.</li>
+      <li><strong>Sikkerhetsekspert:</strong> kan identifisere ikke-åpenbare trusler og kjente angrepsmønstre.</li>
+      <li><strong>Produkteier (valgfritt):</strong> gir forretningskontekst og prioritering.</li>
+    </ul>
+    <p>Varighet: 1–2 timer for enkle endringer, 1–2 dager for komplekse systemer. Ikke la perfeksjon hindre gjennomføring — et ufullstendig threat model er bedre enn ingen.</p>
+  </div>
+</section>
+
+<section id="output">
+  <div class="container">
+    <div class="section-badge">05 · Output</div>
+    <h2><em>Output</em> fra threat modeling</h2>
+    <p class="section-intro">Et threat model er ikke verdifullt som et dokument — det er verdifullt som et sett handlinger.</p>
+    <p class="lead">Output fra en threat modeling-økt bør inkludere: et DFD, en trusselregisteret (liste over identifiserte trusler med STRIDE-kategori, komponent og score), et mitigasjonskart (hvilke kontroller adresserer hvilke trusler), og en liste over akseptert residualrisiko (trusler du vet om men ikke mitigerer, med begrunnelse).</p>
+    <ul>
+      <li><strong>Trusselregisteret:</strong> strukturert liste — trussel-ID, STRIDE-kategori, berørt komponent, score, status.</li>
+      <li><strong>Mitigasjons-backlog:</strong> konkrete tiltak som opprettes som tasks i sprintplanleggingen.</li>
+      <li><strong>Akseptert risiko:</strong> eksplisitt dokumentert og signert av ansvarlig — ikke stilltiende ignorert.</li>
+      <li><strong>Oppdateringssyklus:</strong> threat model oppdateres ved arkitekturendringer, ikke bare på nyttår.</li>
+    </ul>
+    <div class="callout callout-green">
+      <h4>Praktisk tips</h4>
+      <p>Bruk et enkelt regneark eller en Markdown-tabell for trusselregisteret. Komplekse verktøy bremser prosessen. Det viktigste er at threat modeling skjer — ikke at det dokumenteres perfekt.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

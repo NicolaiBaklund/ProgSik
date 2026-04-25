@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JWT — Kapittel 4</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 4</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 4: Autentisering og autorisasjon">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 4 · JWT</div>
+    <h1><em>JWT</em></h1>
+    <p class="lede">Et kompakt token-format med noen subtile feller — spesielt rundt algoritmer, claim-validering og hvem som egentlig kan stole på hva.</p>
+    <nav class="toc">
+      <a href="#struktur"><span class="toc-num">01</span>JWT-struktur</a>
+      <a href="#algoritme-feil"><span class="toc-num">02</span>Algoritme-forvirring</a>
+      <a href="#claim-validering"><span class="toc-num">03</span>Claim-validering</a>
+      <a href="#sikker-bruk"><span class="toc-num">04</span>Sikker JWT-bruk</a>
+    </nav>
+  </div>
+</header>
+
+<section id="struktur">
+  <div class="container">
+    <div class="section-badge">01 · Struktur</div>
+    <h2>JWT-<em>struktur</em></h2>
+    <p class="section-intro">Et JWT er tre base64url-kodede deler adskilt av punktum — og payloaden er ikke kryptert, bare signert.</p>
+    <p class="lead">Et JWT ser slik ut: <code>eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyNDIiLCJyb2xlIjoiYWRtaW4ifQ.&lt;sig&gt;</code>. Base64url-dekod del 1: <code>{"alg":"RS256"}</code>. Del 2: <code>{"sub":"user42","role":"admin","exp":1716235022}</code>. Del 3: signaturen. Payloaden er lesbar for alle — ikke send sensitiv informasjon i JWT uten å kryptere tokenet (JWE).</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 140" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace" font-size="12">
+        <rect x="30" y="30" width="190" height="80" rx="3" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="125" y="52" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="#b04428">Header</text>
+        <text x="125" y="72" text-anchor="middle" fill="#6b6257">{"alg":"RS256",</text>
+        <text x="125" y="88" text-anchor="middle" fill="#6b6257"> "typ":"JWT"}</text>
+
+        <text x="222" y="75" fill="#a39886" font-size="18">.</text>
+
+        <rect x="230" y="30" width="260" height="80" rx="3" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="52" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="#2d4a7a">Payload (claims)</text>
+        <text x="360" y="70" text-anchor="middle" fill="#6b6257">{"sub":"user42",</text>
+        <text x="360" y="86" text-anchor="middle" fill="#6b6257"> "role":"admin","exp":...}</text>
+
+        <text x="492" y="75" fill="#a39886" font-size="18">.</text>
+
+        <rect x="500" y="30" width="190" height="80" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="595" y="52" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="#3d6b3a">Signatur</text>
+        <text x="595" y="72" text-anchor="middle" fill="#6b6257">RSASHA256(</text>
+        <text x="595" y="88" text-anchor="middle" fill="#6b6257">base64(hdr+pld))</text>
+
+        <text x="360" y="128" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#b04428">Payload er base64-kodet, IKKE kryptert — synlig for alle</text>
+      </svg>
+      <figcaption>JWT-struktur: header og payload er lesbare — signaturen verifiserer at de ikke er endret.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="algoritme-feil">
+  <div class="container">
+    <div class="section-badge">02 · Algoritme-forvirring</div>
+    <h2>Algoritme-<em>forvirring</em></h2>
+    <p class="section-intro">To klassiske JWT-angrep basert på algoritme-forvirring — begge unngås ved å spesifisere tillatte algoritmer eksplisitt.</p>
+    <p class="lead">En JWT-verifiserings-implementasjon leser <code>alg</code>-feltet fra tokenet for å bestemme hvilken algoritme som skal brukes. En angriper endrer <code>alg</code> til <code>"none"</code>. Biblioteket hopper over signaturverifisering og aksepterer tokenet. Angriperen har nå et gyldig token med vilkårlig payload. Løsningen er triviell: spesifiser alltid tillatte algoritmer på serversiden og ignorer <code>alg</code>-feltet i tokenet.</p>
+
+    <pre><code><span class="comment"># Sårbar — stoler på alg-felt i tokenet</span>
+jwt.decode(token, key)
+
+<span class="comment"># Sikker — eksplisitt algoritmeliste</span>
+jwt.decode(token, key, algorithms=["RS256"])
+<span class="comment"># Aldri: algorithms=["RS256", "HS256", "none"]</span></code></pre>
+
+    <p><strong>RS256 → HS256-angrepet:</strong> Et API bruker RS256 og publiserer offentlig nøkkel. En angriper lager et token med <code>alg: HS256</code> og signerer det med den offentlige nøkkelen. Et sårbart bibliotek verifiserer HS256-signaturen med den offentlige nøkkelen som hemmelighet — og godkjenner tokenet. Fix: aldri tillat begge algoritmetyper på samme endepunkt.</p>
+  </div>
+</section>
+
+<section id="claim-validering">
+  <div class="container">
+    <div class="section-badge">03 · Claim-validering</div>
+    <h2>Claim-<em>validering</em></h2>
+    <p class="section-intro">Signaturverifisering bekrefter at tokenet er autentisk. Claim-validering bekrefter at det er gyldig for denne konteksten.</p>
+    <p class="lead">Et gyldig signert JWT er ikke nødvendigvis et gyldig token for din tjeneste. Tenk deg et token utstedt for tjeneste A som sendes til tjeneste B. Uten <code>aud</code>-validering aksepterer tjeneste B det. Uten <code>exp</code>-validering er et stjålet token gyldig for alltid. Uten <code>iss</code>-validering kan en ondsinnet issuer utstede gyldige tokens for din tjeneste.</p>
+
+    <table>
+      <thead><tr><th>Claim</th><th>Hva det er</th><th>Hva skjer uten validering</th></tr></thead>
+      <tbody>
+        <tr><td><code>exp</code></td><td>Utløpstidspunkt (Unix timestamp)</td><td>Utløpte tokens er gyldige for alltid</td></tr>
+        <tr><td><code>aud</code></td><td>Tiltenkt mottaker</td><td>Tokens for andre tjenester aksepteres</td></tr>
+        <tr><td><code>iss</code></td><td>Utsteder</td><td>Tokens fra onde issuere aksepteres</td></tr>
+        <tr><td><code>nbf</code></td><td>Not before (gyldig fra)</td><td>Fremtidige tokens er gyldige nå</td></tr>
+        <tr><td><code>sub</code></td><td>Subjekt (brukeridentifikator)</td><td>Feil bruker assosieres med token</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="sikker-bruk">
+  <div class="container">
+    <div class="section-badge">04 · Sikker bruk</div>
+    <h2>Sikker JWT-<em>bruk</em></h2>
+    <p class="section-intro">JWT er et godt format for stateless autentisering — forutsatt at du forstår hva det ikke gjør.</p>
+    <p class="lead">JWT gir ikke revokasjon ut av boksen. Et utstedt access token er gyldig til det utløper — det finnes ingen innebygd mekanisme for å invalidere det. En bruker som logger ut, fjerner tokenet fra klienten, men tokenet er fortsatt gyldig på serversiden. For sesjonskritiske applikasjoner (bank, helse) kreves en revoke-liste (Redis-blacklist) eller kortlevde tokens (5–15 minutter) med refresh token-mønsteret.</p>
+
+    <ul>
+      <li><strong>Kort levetid for access token:</strong> 5–15 minutter for sensitive systemer, opptil 1 time for vanlige APIs.</li>
+      <li><strong>Refresh tokens:</strong> langlevde tokens lagret sikkert, brukes til å hente nye access tokens — kan revokeres.</li>
+      <li><strong>RS256 fremfor HS256:</strong> asymmetrisk signering lar tjenester verifisere tokens uten å kjenne signeringsnøkkelen.</li>
+      <li><strong>Ikke legg sensitiv data i payload:</strong> payload er lesbar uten nøkkel — bruk bare identifikatorer, ikke personopplysninger.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>Oppsummering</h4>
+      <p>Bruk et velrenommert JWT-bibliotek. Spesifiser tillatte algoritmer eksplisitt. Valider <code>exp</code>, <code>aud</code> og <code>iss</code>. Bruk korte levetider og refresh tokens. Send aldri sensitiv informasjon i payload uten JWE-kryptering.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

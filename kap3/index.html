@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapittel 3 — Kryptografi</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="../" class="nav-back">&larr; Alle kapitler</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 3: Kryptografi">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 3 · Kryptografi</div>
+    <h1>Krypto<em>grafi</em></h1>
+    <p class="lede">Matematikk med veldig presise forutsetninger — sikkerheten bryter sammennøyaktig der forutsetningene ikke holder.</p>
+  </div>
+</header>
+
+<nav class="chapter-toc">
+  <div class="container">
+    <ol class="chapter-toc-list">
+      <li><span class="toc-num">01</span><a href="#overblikk">Helhetsbilde</a></li>
+      <li><span class="toc-num">02</span><a href="#deler">Delsider</a></li>
+      <li><span class="toc-num">03</span><a href="#quiz">Test deg selv</a></li>
+    </ol>
+  </div>
+</nav>
+
+<section id="overblikk">
+  <div class="container">
+    <div class="section-badge">Overblikk</div>
+    <h2>Det store <em>bildet</em></h2>
+    <p class="section-intro">Kryptografi er ikke ett verktøy — det er en verktøykasse der hvert verktøy har sin rette anvendelse og sine feil anvendelser.</p>
+    <p class="lead">Kryptografi løser tre distinkte problemer: <strong>konfidensialitet</strong> (bare mottakeren kan lese meldingen), <strong>integritet</strong> (meldingen er uendret), og <strong>autentisering</strong> (meldingen kom virkelig fra den som hevder å ha sendt den). Symmetrisk kryptografi er rask og egner seg for bulk-kryptering. Asymmetrisk kryptografi løser nøkkelutvekslingsproblemet, men er treg. Hashfunksjoner gir integritet uten hemmelighet. TLS 1.3 kombinerer alle tre.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="13">
+        <defs>
+          <marker id="ka" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a39886"/></marker>
+        </defs>
+        <!-- Symmetrisk -->
+        <rect x="40" y="40" width="180" height="70" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="130" y="68" text-anchor="middle" font-weight="600" fill="#b04428">Symmetrisk</text>
+        <text x="130" y="86" text-anchor="middle" font-size="11" fill="#6b6257">AES-GCM, ChaCha20</text>
+        <text x="130" y="100" text-anchor="middle" font-size="11" fill="#6b6257">Rask · Bulk-kryptering</text>
+        <!-- Asymmetrisk -->
+        <rect x="270" y="40" width="180" height="70" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="68" text-anchor="middle" font-weight="600" fill="#2d4a7a">Asymmetrisk</text>
+        <text x="360" y="86" text-anchor="middle" font-size="11" fill="#6b6257">RSA, ECDH, ECDSA</text>
+        <text x="360" y="100" text-anchor="middle" font-size="11" fill="#6b6257">Nøkkelutveksling · Signatur</text>
+        <!-- Hashing -->
+        <rect x="500" y="40" width="180" height="70" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="590" y="68" text-anchor="middle" font-weight="600" fill="#3d6b3a">Hashing / MAC</text>
+        <text x="590" y="86" text-anchor="middle" font-size="11" fill="#6b6257">SHA-256, HMAC, Argon2</text>
+        <text x="590" y="100" text-anchor="middle" font-size="11" fill="#6b6257">Integritet · Passord</text>
+        <!-- TLS samler dem -->
+        <rect x="200" y="160" width="320" height="50" rx="3" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="360" y="181" text-anchor="middle" font-weight="600" fill="#b04428">TLS 1.3</text>
+        <text x="360" y="198" text-anchor="middle" font-size="11" fill="#6b6257">kombinerer alle tre i én protokoll</text>
+        <line x1="130" y1="112" x2="270" y2="170" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ka)"/>
+        <line x1="360" y1="112" x2="360" y2="158" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ka)"/>
+        <line x1="590" y1="112" x2="450" y2="170" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ka)"/>
+      </svg>
+      <figcaption>De tre kryptografiske primitivene og hvordan TLS 1.3 kombinerer dem til en komplett sikkerhetsprotokoll.</figcaption>
+    </figure>
+
+    <div class="callout callout-green">
+      <h4>Kapittelets kjerneidé</h4>
+      <p>Kryptografi brukes feil langt oftere enn den brytes matematisk. ECB-modus, MD5-passord, hard-kodede nøkler og gjenbrukte nonces er alle eksempler på riktige algoritmer brukt feil. Forstå forutsetningene — ikke bare navnene.</p>
+    </div>
+  </div>
+</section>
+
+<section id="deler">
+  <div class="container">
+    <div class="section-badge">Delsider</div>
+    <h2>Utforsk <em>kapittelet</em></h2>
+    <div class="subpage-list">
+      <a href="symmetrisk-krypto.html" class="subpage-card">
+        <div class="sp-icon">01–05</div>
+        <div class="sp-info">
+          <div class="sp-title">Symmetrisk kryptografi</div>
+          <div class="sp-desc">AES, driftsmodus (GCM, CBC, ECB), ChaCha20 og nøkkelhåndtering.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="asymmetrisk-krypto.html" class="subpage-card">
+        <div class="sp-icon">06–10</div>
+        <div class="sp-info">
+          <div class="sp-title">Asymmetrisk kryptografi og TLS</div>
+          <div class="sp-desc">RSA, elliptisk kurvekryptografi, TLS 1.3-handshake og PKI.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="hashing-mac.html" class="subpage-card">
+        <div class="sp-icon">11–14</div>
+        <div class="sp-info">
+          <div class="sp-title">Hashing, MAC og passordhashing</div>
+          <div class="sp-desc">SHA-256, HMAC, bcrypt, Argon2 og hva som faktisk beskytter passord i hvile.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="container">
+    <h2>Test deg <em>selv</em></h2>
+    <p class="section-intro">18 spørsmål om kryptografi — fra begreper til fallgruver.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 1 · Lett</div>
+      <div class="q-text">Hva er AES, og hvilke nøkkellengder brukes?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">AES (Advanced Encryption Standard) er en symmetrisk blokkchiffer som opererer på 128-bits blokker. Standard nøkkellengder er 128, 192 og 256 bits. AES-128 er fortsatt kryptografisk sikker for de fleste formål; AES-256 foretrekkes i høysikkerhets- og militære kontekster.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 2 · Lett</div>
+      <div class="q-text">Hva er en kryptografisk hashfunksjon?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En kryptografisk hashfunksjon tar inn vilkårlig data og produserer en fast-lengde output (digest). Den er enveiskjørt (ikke inverterbar i praksis), kollisjonsmotstandig (vanskelig å finne to ulike input med samme hash) og deterministisk. Eksempler: SHA-256, SHA-3.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 3 · Lett</div>
+      <div class="q-text">Hva er TLS, og hva beskytter det?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">TLS (Transport Layer Security) er en kryptografisk protokoll som gir konfidensialitet (kryptering), integritet (MAC) og autentisering (sertifikater) for nettverkskommunikasjon. TLS 1.3 er gjeldende versjon og er vesentlig sikrere og raskere enn TLS 1.2.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 4 · Lett</div>
+      <div class="q-text">Hva er salting i passordhashing?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Salting betyr å legge til en unik tilfeldig verdi (salt) til hvert passord før hashing. Saltet lagres i klartekst sammen med hashen. Dette hindrer rainbow table-angrep (forhåndsgenererte hash-tabeller) og gjør det slik at to brukere med samme passord får forskjellige hashes.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 5 · Lett</div>
+      <div class="q-text">Hva er forskjellen mellom symmetrisk og asymmetrisk kryptografi?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Symmetrisk:</strong> same nøkkel brukes til kryptering og dekryptering. Rask, men krever sikker nøkkelutveksling. Eksempel: AES. <strong>Asymmetrisk:</strong> to nøkler — offentlig og privat. Offentlig nøkkel krypterer (eller verifiserer), privat nøkkel dekrypterer (eller signerer). Løser nøkkelutvekslingsproblemet, men er langt tregere. Eksempel: RSA, ECDH.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 6 · Lett</div>
+      <div class="q-text">Hva er forward secrecy?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Forward secrecy (perfekt forward secrecy, PFS) betyr at kompromittering av en langsiktig privat nøkkel ikke kompromitterer tidligere sesjoner. TLS 1.3 oppnår dette ved å bruke midlertidige ECDH-nøkler (ephemeral) for nøkkelutveksling — sesjonsnøkkelen kastes etter bruk.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 7 · Middels</div>
+      <div class="q-text">Hvorfor er ECB-modus usikker for kryptering av meningsfull data?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">ECB (Electronic Codebook) krypterer hver 128-bits blokk uavhengig med samme nøkkel. Identiske klartekstblokker gir identiske chiffreblokker. Mønstre i dataene bevares i chifferteksten. Det klassiske eksempelet: et bilde kryptert med ECB er fortsatt gjenkjennelig fordi store ensartede flater (bakgrunn, konturer) produserer like chiffreblokker. Bruk GCM eller CBC med tilfeldig IV.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8 · Middels</div>
+      <div class="q-text">Hva er HMAC og hva beskytter det mot som en vanlig hash ikke gjør?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">HMAC (Hash-based Message Authentication Code) er en konstruksjon som kombinerer en hemmelig nøkkel med en hashfunksjon: <code>HMAC(key, msg)</code>. En vanlig hash gir integritet men ikke autentisering — hvem som helst kan beregne en hash. HMAC gir <em>autentisert integritet</em>: bare den som kjenner nøkkelen kan produsere en gyldig MAC. HMAC beskytter også mot lengde-utvidelsesangrep som rammer <code>SHA-256(key || msg)</code>.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 9 · Middels</div>
+      <div class="q-text">Hva er 0-RTT i TLS 1.3 og hva er risikoen?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">0-RTT (zero round-trip time) lar en klient sende data i det første meldingen til en server den har koblet til tidligere, uten å vente på handshake. Det reduserer latens. Risikoen: 0-RTT-data er sårbare for <strong>replay-angrep</strong> — en angriper kan fange opp og respille den første meldingen. 0-RTT bør kun brukes for idempotente operasjoner (GET), aldri for state-endringer.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 10 · Middels</div>
+      <div class="q-text">Forklar hva Certificate Transparency er.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Certificate Transparency (CT) er en åpen logg der alle utstedte TLS-sertifikater publiseres. Nettlesere krever at sertifikater er logget i en CT-logg for å bli akseptert. Dette gjør det mulig å oppdage feilutstedte sertifikater (f.eks. en CA som utsteder et sertifikat for google.com til en angriper) raskt, fordi sertifikatet er offentlig synlig.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 11 · Middels</div>
+      <div class="q-text">Hva er forskjellen mellom kryptering og signering med et asymmetrisk nøkkelpar?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Kryptering:</strong> avsender krypterer med mottakerens offentlige nøkkel. Bare mottakeren (med sin private nøkkel) kan dekryptere. Gir konfidensialitet. <strong>Signering:</strong> avsender signerer med sin private nøkkel. Alle med avsenderens offentlige nøkkel kan verifisere signaturen. Gir autentisering og ikke-avvisning, men ikke konfidensialitet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 12 · Middels</div>
+      <div class="q-text">Hvorfor er bcrypt bedre enn SHA-256 for passordlagring?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SHA-256 er designet for å være rask — en GPU kan beregne milliarder per sekund. bcrypt er designet for å være langsom via en konfigurerbar kostfaktor. Kostfaktoren kan økes etter hvert som maskinvare blir raskere. bcrypt inkluderer automatisk salting og produserer et selv-beskrivende format som inneholder algoritme, kostfaktor og salt.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 13 · Vanskelig</div>
+      <div class="q-text">En tjeneste bruker AES-CBC med en fast IV lagret i kildekoden. Hva er angrepsvektoren?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En fast (deterministisk) IV i CBC gjør kryptering deterministisk: samme klartekst gir alltid samme chiffertekst. Dette åpner for: (1) <strong>Chosen-plaintext-angrep</strong> — angriperen kan oppdage om to meldinger er like. (2) Mulig <strong>padding oracle-angrep</strong> hvis feilmeldinger lekker padding-informasjon. IV skal alltid genereres tilfeldig per krypteringsoperasjon og sendes (i klartekst) med chifferteksten. AES-GCM (autentisert kryptering) er å foretrekke.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 14 · Vanskelig</div>
+      <div class="q-text">Et system lagrer <code>sha256(passord)</code> uten salt. Forklar nøyaktig hvilke to angrep dette åpner for.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>1. Rainbow table-angrep:</strong> angriperen bruker forhåndsgenererte tabeller som mapper kjente passord til SHA-256-hashes. Uten salt er beregningene gjenbrukbare på tvers av alle brukere i alle databaser. <strong>2. Parallell cracking:</strong> siden SHA-256 er rask og deterministisk, kan en GPU beregne ~10 milliarder SHA-256-hashes per sekund. Uten salt gir ett crack-forsøk resultater for <em>alle</em> brukere med det passordets hash — ikke bare én.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 15 · Vanskelig</div>
+      <div class="q-text">Forklar hvorfor RSA-2048 er kvantesårbar mens AES-128 i praksis ikke er det.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">RSA baserer seg på faktoriseringsproblemet. Shors algoritme på en kvantedatamaskin kan løse dette eksponentielt raskere enn klassiske algoritmer — RSA-2048 ville brytes i polynomial tid. AES er sårbar for Grovers algoritme, som gir en kvadratrotforbedring i brute-force-søk, dvs. effektiv nøkkelstørrelse halveres: AES-128 reduseres til ekvivalenten av 64-bits klassisk sikkerhet. AES-256 reduseres til 128-bits. Siden AES-128 allerede er praktisk ubrytelig, er den marginale reduksjonen ikke kritisk. RSA 2048 derimot brytes fullstendig.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 16 · Vanskelig</div>
+      <div class="q-text">Hva er et lengde-utvidelsesangrep, og hvorfor er <code>HMAC(key, msg)</code> immun mot det?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Et lengde-utvidelsesangrep utnytter at Merkle-Damgård-konstruksjoner (SHA-256, SHA-1) beregner hash inkrementelt. Gitt <code>H(key || msg)</code> og lengden på <code>key || msg</code>, kan en angriper beregne <code>H(key || msg || padding || tillegg)</code> uten å kjenne nøkkelen. HMAC er immun fordi konstruksjonen er <code>H(key XOR opad || H(key XOR ipad || msg))</code> — den indre hashen er innpakket i en ytre hash med nøkkel, noe som bryter antagelsene lengde-utvidelsesangrepet hviler på.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 17 · Vanskelig</div>
+      <div class="q-text">Hva er post-kvantum-kryptografi, og hvilke algoritmer er standardisert av NIST?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Post-kvantum-kryptografi (PQC) er asymmetriske algoritmer designet for å motstå angrep fra kvantemaskiner. NIST standardiserte i 2024: <strong>CRYSTALS-Kyber</strong> (nå ML-KEM) for nøkkelinnkapsling, <strong>CRYSTALS-Dilithium</strong> (ML-DSA) og <strong>FALCON</strong> for digitale signaturer. Disse baserer seg på gitter-problemer («lattice problems») i stedet for faktorisering og diskret logaritme.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 18 · Vanskelig</div>
+      <div class="q-text">Hva er Argon2id og hvorfor velges det fremfor bcrypt i nye systemer?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Argon2id (vinner av Password Hashing Competition 2015) er minne-hard: den krever store mengder RAM i tillegg til tid. bcrypt er bare tid-hard. ASIC og GPU-er er gode på tidsintensive beregninger men har begrenset minne — Argon2id gjør massevis av parallelle crack-forsøk vesentlig dyrere. Argon2id har konfigurerbare parametre for tid, minnebruk og parallellisme, noe som gjør den mer fleksibel enn bcrypt.</div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

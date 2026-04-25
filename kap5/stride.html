@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STRIDE og mitigasjoner — Kapittel 5</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 5</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 5: Threat modeling">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 5 · STRIDE</div>
+    <h1>STRIDE og <em>mitigasjoner</em></h1>
+    <p class="lede">Seks trusselkategorier som dekker nesten alt som kan gå galt i et system — og den kontrollen som adresserer hver av dem.</p>
+    <nav class="toc">
+      <a href="#stride-oversikt"><span class="toc-num">01</span>STRIDE-oversikt</a>
+      <a href="#stride-per-element"><span class="toc-num">02</span>STRIDE per DFD-element</a>
+      <a href="#dread"><span class="toc-num">03</span>DREAD-scoring</a>
+      <a href="#mitigasjoner"><span class="toc-num">04</span>Mitigasjoner</a>
+      <a href="#praktisk-eksempel"><span class="toc-num">05</span>Praktisk eksempel</a>
+    </nav>
+  </div>
+</header>
+
+<section id="stride-oversikt">
+  <div class="container">
+    <div class="section-badge">01 · Oversikt</div>
+    <h2>STRIDE-<em>oversikt</em></h2>
+    <p class="section-intro">STRIDE er et akronym for seks trusselkategorier — opprinnelig utviklet av Microsoft, og fortsatt det mest brukte rammeverket.</p>
+    <p class="lead">STRIDE gir deg et strukturert vokabular for trusler. I stedet for å starte fra blankt ark og spørre «hva kan gå galt?» med en uendelig mengde mulige svar, gir STRIDE deg seks spesifikke linser å se systemet ditt gjennom — og for hvert DFD-element kan du systematisk sjekke alle seks.</p>
+
+    <table>
+      <thead><tr><th>Bokstav</th><th>Trusselkategori</th><th>Hva det betyr</th><th>Motsvarer CIA</th></tr></thead>
+      <tbody>
+        <tr><td><strong>S</strong></td><td>Spoofing</td><td>Utgi seg for å være noen andre</td><td>Autentisering</td></tr>
+        <tr><td><strong>T</strong></td><td>Tampering</td><td>Endre data eller kode uautorisert</td><td>Integritet</td></tr>
+        <tr><td><strong>R</strong></td><td>Repudiation</td><td>Nekte å ha utført en handling</td><td>Ikke-avvisning</td></tr>
+        <tr><td><strong>I</strong></td><td>Information Disclosure</td><td>Eksponere data til uvedkommende</td><td>Konfidensialitet</td></tr>
+        <tr><td><strong>D</strong></td><td>Denial of Service</td><td>Gjøre systemet utilgjengelig</td><td>Tilgjengelighet</td></tr>
+        <tr><td><strong>E</strong></td><td>Elevation of Privilege</td><td>Oppnå høyere tilgang enn tillatt</td><td>Autorisasjon</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="stride-per-element">
+  <div class="container">
+    <div class="section-badge">02 · Mapping</div>
+    <h2>STRIDE per <em>DFD-element</em></h2>
+    <p class="section-intro">Ikke alle STRIDE-kategorier gjelder for alle DFD-elementer — denne mappingen hjelper deg å fokusere analysen.</p>
+    <p class="lead">En prosess kan spoofes, tamperes med, nektes tjeneste, og brukes til privilege escalation. Et datalager kan utsettes for tampering, information disclosure og denial of service — men et datalager i seg selv spoofes vanligvis ikke. En dataflykt kan avlyttes (information disclosure) eller manipuleres (tampering). Ekstern entitet: Spoofing er den primære bekymringen.</p>
+
+    <table>
+      <thead><tr><th>DFD-element</th><th>S</th><th>T</th><th>R</th><th>I</th><th>D</th><th>E</th></tr></thead>
+      <tbody>
+        <tr><td>Ekstern entitet</td><td>✓</td><td></td><td>✓</td><td></td><td></td><td></td></tr>
+        <tr><td>Prosess</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Datalager</td><td></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
+        <tr><td>Dataflykt</td><td></td><td>✓</td><td></td><td>✓</td><td>✓</td><td></td></tr>
+      </tbody>
+    </table>
+
+    <p>I praksis brukes mappingen som sjekkliste under threat modeling-økten: for hvert DFD-element, gå gjennom de relevante STRIDE-kategoriene og spør «er dette en reell trussel for dette elementet i dette systemet?»</p>
+  </div>
+</section>
+
+<section id="dread">
+  <div class="container">
+    <div class="section-badge">03 · DREAD</div>
+    <h2>DREAD-<em>scoring</em></h2>
+    <p class="section-intro">DREAD gir en kvantitativ score til trusler slik at de kan prioriteres — men med bevissthet om at scoren er subjektiv.</p>
+    <p class="lead">DREAD scores trusler på fem dimensjoner, hver fra 1 til 10. Summen gir en total score som brukes til å prioritere hvilke trusler som skal mitigeres først. En SQL injection mot en åpen innloggingsside scorer høyt på alle dimensjoner. En XML injection mot et internt verktøy brukt av én person scorer lavt på Affected users.</p>
+
+    <table>
+      <thead><tr><th>Dimensjon</th><th>Spørsmål</th><th>Lav (1–3)</th><th>Høy (8–10)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>D</strong>amage</td><td>Hva er skadeomfanget?</td><td>Lokal, begrenset</td><td>Full kontokompromittering</td></tr>
+        <tr><td><strong>R</strong>eproducibility</td><td>Hvor enkelt er det å gjenta angrepet?</td><td>Krever spesielle omstendigheter</td><td>Alltid reproduserbart</td></tr>
+        <tr><td><strong>E</strong>xploitability</td><td>Hva kreves for å utnytte trusselen?</td><td>Expert, fysisk tilgang</td><td>Ingen skills, remote</td></tr>
+        <tr><td><strong>A</strong>ffected users</td><td>Hvor mange berøres?</td><td>Én bruker</td><td>Alle brukere</td></tr>
+        <tr><td><strong>D</strong>iscoverability</td><td>Hvor lett er trusselen å oppdage?</td><td>Krever intern kunnskap</td><td>Offentlig kjent</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>DREAD vs. CVSS</h4>
+      <p>DREAD er subjektiv og egnet for intern prioritering. CVSS (Common Vulnerability Scoring System) er en industristandard for kjente sårbarheter med mer presise beregningsregler. For threat modeling av ukjente trusler er DREAD enklere; for rapportering av kjente CVEer er CVSS standarden.</p>
+    </div>
+  </div>
+</section>
+
+<section id="mitigasjoner">
+  <div class="container">
+    <div class="section-badge">04 · Mitigasjoner</div>
+    <h2>Mitigasjoner per <em>STRIDE-kategori</em></h2>
+    <p class="section-intro">Hver STRIDE-kategori har en naturlig motpart — den kontrollen som direkte adresserer trusselen.</p>
+
+    <table>
+      <thead><tr><th>STRIDE</th><th>Primær mitigasjon</th><th>Eksempel</th></tr></thead>
+      <tbody>
+        <tr><td>Spoofing</td><td>Autentisering</td><td>MFA, mTLS, FIDO2</td></tr>
+        <tr><td>Tampering</td><td>Integritetskontroll</td><td>HMAC, digital signatur, parameterisering</td></tr>
+        <tr><td>Repudiation</td><td>Ikke-avvisbar logging</td><td>Kryptografisk signerte revisionsspor</td></tr>
+        <tr><td>Information Disclosure</td><td>Kryptering + tilgangskontroll</td><td>TLS, AES-GCM, RBAC/ABAC</td></tr>
+        <tr><td>Denial of Service</td><td>Rate-limiting + redundans</td><td>WAF, CDN, auto-scaling, circuit breaker</td></tr>
+        <tr><td>Elevation of Privilege</td><td>Autorisasjon + least privilege</td><td>RBAC, serversidesjekk, deny-by-default</td></tr>
+      </tbody>
+    </table>
+
+    <p>Mitigasjoner er ikke nødvendigvis ett-til-ett. Kryptering (TLS) adresserer Information Disclosure på transportlag, men hjelper ikke mot Tampering hvis integriteten ikke verifiseres i applikasjonen. Defense in depth betyr å ha kontroller på flere lag.</p>
+  </div>
+</section>
+
+<section id="praktisk-eksempel">
+  <div class="container">
+    <div class="section-badge">05 · Eksempel</div>
+    <h2>Praktisk <em>eksempel</em></h2>
+    <p class="section-intro">Threat modeling av et JWT-basert API — fra DFD til trusselregisteret til mitigasjoner.</p>
+    <p class="lead">System: et REST API med JWT-autentisering. Klienten (nettleser) sender JWT i Authorization-header. API-et verifiserer tokenet og returnerer brukerdata. En database lagrer brukerdata. Trust boundaries: klient ↔ API (internett-grense), API ↔ database (intern grense).</p>
+
+    <table>
+      <thead><tr><th>Trussel-ID</th><th>STRIDE</th><th>Element</th><th>Trussel</th><th>Mitigasjon</th></tr></thead>
+      <tbody>
+        <tr><td>T-01</td><td>Spoofing</td><td>Klient</td><td>Angriper forfalsker JWT (alg:none)</td><td>Spesifiser tillatte algoritmer eksplisitt</td></tr>
+        <tr><td>T-02</td><td>Tampering</td><td>Dataflykt</td><td>JWT-payload endres under transport</td><td>TLS 1.3 for all kommunikasjon</td></tr>
+        <tr><td>T-03</td><td>Information Disclosure</td><td>API</td><td>Verbose feilmeldinger avslører intern logikk</td><td>Generiske feilmeldinger i produksjon</td></tr>
+        <tr><td>T-04</td><td>Elevation of Privilege</td><td>API</td><td>Bruker kaller admin-endepunkt uten sjekk</td><td>Rollesjekk på hvert endepunkt</td></tr>
+        <tr><td>T-05</td><td>Denial of Service</td><td>API</td><td>Credential stuffing overbelaster autentisering</td><td>Rate-limiting per IP og per konto</td></tr>
+        <tr><td>T-06</td><td>Repudiation</td><td>Datalager</td><td>Bruker nekter å ha endret data</td><td>Revisjonsspor med bruker-ID og tidsstempel</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-green">
+      <h4>Husk</h4>
+      <p>Et trusselregister er en levende liste. T-01 kan endres til «Løst — algoritme whitelist implementert» når mitigasjonen er verifisert i kode. Threat modeling er ikke ferdig ved første økt.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

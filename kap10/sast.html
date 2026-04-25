@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAST — Kapittel 10</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 10</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 10: Statisk analyse og AI-sikkerhet">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 10 · SAST</div>
+    <h1><em>SAST</em></h1>
+    <p class="lede">Statisk analyse finner det systematiske og det gjentatte — og gjøres tusen ganger for hvert eneste commit.</p>
+    <nav class="toc">
+      <a href="#hva-sast"><span class="toc-num">01</span>Hva SAST er</a>
+      <a href="#verktoy"><span class="toc-num">02</span>Verktøy</a>
+      <a href="#cicd-integrering"><span class="toc-num">03</span>Integrering i CI/CD</a>
+      <a href="#fp-fn"><span class="toc-num">04</span>Falske positiver og negativer</a>
+      <a href="#sast-vs-review"><span class="toc-num">05</span>SAST vs. kodegjennomgang</a>
+    </nav>
+  </div>
+</header>
+
+<section id="hva-sast">
+  <div class="container">
+    <div class="section-badge">01 · Definisjon</div>
+    <h2>Hva SAST <em>er</em></h2>
+    <p class="section-intro">SAST analyserer koden som tekst og struktur — uten å kjøre den — og søker etter kjente sårbarhetsmønstre.</p>
+    <p class="lead">SAST-verktøy bygger en AST (Abstract Syntax Tree) og en CFG (Control Flow Graph) av koden, og kjører analyser over disse representasjonene. Taint tracking følger data fra brukerkontrollerte sources til farlige sinks. Dataflyt-analyse sporer hvordan variabler endres på tvers av funksjoner. Mønstre-analyse matcher kjente sårbarhetssignaturer.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs><marker id="saa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
+        <!-- Source -->
+        <rect x="40" y="80" width="130" height="40" rx="3" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="105" y="95" text-anchor="middle" font-size="11" font-weight="600" fill="#b04428">Source (taint)</text>
+        <text x="105" y="110" text-anchor="middle" font-size="10" fill="#6b6257">request.GET['q']</text>
+        <!-- Pil -->
+        <line x1="172" y1="100" x2="218" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#saa)"/>
+        <text x="195" y="93" text-anchor="middle" font-size="10" fill="#b04428">flyter til</text>
+        <!-- Mellomled -->
+        <rect x="220" y="70" width="160" height="60" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="300" y="92" text-anchor="middle" font-size="11" fill="#2d4a7a">Programflyt</text>
+        <text x="300" y="107" text-anchor="middle" font-size="10" fill="#6b6257">process(q) →</text>
+        <text x="300" y="120" text-anchor="middle" font-size="10" fill="#6b6257">build_query(q)</text>
+        <!-- Pil -->
+        <line x1="382" y1="100" x2="428" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#saa)"/>
+        <text x="405" y="93" text-anchor="middle" font-size="10" fill="#b04428">når sink</text>
+        <!-- Sink -->
+        <rect x="430" y="80" width="130" height="40" rx="3" fill="rgba(176,68,40,0.2)" stroke="#b04428" stroke-width="2"/>
+        <text x="495" y="95" text-anchor="middle" font-size="11" font-weight="600" fill="#b04428">Sink (farlig)</text>
+        <text x="495" y="110" text-anchor="middle" font-size="10" fill="#6b6257">cursor.execute(q)</text>
+        <!-- Sanitering mangler -->
+        <text x="300" y="160" text-anchor="middle" font-size="11" fill="#b04428" font-style="italic">Ingen sanitering i flyten → SAST rapporterer SQL injection</text>
+        <!-- Sanitering finnes -->
+        <text x="300" y="176" text-anchor="middle" font-size="11" fill="#3d6b3a" font-style="italic">Med parameterisering → SAST taus (sanitert)</text>
+      </svg>
+      <figcaption>Taint tracking: SAST følger taintede data fra source til sink. Manglende sanitering = varsling.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="verktoy">
+  <div class="container">
+    <div class="section-badge">02 · Verktøy</div>
+    <h2><em>Verktøy</em></h2>
+    <p class="section-intro">Tre SAST-verktøy dominerer åpent kildekode-landskapet — med ulike styrker og brukstilfeller.</p>
+    <p class="lead">Valget av SAST-verktøy avhenger av teknologistakk, ønsket konfigurerbarhet og false positive-toleranse. Alle tre verktøyene nedenfor er gratis for open source og integreres med GitHub Actions, GitLab CI og Jenkins.</p>
+
+    <table>
+      <thead><tr><th>Verktøy</th><th>Tilnærming</th><th>Styrke</th><th>Ulempe</th></tr></thead>
+      <tbody>
+        <tr><td><strong>SonarQube</strong></td><td>Mønstre + regelbasert</td><td>Bredt språkstøtte (30+), IDE-plugin, kjent i enterprise</td><td>Høy false positive rate uten kalibrering</td></tr>
+        <tr><td><strong>CodeQL</strong></td><td>Dataflytanalyse via QL-spørringer</td><td>Svært lav false positive rate, kraftig spørringsspråk</td><td>Treg, kompilert kode kreves, bratt læringskurve</td></tr>
+        <tr><td><strong>Semgrep</strong></td><td>Mønstre-matching med AST</td><td>Rask, enkel å skrive egne regler, lav entry barrier</td><td>Enklere analysemodell enn CodeQL, lite inter-prosedural analyse</td></tr>
+      </tbody>
+    </table>
+
+    <pre><code><span class="comment"># Semgrep: kjør mot en katalog</span>
+semgrep --config=auto src/
+
+<span class="comment"># Semgrep: spesifikk regelsamling for Python-sikkerhet</span>
+semgrep --config=p/python-security src/
+
+<span class="comment"># CodeQL i GitHub Actions (yaml-snippet)</span>
+- uses: github/codeql-action/analyze@v3
+  with:
+    languages: python, javascript</code></pre>
+  </div>
+</section>
+
+<section id="cicd-integrering">
+  <div class="container">
+    <div class="section-badge">03 · CI/CD</div>
+    <h2>Integrering i <em>CI/CD</em></h2>
+    <p class="section-intro">SAST gir størst verdi når det kjøres automatisk og gir feedback der utvikleren er — ikke i en rapport de ikke leser.</p>
+    <p class="lead">Nøkkelprinsippet: SAST-resultater skal vises i pull request-kommentarer, ikke i en separat rapport som krever separat innlogging og gjennomgang. Jo kortere distansen er fra «funnet sårbarhet» til «utvikler ser varsling», desto raskere fikses det.</p>
+
+    <p>Anbefalte CI/CD-innstillinger:</p>
+    <ul>
+      <li><strong>Blokkér merge</strong> på kritiske funn med høy konfidensgrad — men bare disse, ikke alle funn.</li>
+      <li><strong>Advisory mode</strong> for lav-konfidensregler — kommenteres som informasjon, blokkerer ikke.</li>
+      <li><strong>Inkrementell skanning:</strong> kun endre filer per PR i stedet for hele kodebasen — langt raskere feedback.</li>
+      <li><strong>Suppresjon med forklaring:</strong> <code># nosec SQLi001: parameterisert via SQLAlchemy ORM</code> — suppresjon uten forklaring er et anti-mønster.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="fp-fn">
+  <div class="container">
+    <div class="section-badge">04 · Falske positiver</div>
+    <h2>Falske positiver og <em>negativer</em></h2>
+    <p class="section-intro">Begge er problemer, men de er asymmetriske: falske positiver dreper SAST-kulturen, falske negativer skaper falsk trygghet.</p>
+    <p class="lead">En SAST som genererer hundre varsler per PR, der 90 er falske positiver, vil raskt bli ignorert av teamet. Alert fatigue er det vanligste hinderet for effektiv SAST-bruk. Løsningen er ikke å deaktivere SAST — det er å kalibrere regelsettet mot kodesbasen og akseptere at noen regler er for støyende til å bruke.</p>
+
+    <p>Strategier for å håndtere falske positiver:</p>
+    <ul>
+      <li><strong>Segmenter regler:</strong> «blocking rules» (lav false positive, høy konfidensgrad) vs. «advisory rules» (høyere false positive, men nyttig for review).</li>
+      <li><strong>Mål false positive rate:</strong> triager alle funn i én sprint, kategoriser som TP/FP. Supprimér FP med forklaring.</li>
+      <li><strong>Feedback loop:</strong> rapporter false positive-rate til verktøyleverandøren — noen godtar bidrag.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Falske negativer</h4>
+      <p>SAST finner ikke alt. Det finner heller ikke logiske tilgangskontrollfeil, forretningslogikk-svakheter eller feil som krever kontekst på tvers av systemer. Suppler alltid med DAST og manuell kodegjennomgang for kritiske komponenter.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sast-vs-review">
+  <div class="container">
+    <div class="section-badge">05 · SAST vs. gjennomgang</div>
+    <h2>SAST vs. <em>kodegjennomgang</em></h2>
+    <p class="section-intro">De er komplementære — verktøyet finner det systematiske, mennesket finner resten.</p>
+    <p class="lead">En kodegjennomgang tar tid og kognitivt arbeid. Den er best brukt på det verktøy ikke kan se: forretningslogikk, arkitekturavveining, «er dette den riktige løsningen» og den subtile rase-condition som kun manifesteres under spesifikke last-betingelser. SAST tar seg av «er passord lagret i klartekst» og «er denne SQL-spørringen parameterisert» — repetitive sjekker som er kostbare å gjøre manuelt i stor skala.</p>
+
+    <table>
+      <thead><tr><th>Hva SAST finner</th><th>Hva kodegjennomgang finner</th></tr></thead>
+      <tbody>
+        <tr><td>SQL/command injection-mønstre</td><td>Logiske IDOR-feil</td></tr>
+        <tr><td>Hardkodede hemmeligheter</td><td>Manglende rate-limiting (ikke alltid synlig i kode)</td></tr>
+        <tr><td>Usikre krypto-mønstre (MD5, ECB)</td><td>Feil forretningslogikk i autorisasjon</td></tr>
+        <tr><td>Direkte path traversal i strengoperasjoner</td><td>Design-svakheter som krever kontekst</td></tr>
+        <tr><td>Potensielt farlige import/biblioteker</td><td>Tilstandsbaserte race conditions</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-green">
+      <h4>Oppsummering</h4>
+      <p>Implementer SAST for å frigjøre kodegjennomgangens kapasitet til det menneskene er best til — ikke som en erstatning for menneskelig vurdering.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

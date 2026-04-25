@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supply chain-sikkerhet — Kapittel 8</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 8</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 8: Mikrotjenester og supply chain">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 8 · Supply chain</div>
+    <h1>Supply chain-<em>sikkerhet</em></h1>
+    <p class="lede">Koden du ikke har skrevet er nå det primære angrepsmålet — fordi den er pålitelig, utbredt og vanskelig å overvåke.</p>
+    <nav class="toc">
+      <a href="#hva-er-sca"><span class="toc-num">01</span>Hva supply chain-angrep er</a>
+      <a href="#dep-confusion"><span class="toc-num">02</span>Dependency confusion og typosquatting</a>
+      <a href="#sbom"><span class="toc-num">03</span>SBOM</a>
+      <a href="#sigstore"><span class="toc-num">04</span>Sigstore og kodesignering</a>
+      <a href="#forsvar-sc"><span class="toc-num">05</span>Forsvar i dybde</a>
+    </nav>
+  </div>
+</header>
+
+<section id="hva-er-sca">
+  <div class="container">
+    <div class="section-badge">01 · Definisjon</div>
+    <h2>Hva supply chain-angrep <em>er</em></h2>
+    <p class="section-intro">Et supply chain-angrep kompromitterer tilliten som allerede eksisterer mellom leverandør og mottaker.</p>
+    <p class="lead">I desember 2020 avsløres SolarWinds Orion-angrepet: en nasjonalstat-aktør hadde kompromittert SolarWinds' byggemiljø og injisert ondsinnet kode i en legitim softwareoppdatering. Oppdateringen ble signert av SolarWinds' offisielle sertifikater og distribuert til 18 000 kunder — inkludert den amerikanske regjeringen. Mottakerne hadde ingen grunn til å mistro oppdateringen: den kom fra en pålitelig kilde og var kryptografisk signert.</p>
+
+    <p>To primære supply chain-angrepsvektorer:</p>
+    <ul>
+      <li><strong>Kompromittering av leverandør:</strong> angriperen kompromitterer leverandørens systemer og injiserer ondsinnet kode i legitime utgivelser (SolarWinds, XZ Utils).</li>
+      <li><strong>Pakkeinjeksjon:</strong> angriperen publiserer ondsinnet kode i pakkeregistere som konsumenter henter automatisk (dependency confusion, typosquatting, account takeover).</li>
+    </ul>
+  </div>
+</section>
+
+<section id="dep-confusion">
+  <div class="container">
+    <div class="section-badge">02 · Dependency confusion</div>
+    <h2>Dependency confusion og <em>typosquatting</em></h2>
+    <p class="section-intro">To ulike angrep som begge utnytter at pakkemanagere henter kode automatisk uten å verifisere at den er det du forventet.</p>
+    <p class="lead">En sikkerhetsforsker demonstrerte i 2021 at han kunne få kode kjørt hos Apple, Netflix og Microsoft ved å registrere interne pakkenavn på offentlige registere med høyere versjonsnumre. Organisasjonene hadde konfigurert sine pakkemanagere til å sjekke offentlige registere som fallback — og fikk den ondsinnede pakken i stedet for sin interne.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs><marker id="dca" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
+        <!-- Privat register -->
+        <rect x="40" y="60" width="160" height="50" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="120" y="81" text-anchor="middle" font-weight="600" fill="#3d6b3a">Privat register</text>
+        <text x="120" y="97" text-anchor="middle" font-size="11" fill="#6b6257">@acme/utils v1.2.0</text>
+        <!-- Offentlig register -->
+        <rect x="40" y="130" width="160" height="50" rx="3" fill="rgba(176,68,40,0.12)" stroke="#b04428" stroke-width="2"/>
+        <text x="120" y="151" text-anchor="middle" font-weight="600" fill="#b04428">Offentlig register</text>
+        <text x="120" y="167" text-anchor="middle" font-size="11" fill="#b04428">@acme/utils v99.0.0 ← ONDSINNET</text>
+        <!-- Pakkemanager -->
+        <rect x="280" y="90" width="160" height="50" rx="3" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="111" text-anchor="middle" font-weight="600" fill="#2d4a7a">Pakkemanager</text>
+        <text x="360" y="127" text-anchor="middle" font-size="11" fill="#6b6257">sjekker begge registre</text>
+        <!-- Pil fra ondsinnet (velges pga høyere versjon) -->
+        <line x1="202" y1="155" x2="278" y2="130" stroke="#b04428" stroke-width="2" marker-end="url(#dca)"/>
+        <text x="240" y="145" text-anchor="middle" font-size="10" fill="#b04428" font-weight="600">v99 velges!</text>
+        <!-- Linje fra privat (ikke valgt) -->
+        <line x1="202" y1="85" x2="278" y2="105" stroke="#3d6b3a" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="240" y="90" text-anchor="middle" font-size="10" fill="#3d6b3a">v1.2 ignorert</text>
+        <!-- Konsument -->
+        <rect x="520" y="90" width="140" height="50" rx="3" fill="rgba(198,138,31,0.1)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="590" y="111" text-anchor="middle" font-weight="600" fill="#c68a1f">Konsument</text>
+        <text x="590" y="127" text-anchor="middle" font-size="11" fill="#b04428">kjører ondsinnet kode</text>
+        <line x1="442" y1="115" x2="518" y2="115" stroke="#b04428" stroke-width="1.5" marker-end="url(#dca)"/>
+      </svg>
+      <figcaption>Dependency confusion: offentlig pakke med høyere versjonsnummer velges fremfor intern pakke — angriperen trenger bare å registrere pakkenavnet.</figcaption>
+    </figure>
+
+    <p><strong>Forsvar:</strong> bruk scoped packages (<code>@acme/utils</code> med scope-registry-konfigrasjon), registrer interne pakkenavn på offentlige registere (uten innhold), bruk private registry-mirrors med allowlist, og deaktiver fallback til offentlig register for interne pakker.</p>
+  </div>
+</section>
+
+<section id="sbom">
+  <div class="container">
+    <div class="section-badge">03 · SBOM</div>
+    <h2><em>SBOM</em></h2>
+    <p class="section-intro">Du kan ikke beskytte det du ikke vet du har — SBOM er grunnlaget for supply chain-synlighet.</p>
+    <p class="lead">En SBOM (Software Bill of Materials) er en komplett liste over alle komponenter, avhengigheter, versjoner og lisenser i en programvare. Den inkluderer direkte avhengigheter (de du eksplisitt installerte) og transitive avhengigheter (avhengighetenes avhengigheter). En moderne applikasjon kan ha tusenvis av transitive avhengigheter.</p>
+
+    <p>Brukstilfeller for SBOM:</p>
+    <ul>
+      <li><strong>CVE-respons:</strong> når Log4Shell publiseres, vet du på 5 minutter om noen av dine produkter bruker log4j.</li>
+      <li><strong>Lisenscompliance:</strong> identifiser komponenter med GPL-lisenser i et proprietært produkt.</li>
+      <li><strong>Leverandørattestasjon:</strong> lever SBOM til kunder som del av sikkerhetsdokumentasjon.</li>
+    </ul>
+
+    <pre><code><span class="comment"># Generer SBOM med syft</span>
+syft packages . -o spdx-json > sbom.spdx.json
+
+<span class="comment"># Sjekk for CVEer med grype</span>
+grype sbom:sbom.spdx.json
+
+<span class="comment"># CycloneDX alternativ</span>
+syft packages . -o cyclonedx-json > sbom.cdx.json</code></pre>
+  </div>
+</section>
+
+<section id="sigstore">
+  <div class="container">
+    <div class="section-badge">04 · Sigstore</div>
+    <h2>Sigstore og <em>kodesignering</em></h2>
+    <p class="section-intro">Kodesignering gir mottakeren en kryptografisk garanti for at artefaktet kom fra den angitte kilden og ikke er endret.</p>
+    <p class="lead">Sigstore er et open-source-prosjekt som gjør kodesignering praktisk uten å kreve at utviklere administrerer PGP-nøkler manuelt. Via Cosign, Fulcio og Rekor kan utviklere signere container images og andre artefakter med identiteten sin (GitHub Actions OIDC token, e-postadresse) — og signaturen logges i en public transparency log.</p>
+
+    <pre><code><span class="comment"># Signer container image med Cosign (keyless)</span>
+cosign sign --oidc-issuer https://token.actions.githubusercontent.com \
+            ghcr.io/acme/myapp:v1.2.3
+
+<span class="comment"># Verifiser signatur</span>
+cosign verify \
+  --certificate-identity-regexp "https://github.com/acme/myapp" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghcr.io/acme/myapp:v1.2.3</code></pre>
+
+    <p>Kubernetes-policyer (via Kyverno eller OPA Gatekeeper) kan konfigureres til å avvise deployment av images som ikke har en gyldig Cosign-signatur — «admit only signed images».</p>
+  </div>
+</section>
+
+<section id="forsvar-sc">
+  <div class="container">
+    <div class="section-badge">05 · Forsvar</div>
+    <h2>Forsvar i <em>dybde</em></h2>
+    <p class="section-intro">Supply chain-angrep kan ikke elimineres, men de kan gjøres vesentlig vanskeligere og raskere å oppdage.</p>
+    <p class="lead">Ingen enkelt kontroll eliminerer supply chain-risiko. Defense in depth gjelder her som ellers: lag på lag med kontroller som gjør angrepet dyrere og mer sannsynlig å oppdages.</p>
+    <ul>
+      <li><strong>Pin avhengigheter:</strong> bruk lock-filer med integritetshash (<code>package-lock.json</code> SHA512, <code>pip freeze</code> + hash).</li>
+      <li><strong>Verifiser signaturer:</strong> bruk npm provenance, sigstore/cosign for container images, Homebrew SHA256-verifisering.</li>
+      <li><strong>Privat registry mirror:</strong> speil pakkene du bruker i et privat register — ikke hent direkte fra internett i CI/CD.</li>
+      <li><strong>SCA i pipeline:</strong> scan avhengigheter for CVEer ved hvert bygg.</li>
+      <li><strong>SBOM:</strong> generer og lagre SBOM per release.</li>
+      <li><strong>Revisjonslogg for avhengighetsendringer:</strong> varsle ved nye eller endrede avhengigheter i PR-er.</li>
+      <li><strong>SLSA-rammeverket:</strong> Supply chain Levels for Software Artifacts — et modenhetsnivå-rammeverk for byggesystem-integritet.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>Prioriter</h4>
+      <p>Start med lock-filer + SCA. Legg til privat registry og signaturnverifisering for kritisk infrastruktur. SBOM og SLSA er neste steg for høymodne organisasjoner.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

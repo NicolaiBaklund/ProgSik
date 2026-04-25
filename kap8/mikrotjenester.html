@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mikrotjenester — Kapittel 8</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 8</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 8: Mikrotjenester og supply chain">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 8 · Mikrotjenester</div>
+    <h1>Mikro<em>tjenester</em></h1>
+    <p class="lede">Tillit er ikke lenger et nettverksspørsmål — den er et identitetsspørsmål som hvert tjeneste-kall må besvare.</p>
+    <nav class="toc">
+      <a href="#angrepsoverflate-ms"><span class="toc-num">01</span>Angrepsoverflate</a>
+      <a href="#mtls"><span class="toc-num">02</span>mTLS og service mesh</a>
+      <a href="#secrets"><span class="toc-num">03</span>Secrets management</a>
+      <a href="#container"><span class="toc-num">04</span>Container security</a>
+      <a href="#zero-trust-ms"><span class="toc-num">05</span>Zero trust i microservices</a>
+    </nav>
+  </div>
+</header>
+
+<section id="angrepsoverflate-ms">
+  <div class="container">
+    <div class="section-badge">01 · Angrepsoverflate</div>
+    <h2>Angreps<em>overflate</em></h2>
+    <p class="section-intro">Hvert nettverkskall er et potensielt angrepspunkt — og i et microservice-system er det mange kall.</p>
+    <p class="lead">En monolitt har én prosess-grense, én autentiseringsmekanisme og én angrepsoverflate mot omverdenen. Et system med 50 mikrotjenester har 50 potensielle inngangspunkter, hundrevis av interne kommunikasjonskanaler og en rekke avhengige infrastruktur-tjenester (serviceregistre, message busser, logging-pipelines). Hver av disse er et potensielt angrepspunkt — og kompromittering av én tjeneste kan gi lateral movement til andre.</p>
+    <ul>
+      <li><strong>Eksponerte API-er:</strong> mikroservicers API-er bør ikke eksponeres direkte mot internett uten en API Gateway.</li>
+      <li><strong>Interne kall:</strong> tjeneste-til-tjeneste-kommunikasjon antas sjeldent å trenge autentisering — det er feil.</li>
+      <li><strong>Infrastructure-tjenester:</strong> Kubernetes API-server, etcd, container registry — alle er mål.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="mtls">
+  <div class="container">
+    <div class="section-badge">02 · mTLS</div>
+    <h2>mTLS og <em>service mesh</em></h2>
+    <p class="section-intro">mTLS gir tjeneste-til-tjeneste-autentisering — begge parter beviser sin identitet kryptografisk.</p>
+    <p class="lead">I et microservice-oppsett med mTLS utstedes hvert tjeneste et sertifikat fra en intern Certificate Authority (CA). Når tjeneste A kaller tjeneste B, presenterer begge sine sertifikater — og begge verifiserer den andres identitet. En angriper som har kompromittert én tjeneste, kan ikke automatisk kalle andre tjenester uten et gyldig sertifikat for den tjenestens identitet.</p>
+
+    <pre><code><span class="comment"># Kubernetes mTLS med Istio — annotasjon på namespace</span>
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: production
+spec:
+  mtls:
+    mode: STRICT  <span class="comment"># Avvis all ikke-mTLS trafikk</span></code></pre>
+
+    <p>En service mesh (Istio, Linkerd) håndterer mTLS transparent — applikasjonskoden trenger ikke å vite om det. Meshen injiserer en sidecar-proxy (Envoy) i hver pod som terminerer og initierer mTLS-forbindelser.</p>
+
+    <div class="callout callout-blue">
+      <h4>Sertifikatrotasjon</h4>
+      <p>Sertifikater i en service mesh har typisk 24-timers levetid og roteres automatisk. Rotasjonen skjer uten nedetid og uten kodeendring — og er en sikkerhetsforbedring sammenlignet med manuelt administrerte sertifikater.</p>
+    </div>
+  </div>
+</section>
+
+<section id="secrets">
+  <div class="container">
+    <div class="section-badge">03 · Secrets management</div>
+    <h2>Secrets <em>management</em></h2>
+    <p class="section-intro">Hemmeligheter lagret i kode, konfigurasjonsfiler eller miljøvariabler er ikke hemmelige — de er bare litt skjulte.</p>
+    <p class="lead">«The twelve-factor app»-metodikken anbefaler miljøvariabler for konfigurasjon. Men miljøvariabler har problemer: de lekker i child-prosesser, vises i feilmeldinger, er synlige i Kubernetes pod-beskrivelser og committes ved uhell til Git. En secrets manager er den korrekte løsningen for produksjon.</p>
+
+    <table>
+      <thead><tr><th>Løsning</th><th>Styrke</th><th>Ulempe</th></tr></thead>
+      <tbody>
+        <tr><td>HashiCorp Vault</td><td>Dynamiske secrets, rotasjon, audit log</td><td>Kompleks drift</td></tr>
+        <tr><td>AWS Secrets Manager</td><td>Managed, rotasjon for RDS, IAM-integrert</td><td>Cloud-låst</td></tr>
+        <tr><td>Kubernetes Secrets</td><td>Native, enkelt</td><td>Base64-kodet (ikke kryptert), krever RBAC</td></tr>
+        <tr><td>External Secrets Operator</td><td>Synkroniserer fra Vault/AWS til K8s Secrets</td><td>Ekstra komponent</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Dynamiske hemmeligheter</strong> er den kraftigste funksjonen i Vault: databasenpassord genereres on-demand med kort levetid (1 time) og revokeres automatisk etter bruk. En kompromittert tjeneste får bare tilgang til hemmeligheten for sin sesjon.</p>
+  </div>
+</section>
+
+<section id="container">
+  <div class="container">
+    <div class="section-badge">04 · Container security</div>
+    <h2>Container <em>security</em></h2>
+    <p class="section-intro">Containere gir ikke isolasjon av seg selv — de gir prosessisolasjon, men deler Linux-kjernen.</p>
+    <p class="lead">En container som kjører som root har langt mer kapabilitet enn nødvendig og er et hopp til host-system ved kernel-exploits. Prinsipper for container-herdning: minste nødvendige basisimage, kjøres som non-root bruker, read-only filsystem, og begrensede kernel capabilities.</p>
+
+    <pre><code><span class="comment"># Dockerfile: minimal og non-root</span>
+FROM python:3.12-slim AS base
+
+RUN useradd --no-create-home appuser
+COPY --chown=appuser:appuser app/ /app/
+
+USER appuser
+EXPOSE 8080
+CMD ["python", "/app/main.py"]</code></pre>
+
+    <pre><code><span class="comment"># Kubernetes securityContext</span>
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]</code></pre>
+
+    <p>Container image scanning (Trivy, Grype) bør kjøres i CI/CD for å oppdage CVEer i base-imagen og installerte pakker — og blocke deploy av bilder med kritiske sårbarheter.</p>
+  </div>
+</section>
+
+<section id="zero-trust-ms">
+  <div class="container">
+    <div class="section-badge">05 · Zero trust i microservices</div>
+    <h2>Zero trust i <em>microservices</em></h2>
+    <p class="section-intro">I et microservice-oppsett er «aldri stol, alltid verifiser» en praktisk arkitekturpolicy, ikke bare et prinsipp.</p>
+    <p class="lead">Zero trust i microservices betyr at ingen tjeneste stoler på en annen basert på nettverksposisjon alene. Hvert kall autentiseres (mTLS), autoriseres (tjenesteidentitet kontrolleres mot tillatte kaller), og logges (alle kall er observerbare). Mikrosegmentering via nettverkspolicyer begrenser hvilke tjenester som kan kommunisere med hverandre i det hele tatt.</p>
+
+    <ul>
+      <li><strong>Service identitet:</strong> SPIFFE (Secure Production Identity Framework) gir en standard for tjenesteidentitet via URI-er som <code>spiffe://cluster.local/ns/prod/sa/payment-svc</code>.</li>
+      <li><strong>Autorisasjonspolicyer:</strong> «Kun <code>order-svc</code> kan kalle <code>payment-svc</code>» defineres som en policy, ikke hardkodede nettverksregler.</li>
+      <li><strong>Observabilitet:</strong> alle tjeneste-kall logges med kilde-identitet, mål, tidsstempel og utfall — for deteksjon og etterforskning.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>Praktisk start</h4>
+      <p>Start med mTLS (en service mesh gjør det enkelt), legg til nettverkspolicyer (Kubernetes NetworkPolicy), og mål og logg tjeneste-til-tjeneste-kall. Det er nok til å redusere lateral movement-risikoen betraktelig uten å måtte implementere et komplett zero trust-rammeverk fra dag én.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

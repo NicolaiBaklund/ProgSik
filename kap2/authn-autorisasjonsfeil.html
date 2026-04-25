@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broken access control og autentiseringsfeil — Kapittel 2</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 2</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 2: OWASP Top 10">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 2 · A01 · A07</div>
+    <h1>Broken access control og <em>autentiseringsfeil</em></h1>
+    <p class="lede">Den vanligste OWASP-kategorien er ikke en avansert utnyttelse — det er manglende sjekk på serversiden av hvem som spør og hva de har lov til.</p>
+    <nav class="toc">
+      <a href="#broken-access"><span class="toc-num">01</span>Broken access control</a>
+      <a href="#idor"><span class="toc-num">02</span>IDOR</a>
+      <a href="#broken-authn"><span class="toc-num">03</span>Broken authentication</a>
+      <a href="#logging-failures"><span class="toc-num">04</span>Logging failures</a>
+      <a href="#forsvar-access"><span class="toc-num">05</span>Forsvar</a>
+    </nav>
+  </div>
+</header>
+
+<section id="broken-access">
+  <div class="container">
+    <div class="section-badge">01 · A01</div>
+    <h2>Broken access <em>control</em></h2>
+    <p class="section-intro">Broken access control er OWASP A01 — den hyppigst forekommende kritiske sårbarheten i webapplikasjoner.</p>
+    <p class="lead">En nettapplikasjon skjuler admin-knappen i brukergrensesnittet for vanlige brukere. Men hvis en vanlig bruker vet URL-en til admin-panelet — <code>/admin/users</code> — og serveren ikke verifiserer rollen, er tilgangen åpen. Skjuling i UI er ikke tilgangskontroll. Tilgangskontroll skjer på serversiden.</p>
+
+    <p>Typiske brudd på tilgangskontroll:</p>
+    <ul>
+      <li>Manglende serversidekontroller på sensitive endepunkter.</li>
+      <li>IDOR — direkte tilgang til ressurser via brukerkontrollert ID uten eierskapssjekk.</li>
+      <li>Privilege escalation — en vanlig bruker oppnår admin-rettigheter ved å sende en manipulert forespørsel.</li>
+      <li>Path traversal — <code>../../etc/passwd</code> i filnavn-parametere.</li>
+      <li>Manglende CORS-konfigurasjon — API-er aksepterer forespørsler fra hvilken som helst origin.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="idor">
+  <div class="container">
+    <div class="section-badge">02 · IDOR</div>
+    <h2>Insecure Direct Object <em>Reference</em></h2>
+    <p class="section-intro">IDOR er broken access control i sin enkleste form — og den er i praksis lett å utnytte, men like lett å fikse.</p>
+    <p class="lead">Du er innlogget og ser fakturaene dine på <code>/api/invoices/1042</code>. Du endrer <code>1042</code> til <code>1043</code>. Apper uten serversidesjekk returnerer fakturaen til en annen bruker — navn, adresse, beløp, alt. Med systematisk enumerering kan en angriper laste ned hele kunderegisteret.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs>
+          <marker id="iarr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#b04428"/>
+          </marker>
+          <marker id="garr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#3d6b3a"/>
+          </marker>
+        </defs>
+        <!-- Bruker -->
+        <rect x="30" y="75" width="110" height="50" rx="3" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="85" y="96" text-anchor="middle" font-weight="600" fill="#b04428">Angriper</text>
+        <text x="85" y="112" text-anchor="middle" font-size="11" fill="#6b6257">user_id=42</text>
+        <!-- Forespørsel -->
+        <line x1="142" y1="100" x2="248" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#iarr)"/>
+        <text x="195" y="92" text-anchor="middle" font-size="10" fill="#b04428">GET /invoices/99</text>
+        <!-- Server -->
+        <rect x="250" y="75" width="220" height="50" rx="3" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="96" text-anchor="middle" font-weight="600" fill="#2d4a7a">Server</text>
+        <!-- Sårbart svar -->
+        <text x="360" y="152" text-anchor="middle" font-size="11" fill="#b04428" font-style="italic">Sårbart: returnerer faktura 99 uten sjekk</text>
+        <line x1="360" y1="127" x2="360" y2="143" stroke="#b04428" stroke-width="1" stroke-dasharray="3,3"/>
+        <!-- Sikker sjekk -->
+        <text x="360" y="170" text-anchor="middle" font-size="11" fill="#3d6b3a" font-style="italic">Sikker: invoice.owner == current_user → 200 ellers 403</text>
+        <!-- DB -->
+        <rect x="540" y="75" width="140" height="50" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="610" y="96" text-anchor="middle" font-weight="600" fill="#3d6b3a">Database</text>
+        <text x="610" y="112" text-anchor="middle" font-size="11" fill="#6b6257">faktura 99: user 77</text>
+        <line x1="472" y1="100" x2="538" y2="100" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#garr)"/>
+      </svg>
+      <figcaption>IDOR: angriperen bytter ID i URL-en. Uten serversidesjekk returneres andres data.</figcaption>
+    </figure>
+
+    <pre><code><span class="comment"># Sårbar</span>
+invoice = Invoice.query.get(invoice_id)
+<span class="keyword">return</span> invoice.to_dict()
+
+<span class="comment"># Sikker</span>
+invoice = Invoice.query.filter_by(id=invoice_id,
+                                  owner_id=current_user.id).first_or_404()
+<span class="keyword">return</span> invoice.to_dict()</code></pre>
+  </div>
+</section>
+
+<section id="broken-authn">
+  <div class="container">
+    <div class="section-badge">03 · A07</div>
+    <h2>Broken <em>authentication</em></h2>
+    <p class="section-intro">Autentiseringsfeil skyldes sjelden svak kryptografi — de skyldes oftest svake prosesser og manglende kontroller.</p>
+    <p class="lead">En tjeneste tillater ubegrenset antall innloggingsforsøk. En angriper prøver de 10 000 vanligste passordene mot alle brukernavn de kjenner fra et tidligere databrudd — credential stuffing. Fordi mange brukere gjenbruker passord, treffer de raskt. Ingen teknisk feil i kryptografien — bare en manglende rate-limit.</p>
+
+    <p>Vanlige autentiseringsfeil:</p>
+    <ul>
+      <li><strong>Manglende rate-limiting:</strong> ingen grense på innloggingsforsøk per IP eller konto.</li>
+      <li><strong>Svak sesjonshåndtering:</strong> forutsigbare session-tokens, for lange sesjonens levetid, ingen invalidering ved utlogging.</li>
+      <li><strong>Session fixation:</strong> session-ID regenereres ikke etter autentisering.</li>
+      <li><strong>Passordlagring:</strong> MD5 eller usaltede SHA-hashes i stedet for bcrypt/Argon2.</li>
+      <li><strong>Manglende MFA:</strong> spesielt kritisk for privilegerte kontoer.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Credential stuffing vs. brute force</h4>
+      <p><strong>Credential stuffing</strong> bruker kjente brukernavn/passord-kombinasjoner fra tidligere lekkasjer. <strong>Brute force</strong> prøver alle kombinasjoner. Credential stuffing er langt mer effektivt fordi passgjenbruk er utbredt — og det er mye vanskeligere å detektere siden angripet prøver et passord per konto, ikke mange passord mot én konto.</p>
+    </div>
+  </div>
+</section>
+
+<section id="logging-failures">
+  <div class="container">
+    <div class="section-badge">04 · A09</div>
+    <h2>Security logging <em>failures</em></h2>
+    <p class="section-intro">Det du ikke logger, kan du ikke oppdage — og det du logger feil, kan bli en sårbarhet i seg selv.</p>
+    <p class="lead">En angriper tar seg tid. De logger inn og ut hundrevis av ganger med forskjellige kontoer over to uker. Ingen alarm går. Ingen rapport genereres. Angrepet oppdages først når kunden ringer og spør hvorfor pengene er borte. Mangelfull logging betyr at kompromittering ikke oppdages — og at etterforskning etterpå er nesten umulig.</p>
+
+    <p>Hva som alltid skal logges:</p>
+    <ul>
+      <li>Innloggingsforsøk — vellykkede og mislykkede, med tidsstempel og IP.</li>
+      <li>Tilgangsforsøk til sensitive ressurser, inkludert avviste.</li>
+      <li>Endringer i tilgangskontroll og brukerrettigheter.</li>
+      <li>Alle handlinger utført av privilegerte kontoer.</li>
+    </ul>
+
+    <p>Hva som <em>ikke</em> skal logges:</p>
+    <ul>
+      <li>Passord — heller ikke feilskrevne forsøk.</li>
+      <li>Session-tokens og API-nøkler.</li>
+      <li>Sensitiv personlig informasjon uten lovlig grunnlag (GDPR).</li>
+    </ul>
+  </div>
+</section>
+
+<section id="forsvar-access">
+  <div class="container">
+    <div class="section-badge">05 · Forsvar</div>
+    <h2>Forsvar mot tilgangs- og <em>autentiseringsfeil</em></h2>
+    <p class="section-intro">Serversidekontroller er ikke valgfrie tillegg — de er den eneste tilgangssikringen som teller.</p>
+    <p class="lead">Det ene enkeltprinsippet som eliminerer de fleste broken access control-feil: verifiser tilgang på serversiden for hvert eneste kall, uavhengig av hva klienten sier. Ingen unntak for «intern» trafikk, ingen unntak for «betrodd» klient, ingen unntak for «det er bare et GET».</p>
+
+    <h3>Access control</h3>
+    <ul>
+      <li>Implementer tilgangskontroll sentralt — ikke spredt i hvert endepunkt.</li>
+      <li>Deny by default — kun eksplisitt innvilgede operasjoner tillates.</li>
+      <li>Logg alle avviste tilgangsforsøk og alert på mønstre.</li>
+      <li>Bruk GUID/UUID for ressurs-ID-er i stedet for sekvensielle heltall — ikke sikkerhet by obscurity, men reduserer enumerering.</li>
+    </ul>
+
+    <h3>Autentisering</h3>
+    <ul>
+      <li>Rate-limit innloggingsforsøk — lockout etter N forsøk, med progressiv forsinkelse.</li>
+      <li>Generer ny session-ID etter autentisering (hindrer session fixation).</li>
+      <li>Invalider session ved utlogging — ikke bare slett cookie på klientsiden.</li>
+      <li>Krev MFA for privilegerte kontoer og sensible handlinger.</li>
+      <li>Hash passord med Argon2id eller bcrypt med adekvat kostfaktor.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>En tommelfingerregel</h4>
+      <p>Enhver kode som henter data basert på en ID fra brukeren, skal inneholde en eiersjekk. Én linje. Alltid.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>
