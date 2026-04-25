@@ -23,15 +23,16 @@
 <main data-chapter="Kapittel 2: OWASP Top 10">
 <header class="hero">
   <div class="container">
-    <div class="eyebrow">Kapittel 2 · A02 · A05 · A06 · A10</div>
-    <h1>Konfigurasjon, krypto og <em>SSRF</em></h1>
-    <p class="lede">Default credentials, MD5-passord, Log4Shell og servere som henter URL-er de ikke burde — fire kategorier med en felles fellesnevner: svikt i grunnleggende hygiene.</p>
+    <div class="eyebrow">Kapittel 2 · A02 · A05 · A06 · A08 · A10</div>
+    <h1>Konfigurasjon, krypto, komponenter og <em>SSRF</em></h1>
+    <p class="lede">Default credentials, MD5-passord, Log4Shell, usignerte pakker og servere som henter URL-er de ikke burde — fem kategorier med en felles fellesnevner: svikt i grunnleggende hygiene.</p>
     <nav class="toc">
       <a href="#misconfiguration"><span class="toc-num">01</span>Security misconfiguration</a>
       <a href="#kryptofeil"><span class="toc-num">02</span>Kryptografiske feil</a>
       <a href="#sårbare-komponenter"><span class="toc-num">03</span>Sårbare komponenter</a>
-      <a href="#ssrf"><span class="toc-num">04</span>SSRF</a>
-      <a href="#forsvar-konfig"><span class="toc-num">05</span>Forsvar</a>
+      <a href="#integritetssvikt"><span class="toc-num">04</span>Integritetssvikt</a>
+      <a href="#ssrf"><span class="toc-num">05</span>SSRF</a>
+      <a href="#forsvar-konfig"><span class="toc-num">06</span>Forsvar</a>
     </nav>
   </div>
 </header>
@@ -104,9 +105,45 @@ bcrypt.checkpw(input_password.encode(), stored)</code></pre>
   </div>
 </section>
 
+<section id="integritetssvikt">
+  <div class="container">
+    <div class="section-badge">04 · A08</div>
+    <h2>Software og data <em>integritetssvikt</em></h2>
+    <p class="section-intro">A08 handler om kode og infrastruktur som tas i bruk uten å verifisere at de er hva de utgir seg for å være.</p>
+    <p class="lead">En CI/CD-pipeline henter en avhengighet fra npm. Pakken er legitim — men en angriper har kompromittert vedlikeholderens konto og lastet opp en ny versjon med bakdør. Applikasjonen deployes automatisk til produksjon ved neste bygg. Ingen har sett koden. Ingen har verifisert signaturen. Det er A08 i praksis — og det er slik SolarWinds-angrepet i 2020 fungerte, bare mot Orion-byggeprosessen.</p>
+
+    <p>To hoveddimensjoner:</p>
+    <ul>
+      <li><strong>Usikker deserialisering:</strong> programmet deserialiserer data fra en ukjent kilde uten validering. Python <code>pickle.loads()</code> kan kjøre vilkårlig kode ved deserialisering — alt angriperen trenger er kontroll over inputbytene.</li>
+      <li><strong>CI/CD-integritetssvikt:</strong> pipeline henter kode, avhengigheter eller build-artefakter fra upålitelige kilder uten integritetskontroll. Auto-oppdatering uten signaturverifisering er samme problemet.</li>
+    </ul>
+
+    <pre><code><span class="comment"># Kritisk: pickle.loads kjører vilkårlig kode ved deserialisering</span>
+<span class="keyword">import</span> pickle
+data = pickle.loads(user_controlled_bytes)  <span class="comment"># RCE-risiko
+
+# Trygt: bruk json for ukjente datakilder</span>
+<span class="keyword">import</span> json
+data = json.loads(user_controlled_string)   <span class="comment"># bare primitiver, ingen kodeeksekv.</span></code></pre>
+
+    <div class="callout callout-yellow">
+      <h4>Pipeline som angrepsflate</h4>
+      <p>En CI/CD-pipeline som kjøres med høy tilgang, henter avhengigheter uten lock-fil og deployer uten artefaktsignering, er i praksis en åpen bakdør. Angriperen trenger ikke bryte seg inn i produksjon — de bryter seg inn i byggeprosessen.</p>
+    </div>
+
+    <p>Mottiltak:</p>
+    <ul>
+      <li>Bruk lock-filer (<code>package-lock.json</code>, <code>poetry.lock</code>) og valider checksums mot forventet hash.</li>
+      <li>Verifiser signaturer på avhengigheter og build-artefakter der det støttes (npm provenance, sigstore/cosign).</li>
+      <li>Kjør CI/CD i isolerte miljøer med minimal tilgang og full audit-logging.</li>
+      <li>Unngå deserialisering av ukjente datakilder — foretrekk JSON eller Protocol Buffers over binærformater.</li>
+    </ul>
+  </div>
+</section>
+
 <section id="ssrf">
   <div class="container">
-    <div class="section-badge">04 · A10</div>
+    <div class="section-badge">05 · A10</div>
     <h2>Server-Side Request <em>Forgery</em></h2>
     <p class="section-intro">SSRF er et angrep der serveren gjøres til en proxy angriperen kontrollerer — og serveren er innenfor brannmuren.</p>
     <p class="lead">En funksjon lar brukere importere bilder fra URL. Brukeren sender <code>http://169.254.169.254/latest/meta-data/iam/security-credentials/</code>. Serveren henter URL-en — den er tross alt innenfor AWS sin infrastruktur — og returnerer midlertidige IAM-credentials til angriperen. Med disse credentials kan angriperen aksessere S3-bøtter, sette opp EC2-instanser og eskalere til full kontokompromittering.</p>
@@ -156,10 +193,10 @@ bcrypt.checkpw(input_password.encode(), stored)</code></pre>
 
 <section id="forsvar-konfig">
   <div class="container">
-    <div class="section-badge">05 · Forsvar</div>
-    <h2>Forsvar mot konfig-, krypto- og <em>SSRF-feil</em></h2>
-    <p class="section-intro">Alle fire kategoriene har veldokumenterte fixes — de krever ikke avansert kunnskap, de krever konsistens.</p>
-    <p class="lead">Den felles tråden i misconfiguration, cryptographic failures, vulnerable components og SSRF er at de alle oppstår i fravær av aktiv innsats — ikke i nærvær av avanserte angrep. Et system som aldri er herdet, en hashfunksjon som aldri er oppdatert, en avhengighet som aldri er patched, en URL-validering som aldri ble skrevet. Forsvar er rutine, ikke heroisme.</p>
+    <div class="section-badge">06 · Forsvar</div>
+    <h2>Forsvar mot konfig-, krypto-, integritets- og <em>SSRF-feil</em></h2>
+    <p class="section-intro">Alle fem kategoriene har veldokumenterte fixes — de krever ikke avansert kunnskap, de krever konsistens.</p>
+    <p class="lead">Den felles tråden i misconfiguration, cryptographic failures, vulnerable components, software integrity failures og SSRF er at de alle oppstår i fravær av aktiv innsats — ikke i nærvær av avanserte angrep. Et system som aldri er herdet, en hashfunksjon som aldri er oppdatert, en avhengighet som aldri er patched, en artefakt som aldri er signert, en URL-validering som aldri ble skrevet. Forsvar er rutine, ikke heroisme.</p>
 
     <h3>Konfigurasjon</h3>
     <ul>
@@ -182,6 +219,14 @@ bcrypt.checkpw(input_password.encode(), stored)</code></pre>
       <li>Kjør SCA-skanning i CI — blokker builds med kritiske sårbarheter.</li>
       <li>Hold en oppdatert SBOM.</li>
       <li>Abonner på security advisories for kritiske avhengigheter.</li>
+    </ul>
+
+    <h3>Integritetssvikt (A08)</h3>
+    <ul>
+      <li>Lock-filer og checksum-validering for alle avhengigheter.</li>
+      <li>Signaturer på build-artefakter — verifiser før deploy.</li>
+      <li>Aldri <code>pickle.loads()</code> på ukjente data — bruk JSON eller validerte skjema.</li>
+      <li>CI/CD med minste tilgang og full audit-logging av alle build-steg.</li>
     </ul>
 
     <h3>SSRF</h3>

@@ -23,15 +23,16 @@
 <main data-chapter="Kapittel 2: OWASP Top 10">
 <header class="hero">
   <div class="container">
-    <div class="eyebrow">Kapittel 2 · A01 · A07</div>
+    <div class="eyebrow">Kapittel 2 · A01 · A04 · A07 · A09</div>
     <h1>Broken access control og <em>autentiseringsfeil</em></h1>
     <p class="lede">Den vanligste OWASP-kategorien er ikke en avansert utnyttelse — det er manglende sjekk på serversiden av hvem som spør og hva de har lov til.</p>
     <nav class="toc">
       <a href="#broken-access"><span class="toc-num">01</span>Broken access control</a>
       <a href="#idor"><span class="toc-num">02</span>IDOR</a>
       <a href="#broken-authn"><span class="toc-num">03</span>Broken authentication</a>
-      <a href="#logging-failures"><span class="toc-num">04</span>Logging failures</a>
-      <a href="#forsvar-access"><span class="toc-num">05</span>Forsvar</a>
+      <a href="#insecure-design"><span class="toc-num">04</span>Insecure design</a>
+      <a href="#logging-failures"><span class="toc-num">05</span>Logging failures</a>
+      <a href="#forsvar-access"><span class="toc-num">06</span>Forsvar</a>
     </nav>
   </div>
 </header>
@@ -129,9 +130,38 @@ invoice = Invoice.query.filter_by(id=invoice_id,
   </div>
 </section>
 
+<section id="insecure-design">
+  <div class="container">
+    <div class="section-badge">04 · A04</div>
+    <h2>Insecure <em>design</em></h2>
+    <p class="section-intro">En implementasjonsfeil kan patches. En designfeil krever arkitektur ombygget — og det er det som gjør A04 til en kategori for seg.</p>
+    <p class="lead">Tenk deg en nettbank uten noen form for transaksjonsbegrensning — det er aldri designet inn. Man kan legge til rate-limiting på ett endepunkt etterpå, men hvis pengeflyten kan initieres fra ti forskjellige steder i systemet er det ikke en patch, det er en ombygging. A04 handler om sikkerhetsfeil som måtte vært løst på tegnebordet.</p>
+
+    <p>Klassiske insecure design-mønstre:</p>
+    <ul>
+      <li><strong>Manglende forretningslogikk-begrensninger:</strong> ingen øvre grense på forsøk, beløp, transaksjoner eller ressurser — by design, ikke ved en implementasjonsfeil.</li>
+      <li><strong>For brede trust zones:</strong> alle interne tjenester stoler blindt på hverandre. Én kompromittert intern komponent gir full tilgang til resten.</li>
+      <li><strong>Manglende abuse cases:</strong> systemet er designet for legitim bruk uten å ha tenkt på hva som skjer hvis en bruker gjør det motsatte av det tiltenkte.</li>
+      <li><strong>Sensitiv data i URL-er:</strong> <code>/reset?token=abc123</code> — token havner i server-logger, browser-historikk og Referer-header.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Design vs. implementasjon</h4>
+      <p>SQL injection er en implementasjonsfeil — du fikser den ved å bytte til parameteriserte spørringer. Et system uten rate-limiting er en designfeil — du kan ikke fikse det uten å endre arkitekturen. A04 minner oss om at sikkerhet ikke er noe du legger på etterpå.</p>
+    </div>
+
+    <p>Hva som hjelper i designfasen:</p>
+    <ul>
+      <li><strong>Threat modeling tidlig:</strong> kjør STRIDE på systemet mens det fortsatt er piler og bokser på et whiteboard, ikke kode i produksjon.</li>
+      <li><strong>Security requirements:</strong> definer hva systemet <em>ikke</em> skal tillate — ikke bare hva det skal gjøre.</li>
+      <li><strong>Referansearkitekturer:</strong> bruk OWASP ASVS eller etablerte mønstre for autentisering og sesjonshåndtering i stedet for å finne opp hjulet.</li>
+    </ul>
+  </div>
+</section>
+
 <section id="logging-failures">
   <div class="container">
-    <div class="section-badge">04 · A09</div>
+    <div class="section-badge">05 · A09</div>
     <h2>Security logging <em>failures</em></h2>
     <p class="section-intro">Det du ikke logger, kan du ikke oppdage — og det du logger feil, kan bli en sårbarhet i seg selv.</p>
     <p class="lead">En angriper tar seg tid. De logger inn og ut hundrevis av ganger med forskjellige kontoer over to uker. Ingen alarm går. Ingen rapport genereres. Angrepet oppdages først når kunden ringer og spør hvorfor pengene er borte. Mangelfull logging betyr at kompromittering ikke oppdages — og at etterforskning etterpå er nesten umulig.</p>
@@ -155,7 +185,7 @@ invoice = Invoice.query.filter_by(id=invoice_id,
 
 <section id="forsvar-access">
   <div class="container">
-    <div class="section-badge">05 · Forsvar</div>
+    <div class="section-badge">06 · Forsvar</div>
     <h2>Forsvar mot tilgangs- og <em>autentiseringsfeil</em></h2>
     <p class="section-intro">Serversidekontroller er ikke valgfrie tillegg — de er den eneste tilgangssikringen som teller.</p>
     <p class="lead">Det ene enkeltprinsippet som eliminerer de fleste broken access control-feil: verifiser tilgang på serversiden for hvert eneste kall, uavhengig av hva klienten sier. Ingen unntak for «intern» trafikk, ingen unntak for «betrodd» klient, ingen unntak for «det er bare et GET».</p>

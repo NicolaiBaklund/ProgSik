@@ -76,7 +76,7 @@
       <figcaption>OWASP Top 10 (2021) rangert etter utbredelse — bredden på båndet indikerer relativ forekomst på tvers av applikasjoner.</figcaption>
     </figure>
 
-    <p>Fire delsider dekker hele listen tematisk: <em>Injection</em> (A03) er en kategori for seg. XSS og CSRF grupperes fordi de begge utnytter tillitsrelasjonen mellom nettleseren og serveren. Broken access control og autentiseringsfeil deles fordi de begge handler om identitet og rettigheter. Konfigurasjonsfeil, kryptografiske feil, SSRF og sårbare komponenter samles i den siste delsiden.</p>
+    <p>Fire delsider dekker hele listen tematisk: <em>Injection</em> (A03) er en kategori for seg. XSS og CSRF grupperes fordi de begge utnytter tillitsrelasjonen mellom nettleseren og serveren. Broken access control, insecure design og autentiseringsfeil deles fordi de handler om identitet, rettigheter og systemdesign. Konfigurasjonsfeil, kryptografiske feil, integritetssvikt, sårbare komponenter og SSRF samles i den siste delsiden.</p>
 
     <div class="callout callout-green">
       <h4>Kapittelets kjerneidé</h4>
@@ -107,18 +107,18 @@
         <div class="sp-arrow">&rarr;</div>
       </a>
       <a href="authn-autorisasjonsfeil.html" class="subpage-card">
-        <div class="sp-icon">A01·A07</div>
+        <div class="sp-icon">A01·A04·A07</div>
         <div class="sp-info">
-          <div class="sp-title">Broken access control og autentiseringsfeil</div>
-          <div class="sp-desc">IDOR, manglende serversidekontroller og svak autentisering — der identitet og tilgang kollapser.</div>
+          <div class="sp-title">Broken access control, insecure design og autentiseringsfeil</div>
+          <div class="sp-desc">IDOR, manglende serversidekontroller, designfeil uten fix og svak autentisering — der identitet og tilgang kollapser.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
       <a href="konfig-krypto-ssrf.html" class="subpage-card">
-        <div class="sp-icon">A02·A05·A06·A10</div>
+        <div class="sp-icon">A02·A05·A06·A08·A10</div>
         <div class="sp-info">
           <div class="sp-title">Konfigurasjon, krypto, komponenter og SSRF</div>
-          <div class="sp-desc">Default credentials, ECB-modus, Log4Shell og servere som henter URL-er de ikke burde.</div>
+          <div class="sp-desc">Default credentials, ECB-modus, Log4Shell, usignerte build-artefakter og servere som henter URL-er de ikke burde.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
