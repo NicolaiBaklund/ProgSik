@@ -191,7 +191,7 @@ footer p { font-style: italic; color: var(--ink-faded); font-size: 15px; margin-
 
 /* ---------- DELSIDE-LISTE ---------- */
 .subpage-list { display: grid; grid-template-columns: 1fr; gap: 0; }
-.subpage-card { display: grid; grid-template-columns: 50px 1fr auto; align-items: center; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--line-soft); text-decoration: none; color: inherit; transition: background 0.15s, padding 0.15s; }
+.subpage-card { display: grid; grid-template-columns: max-content 1fr auto; align-items: center; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--line-soft); text-decoration: none; color: inherit; transition: background 0.15s, padding 0.15s; }
 .subpage-card:first-child { border-top: 1px solid var(--line-soft); }
 .subpage-card:hover { background: var(--paper-dark); padding-left: 16px; padding-right: 16px; margin-left: -16px; margin-right: -16px; border-radius: 4px; }
 .subpage-card .sp-icon { font-family: var(--mono); font-size: 13px; color: var(--rust); font-weight: 600; }
