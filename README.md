@@ -34,27 +34,3 @@ python -m http.server 8000
 ```
 
 Chat-widgeten krever en kjørende `/api/chat`-funksjon (Vercel dev eller lokal Node).
-
-## Generer bok-embeddings
-
-```bash
-pip install pdfplumber requests
-export OPENROUTER_API_KEY=sk-or-...
-python tools/build_chunks.py "Security Engineering.pdf"
-# Skriver public/chunks.json
-```
-
-## Deploy til Vercel
-
-1. Push til GitHub.
-2. Importer i Vercel. Framework preset: **Other**. Output-dir: `.`
-3. Legg til env-variabel `OPENROUTER_API_KEY`.
-4. Deploy.
-
-## Bidra
-
-Feil, forbedringsforslag eller manglende innhold? Åpne et issue i dette repositoriet.
-
----
-
-NTNU · TDT4237 · Vår 2026
