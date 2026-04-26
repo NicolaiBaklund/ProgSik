@@ -9,7 +9,9 @@ from pathlib import Path
 import pdfplumber
 import requests
 
-API_KEY = "<FJERNET>"
+API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+if not API_KEY:
+    raise SystemExit("Sett miljøvariabelen OPENROUTER_API_KEY")
 MODEL = "nvidia/llama-nemotron-embed-vl-1b-v2:free"
 OUT = Path("public/chunks.json")
 TARGET_LEN = 1000
