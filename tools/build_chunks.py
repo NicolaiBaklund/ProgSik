@@ -9,7 +9,7 @@ from pathlib import Path
 import pdfplumber
 import requests
 
-API_KEY = os.environ["OPENROUTER_API_KEY"]
+API_KEY = "<FJERNET>"
 MODEL = "nvidia/llama-nemotron-embed-vl-1b-v2:free"
 OUT = Path("public/chunks.json")
 TARGET_LEN = 1000
@@ -40,41 +40,51 @@ CHAPTER_LABELS = {
 
 def extract_text_by_chapter(pdf_path):
     """Returner liste av (kapittelnummer, tekst)-tupler.
-    Detekterer kapittelgrenser via heading-mønstre — juster regex om boka
-    bruker et annet format."""
+    Anderson-boka bruker CHAPTER på én linje, nummeret på neste."""
     buffers = {}
     current = None
+    saw_chapter_keyword = False
+
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
             text = page.extract_text() or ""
             for line in text.split("\n"):
-                m = re.match(r"^\s*(Chapter|Kapittel)\s+(\d+)", line, re.IGNORECASE)
-                if m:
-                    current = int(m.group(2))
-                    buffers.setdefault(current, [])
+                stripped = line.strip()
+
+                if stripped.upper() == "CHAPTER":
+                    saw_chapter_keyword = True
                     continue
-                if current is not None:
-                    buffers[current].append(line)
+
+                if saw_chapter_keyword and stripped:
+                    saw_chapter_keyword = False
+                    if re.match(r"^\d+$", stripped):
+                        current = int(stripped)
+                        buffers.setdefault(current, [])
+                        continue
+
+                # Hopp over running headers: "4 Chapter1 ■ ..." eller "Chapter1 ■ ..."
+                if re.search(r"Chapter\d+\s*■", stripped):
+                    continue
+
+                if current is not None and stripped:
+                    buffers[current].append(stripped)
+
     return [(n, "\n".join(lines)) for n, lines in sorted(buffers.items())]
 
 
 def chunk(text, target=TARGET_LEN, min_len=MIN_LEN):
-    paras = re.split(r"\n\s*\n", text)
-    out, cur = [], ""
-    for p in paras:
-        p = p.strip()
-        if not p:
-            continue
-        if len(cur) + len(p) + 2 <= target:
-            cur = (cur + "\n\n" + p) if cur else p
+    words = text.split()
+    out, cur, cur_len = [], [], 0
+    for w in words:
+        wl = len(w) + 1
+        if cur_len + wl > target and cur_len >= min_len:
+            out.append(" ".join(cur))
+            cur, cur_len = [w], wl
         else:
-            if len(cur) >= min_len:
-                out.append(cur)
-                cur = p
-            else:
-                cur = (cur + "\n\n" + p) if cur else p
+            cur.append(w)
+            cur_len += wl
     if cur:
-        out.append(cur)
+        out.append(" ".join(cur))
     return out
 
 
