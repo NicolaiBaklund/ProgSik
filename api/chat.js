@@ -130,8 +130,8 @@ export async function POST(request) {
       : `Du er en studieassistent for TDT4237 — Programvaresikkerhet og datapersonvern ved NTNU. Bygg svaret på utdragene fra pensumboka (Security Engineering, Ross Anderson) og den synlige teksten under.`;
 
     const rules = locale === "en"
-      ? `Answer in English. Be concrete and grounded. If the answer isn't in the context, say so. Keep technical terms (SQL injection, XSS, CSRF, OWASP, JWT, mTLS, SAST, STRIDE, etc.) in English.`
-      : `Svar på norsk (bokmål). Vær konkret og grunnet. Si ifra hvis svaret ikke finnes i konteksten. Behold etablerte fagbegrep på engelsk: SQL injection, XSS, CSRF, OWASP, JWT, mTLS, SAST, DAST, STRIDE, threat modeling, supply chain attack, prompt injection osv.`;
+      ? `Answer in English. Be concise — 2–4 sentences for simple questions, a short bullet list only when listing 3+ distinct items. If the answer isn't in the context, say so in one sentence. Keep technical terms (SQL injection, XSS, CSRF, OWASP, JWT, mTLS, SAST, STRIDE, etc.) in English.`
+      : `Svar på norsk (bokmål). Vær kortfattet — 2–4 setninger for enkle spørsmål, kort punktliste kun ved 3+ elementer. Si ifra i én setning hvis svaret ikke finnes i konteksten. Behold etablerte fagbegrep på engelsk: SQL injection, XSS, CSRF, OWASP, JWT, mTLS, SAST, DAST, STRIDE, threat modeling, supply chain attack, prompt injection osv.`;
 
     const locInfo = page_context?.chapter
       ? (locale === "en"

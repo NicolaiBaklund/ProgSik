@@ -70,10 +70,24 @@
     return { chapter: chapter, section: section, visible_text: visible, url: location.pathname, locale: locale };
   }
 
+  function renderMd(raw) {
+    var t = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    t = t.replace(/```([\s\S]*?)```/g, function(_,c){ return '<pre><code>'+c.trim()+'</code></pre>'; });
+    t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+    t = t.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+    t = t.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+    t = t.replace(/^#{1,3} (.+)$/gm, '<strong>$1</strong>');
+    t = t.replace(/^[-*] (.+)$/gm, '<li>$1</li>');
+    t = t.replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>');
+    t = t.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>');
+    return '<p>' + t + '</p>';
+  }
+
   function appendMsg(role, text) {
     var div = document.createElement('div');
     div.className = 'chat-msg ' + role;
-    div.textContent = text;
+    if (role === 'assistant') div.innerHTML = renderMd(text);
+    else div.textContent = text;
     body.appendChild(div);
     body.scrollTop = body.scrollHeight;
     return div;
@@ -113,7 +127,7 @@
           if (!line) continue;
           try {
             var obj = JSON.parse(line);
-            if (obj.t) { buffer += obj.t; assistant.textContent = buffer; body.scrollTop = body.scrollHeight; }
+            if (obj.t) { buffer += obj.t; assistant.innerHTML = renderMd(buffer); body.scrollTop = body.scrollHeight; }
             else if (obj.e) { assistant.textContent += '\n[Feil: ' + obj.e + ']'; }
           } catch (_) {}
         }
