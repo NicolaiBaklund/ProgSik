@@ -23,9 +23,9 @@
 <main data-chapter="Kapittel 4: Autentisering og autorisasjon">
 <header class="hero">
   <div class="container">
-    <div class="eyebrow">Kapittel 4 · Identitet og tilgang</div>
+    <div class="eyebrow">Kapittel 4 · Identitet, tilgang og kontrollflyt</div>
     <h1>Autentisering og <em>autorisasjon</em></h1>
-    <p class="lede">«Hvem er du?» og «hva får du lov til?» — to distinkte spørsmål som forvirres hele tiden, og der forvirringen er der de fleste tilgangsfeilene bor.</p>
+    <p class="lede">«Hvem er du?», «hva får du lov til?» og «kjører programmet faktisk koden mitt?» — tre spørsmål som må alle besvares korrekt for at tilgangssikringen skal holde.</p>
   </div>
 </header>
 
@@ -98,11 +98,27 @@
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
+      <a href="multi-level.html" class="subpage-card">
+        <div class="sp-icon">10–14</div>
+        <div class="sp-info">
+          <div class="sp-title">Multi-level security</div>
+          <div class="sp-desc">DAC, tilgangsmatrise, ACL, capabilities, MAC, Bell-LaPadula og Biba.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
       <a href="tilgangskontroll.html" class="subpage-card">
-        <div class="sp-icon">10–13</div>
+        <div class="sp-icon">15–18</div>
         <div class="sp-info">
           <div class="sp-title">Tilgangskontroll</div>
           <div class="sp-desc">RBAC, ABAC, zero trust og least privilege i praksis.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="kontrollhijacking.html" class="subpage-card">
+        <div class="sp-icon">19–26</div>
+        <div class="sp-info">
+          <div class="sp-title">Kontrollflyt-hijacking</div>
+          <div class="sp-desc">Buffer overflow, stack-rammer, AuthMe-bypass, Heartbleed og forsvar mot minne-angrep.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
@@ -113,7 +129,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">18 spørsmål om identitet, tokens og tilgangskontroll.</p>
+    <p class="section-intro">34 spørsmål om identitet, tokens, klassiske tilgangsmodeller, moderne tilgangskontroll og kontrollflyt-angrep.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -239,6 +255,118 @@
       <div class="q-text">Hvilke JWT-claims må alltid valideres på serversiden, og hva skjer hvis de ikke valideres?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer"><strong><code>exp</code> (expiry):</strong> uten validering er utløpte tokens gyldige for alltid — kompromitterte tokens er permanente. <strong><code>aud</code> (audience):</strong> uten validering kan et token utstedt for tjeneste A brukes mot tjeneste B. <strong><code>iss</code> (issuer):</strong> uten validering kan tokens fra en ondsinnet issuer aksepteres. <strong><code>alg</code>:</strong> se alg:none-angrep. Alle claims bør valideres eksplisitt — bruk et battle-tested JWT-bibliotek og ikke rull din egen verifikasjon.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 19 · Lett</div>
+      <div class="q-text">Hva er forskjellen på DAC og MAC?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>DAC (Discretionary Access Control):</strong> eieren av en ressurs bestemmer hvem som får tilgang. Eksempel: Linux-filrettigheter, Google Docs-deling. <strong>MAC (Mandatory Access Control):</strong> en sentral autoritet definerer policy som håndheves av systemet — eieren kan ikke endre den. Eksempel: militær klassifisering, iOS Secure Enclave, SELinux. DAC er fleksibel men sårbar for misbruk; MAC gir streng kontroll men er tung å administrere.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 20 · Lett</div>
+      <div class="q-text">Forklar tilgangsmatrisen og hvordan den implementeres som ACL og capabilities.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Tilgangsmatrisen har subjekter (brukere) på radene og objekter (ressurser) på kolonnene. Hver celle inneholder rettighetene subjektet har på objektet. <strong>ACL:</strong> lagre kolonnevis — hvert objekt har en liste av (subjekt, rettigheter). Linux <code>ls -l</code> og NTFS bruker dette. <strong>Capabilities:</strong> lagre radvis — hvert subjekt har en liste av (objekt, rettigheter). iOS-app-tillatelser fungerer slik. Tredje variant: autorisasjonstabell som lagrer celler som rader i en relasjonsdatabase.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 21 · Middels</div>
+      <div class="q-text">Forklar Trojan-hest-svakheten i DAC og hvorfor MAC løser den.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">DAC sjekker bare brukerens rettigheter — ikke prosessens. Hvis en angriper lurer en privilegert bruker (f.eks. direktør) til å kjøre en app med skjult ondsinnet kode, kjører koden med direktørens rettigheter. Den kan lese hemmelige filer og skrive til en fil angriperen kontrollerer. MAC løser dette ved å klassifisere både subjekter <em>og</em> prosesser. En prosess som kjører på «unclassified» kan ikke lese «secret» (no read up). En prosess på «secret» kan ikke skrive til «unclassified» (no write down). Begge angrepsstegene blokkeres.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 22 · Middels</div>
+      <div class="q-text">Hva er Bell-LaPadula-modellen, og hva betyr «no read up» og «no write down»?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Bell-LaPadula (BLP) er en MAC-modell for konfidensialitet. <strong>No read up (NRU):</strong> et subjekt kan ikke lese objekter klassifisert høyere enn sitt eget nivå — sikrer at hemmeligheter ikke lekker til lavt klarerte. <strong>No write down (NWD), * property:</strong> et subjekt (eller prosess) kan ikke skrive til lavere nivå — hindrer at en Trojan-prosess på høyt nivå kopierer hemmelig data ned til offentlig nivå. Sterk *: kun operasjoner på samme nivå.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 23 · Middels</div>
+      <div class="q-text">Hva er Biba-modellen, og hvorfor er reglene speilvendt fra Bell-LaPadula?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Biba beskytter <strong>integritet</strong>, mens BLP beskytter konfidensialitet. Reglene er speilvendt: <strong>no write up (NWU)</strong> hindrer at lite betrodd kode skriver til kritiske objekter (f.eks. nedlastet programvare kan ikke endre OS-kjernen). <strong>No read down (NRD)</strong> hindrer at høyt klassifiserte prosesser blir forurenset av upålitelige data (f.eks. bilens navigasjonssystem leser ikke fra underholdningssystemet). Hvis både konfidensialitet og integritet skal håndheves, får hvert objekt og subjekt to klassifiseringer.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 24 · Middels</div>
+      <div class="q-text">Hvordan er iOS Secure Enclave et eksempel på Bell-LaPadula i praksis?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Secure Enclave er en isolert kryptografisk prosessor med høy klassifisering. Applikasjonen (lavere nivå) kan be Secure Enclave om å verifisere fingeravtrykk eller signere data, men kan aldri lese de underliggende biometriske dataene eller private nøklene — det er <strong>no read up</strong>. Secure Enclave eksporterer aldri sensitiv data tilbake til appens minne, og holder dermed konfidensialitet selv om applikasjonen kompromitteres.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 25 · Vanskelig</div>
+      <div class="q-text">På hvilke fire nivåer håndheves tilgangskontroll, og hvorfor må alle fungere?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Applikasjon</strong> (RBAC, ABAC, autorisasjonslogikk), <strong>middleware</strong> (DB-roller, message broker ACL), <strong>operativsystem</strong> (filrettigheter, prosess-isolasjon), og <strong>hardware</strong> (CPU-ringnivåer, secure enclave, SGX). Et brudd på ett nivå kan undergrave alle nivåer over: en kjernefeil bryter OS-isolasjon → middleware-tilgang ugyldig → applikasjonens RBAC mister mening. Defense in depth krever at alle fire fungerer samtidig.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 26 · Vanskelig</div>
+      <div class="q-text">Forklar privilege creep og environmental creep — to forskjellige måter en tilgangsmodell svikter på over tid.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Privilege creep:</strong> brukere akkumulerer rettigheter over tid. En utvikler bytter team, beholder gamle tilganger; en konsulent får midlertidig admin og det blir aldri trukket tilbake. Skjer fordi management-laget svikter — ingen kjører jevnlige access reviews. <strong>Environmental creep:</strong> selve sikkerhetsmodellen blir utdatert fordi omgivelsene endrer seg. Sky-migrasjon, fjernarbeid, nye integrasjoner. Den opprinnelige antakelsen om «innenfor brannmur = trygt» holder ikke lenger. Løsninger: regelmessige access reviews, JIT-tilgang (privilege creep) og periodisk re-modellering av trusler (environmental creep).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 27 · Lett</div>
+      <div class="q-text">Hva er SAML, og hvordan brukes det i Feide?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SAML (Security Assertion Markup Language) er en XML-basert SSO-protokoll. En tjeneste («Service Provider», SP) som Blackboard redirecter brukeren til en sentral «Identity Provider» (IdP) som Feide. IdP autentiserer brukeren mot riktig institusjons-LDAP og returnerer en signert SAML-respons med brukerens identitet og attributter. SP verifiserer signaturen og oppretter en sesjon. Feide er Norges felles IdP for utdanning og forskning.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 28 · Middels</div>
+      <div class="q-text">Hvorfor er signaturverifisering kritisk i SAML, og hva er XML signature wrapping-angrepet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SAML-respons er bare XML-tekst — uten signaturverifisering kan en angriper konstruere falske assertions og late som hvem som helst. <strong>XML signature wrapping:</strong> angriperen tar en gyldig signert assertion og legger til en uautorisert assertion ved siden av. Hvis SAML-biblioteket ikke validerer at signaturen faktisk dekker det elementet som tolkes, kan SP behandle den falske assertionen som ekte. Forsvar: bruk velrenommerte SAML-biblioteker som verifiserer signature-element-binding eksplisitt.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 29 · Lett</div>
+      <div class="q-text">Hva er buffer overflow, og hvilke språk er hovedmål?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Buffer overflow oppstår når et program skriver mer data til en buffer enn bufferens kapasitet. Overflødende data overskriver tilstøtende minne — andre lokale variabler, exception handler, eller returadresse. C og C++ er hovedmål fordi språkene gir programmerer ansvar for minnehåndtering uten runtime-grensesjekk. Typesikre språk (Python, Java, Go, Rust) hindrer dette via runtime-sjekker eller eier-modell.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 30 · Middels</div>
+      <div class="q-text">Beskriv «AuthMe.»-angrepet og hvorfor det fungerer.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En funksjon har en lokal <code>int authenticated = 0</code> og <code>char buffer[4]</code>, hvor buffer ligger lavest i stack-rammen. Etter passordsjekk settes flagget. Men <code>strcpy(buffer, arg1)</code> sjekker ikke lengde. Angriper sender <code>"AuthMe."</code> (7 bytes). Første 4 bytes fyller buffer (<code>"Auth"</code>); de neste 3 bytes pluss null-terminator overskriver <code>authenticated</code>-variabelen til <code>0x002E654D</code> ≠ 0. Senere <code>if(authenticated)</code> blir sann — autentiseringssjekken bypasset uten gyldig passord.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 31 · Middels</div>
+      <div class="q-text">Hvordan fungerer Heartbleed, og hvorfor er det en read overflow og ikke en skrive-overflow?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">OpenSSLs heartbeat-melding lar klient sende payload + lengdefelt. Server skal ekko payloaden tilbake. Bug: serveren stolte på lengdefeltet uten å sjekke faktisk payload-størrelse. Angriper sender 1 byte payload men hevder lengden er 65 535 — server leser 65 535 bytes fra minnet etter bufferen og sender tilbake. Det er <em>read</em> overflow fordi angriper leser data forbi bufferens slutt; ingen kontrollflyt-overtakelse, men private nøkler, sesjonskoder og passord lekket fra millioner av servere.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 32 · Middels</div>
+      <div class="q-text">Hvilke usikre C-funksjoner bør erstattes, og hva er <code>strncpy</code>-fellen?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Usikre: <code>strcpy</code>, <code>strcat</code>, <code>gets</code>, <code>sprintf</code> — ingen lengdesjekk. Erstatninger: <code>strcpy_s</code>, <code>strcat_s</code>, <code>fgets</code>, <code>snprintf</code> — alle tar buffer-størrelse. <code>gets</code> er fjernet i C11. <strong>strncpy-fellen:</strong> <code>strncpy(str, "bye", 3)</code> kopierer 3 bytes uten å legge til NULL. Et etterfølgende <code>strlen(str)</code> leser videre i minnet til den tilfeldigvis finner en null — read overflow som lekker tilstøtende data. Bruk <code>strcpy_s</code> i stedet, eller terminer eksplisitt.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 33 · Vanskelig</div>
+      <div class="q-text">Forklar stack canary, ASLR og NX-bit. Hvilke angrep stopper hver, og hvilke omgår dem?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Stack canary</strong> (GCC <code>-fstack-protector</code>, MSVC <code>/GS</code>): kjent verdi mellom lokale variabler og returadresse. Sjekkes før retur. Stopper klassisk overflow som overskriver returadressen. Omgås ved info leak som avslører canary-verdien. <strong>ASLR:</strong> randomiserer adresser for stack/heap/library. Vanskeliggjør valg av hop-mål. Omgås ved info leak som avslører adresser. <strong>NX-bit / DEP:</strong> markerer stack/heap som ikke-kjørbar. Stopper shellcode-injeksjon i bufferen. Omgås av <strong>ROP</strong>: angriperen kjeder eksisterende kodebiter («gadgets») i stedet for å injisere ny kode. Forsvar dybde — alle tre, pluss CFI og typesikre språk for ny kode.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 34 · Vanskelig</div>
+      <div class="q-text">Hvorfor hjelper et typesikkert språk mot buffer overflow, og hvorfor migrerer Linux-kjernen til Rust?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Typesikre språk håndhever array-grenser ved runtime (Java, Python, Go) eller compile-time (Rust). Et indeks-aksess utenfor grenser kaster unntak eller blir avvist av kompilator — ingen vill skriving til tilstøtende minne. <strong>Rust</strong> går lenger: ownership og borrow checker hindrer dangling pointers, double-free og data races uten garbage collector. Linux-kjernen er sikkerhetskritisk og må kjøre nær hardware (tradisjonelt C). Rust gir samme ytelse som C med kompilator-håndhevet minnesikkerhet — så Linux har siden 2022 godtatt Rust-moduler. Microsoft og Google rapporterer ~70 % av sikkerhetshull historisk har vært minnesikkerhetsfeil; Rust eliminerer hele kategorien.</div></div>
     </div>
   </div>
 </section>

@@ -48,35 +48,49 @@
 
     <figure class="fig-frame">
       <svg viewBox="0 0 720 385" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
-        <!-- OWASP Top 10 som horisontale bånd -->
+        <!-- OWASP Top 10 (2025) som horisontale bånd -->
         <rect x="60" y="30" width="600" height="28" rx="2" fill="rgba(176,68,40,0.18)" stroke="#b04428" stroke-width="1"/>
         <text x="70" y="49" font-size="12" fill="#b04428" font-weight="600">A01 Broken Access Control</text>
+
         <rect x="60" y="65" width="560" height="28" rx="2" fill="rgba(176,68,40,0.13)" stroke="#b04428" stroke-width="1"/>
-        <text x="70" y="84" font-size="12" fill="#b04428" font-weight="600">A02 Cryptographic Failures</text>
+        <text x="70" y="84" font-size="12" fill="#b04428" font-weight="600">A02 Security Misconfiguration</text>
+        <text x="625" y="84" font-size="10" fill="#8a7f6b" font-style="italic">↑ fra A05</text>
+
         <rect x="60" y="100" width="520" height="28" rx="2" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1"/>
-        <text x="70" y="119" font-size="12" fill="#b04428" font-weight="600">A03 Injection</text>
+        <text x="70" y="119" font-size="12" fill="#b04428" font-weight="600">A03 Software Supply Chain Failures</text>
+        <rect x="585" y="106" width="32" height="16" rx="3" fill="#b04428"/>
+        <text x="601" y="118" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">NY</text>
+
         <rect x="60" y="135" width="480" height="28" rx="2" fill="rgba(45,74,122,0.12)" stroke="#2d4a7a" stroke-width="1"/>
-        <text x="70" y="154" font-size="12" fill="#2d4a7a" font-weight="600">A04 Insecure Design</text>
+        <text x="70" y="154" font-size="12" fill="#2d4a7a" font-weight="600">A04 Cryptographic Failures</text>
+        <text x="545" y="154" font-size="10" fill="#8a7f6b" font-style="italic">↓ fra A02</text>
+
         <rect x="60" y="170" width="440" height="28" rx="2" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1"/>
-        <text x="70" y="189" font-size="12" fill="#2d4a7a" font-weight="600">A05 Security Misconfiguration</text>
+        <text x="70" y="189" font-size="12" fill="#2d4a7a" font-weight="600">A05 Injection</text>
+        <text x="505" y="189" font-size="10" fill="#8a7f6b" font-style="italic">↓ fra A03</text>
+
         <rect x="60" y="205" width="400" height="28" rx="2" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1"/>
-        <text x="70" y="224" font-size="12" fill="#2d4a7a" font-weight="600">A06 Vulnerable Components</text>
+        <text x="70" y="224" font-size="12" fill="#2d4a7a" font-weight="600">A06 Insecure Design</text>
+        <text x="465" y="224" font-size="10" fill="#8a7f6b" font-style="italic">↓ fra A04</text>
+
         <rect x="60" y="240" width="360" height="28" rx="2" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1"/>
-        <text x="70" y="259" font-size="12" fill="#3d6b3a" font-weight="600">A07 Identification &amp; Auth Failures</text>
+        <text x="70" y="259" font-size="12" fill="#3d6b3a" font-weight="600">A07 Authentication Failures</text>
+
         <rect x="60" y="275" width="320" height="28" rx="2" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1"/>
         <text x="70" y="294" font-size="12" fill="#3d6b3a" font-weight="600">A08 Software &amp; Data Integrity Failures</text>
+
         <rect x="60" y="310" width="280" height="28" rx="2" fill="rgba(198,138,31,0.1)" stroke="#c68a1f" stroke-width="1"/>
-        <text x="70" y="329" font-size="12" fill="#c68a1f" font-weight="600">A09 Security Logging Failures</text>
-        <!-- A10 -->
+        <text x="70" y="329" font-size="12" fill="#c68a1f" font-weight="600">A09 Security Logging &amp; Alerting Failures</text>
+
         <rect x="60" y="345" width="240" height="28" rx="2" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1"/>
-        <text x="70" y="364" font-size="12" fill="#c68a1f" font-weight="600">A10 SSRF</text>
-        <!-- x-akse label -->
-        <text x="660" y="370" font-size="11" fill="#a39886" text-anchor="end">← utbredelse</text>
+        <text x="70" y="364" font-size="12" fill="#c68a1f" font-weight="600">A10 Mishandling of Exceptional Conditions</text>
+        <rect x="305" y="351" width="32" height="16" rx="3" fill="#c68a1f"/>
+        <text x="321" y="363" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">NY</text>
       </svg>
-      <figcaption>OWASP Top 10 (2021) rangert etter utbredelse — bredden på båndet indikerer relativ forekomst på tvers av applikasjoner.</figcaption>
+      <figcaption>OWASP Top 10 (2025), rangert etter utbredelse. <strong>A03 Software Supply Chain Failures</strong> og <strong>A10 Mishandling of Exceptional Conditions</strong> er nye kategorier. SSRF (2021-A10) er nå smeltet inn i A01 Broken Access Control.</figcaption>
     </figure>
 
-    <p>Fire delsider dekker hele listen tematisk: <em>Injection</em> (A03) er en kategori for seg. XSS og CSRF grupperes fordi de begge utnytter tillitsrelasjonen mellom nettleseren og serveren. Broken access control, insecure design og autentiseringsfeil deles fordi de handler om identitet, rettigheter og systemdesign. Konfigurasjonsfeil, kryptografiske feil, integritetssvikt, sårbare komponenter og SSRF samles i den siste delsiden.</p>
+    <p>Fem delsider dekker stoffet. En <em>informasjonsinnsamling</em>-side (WSTG-INFO) viser hvordan man kartlegger en applikasjon før test eller angrep — page maps, trust zones, debug-proxy. <em>Injection</em> (A05 — degradert fra A03 i 2025) er kategori for seg, med SQL-, command- og XPath-injection. XSS og CSRF deler side fordi begge utnytter tillitsrelasjonen mellom nettleser og server — XSS hører nå formelt under A05 Injection, CSRF under A01 Broken Access Control. Broken access control (A01), insecure design (A06), autentiseringsfeil (A07), session fixation og loggingsvikt (A09) deles fordi de handler om identitet, rettigheter og oppdagelse. Konfigurasjonsfeil (A02 — inkludert XXE og clickjacking), kryptografiske feil (A04 — med salt/pepper), supply chain-feil (A03), integritetssvikt (A08) og SSRF (nå under A01) samles i siste delsiden.</p>
 
     <div class="callout callout-green">
       <h4>Kapittelets kjerneidé</h4>
@@ -90,8 +104,16 @@
     <div class="section-badge">Delsider</div>
     <h2>Utforsk <em>kapittelet</em></h2>
     <div class="subpage-list">
+      <a href="info-innsamling.html" class="subpage-card">
+        <div class="sp-icon">INFO</div>
+        <div class="sp-info">
+          <div class="sp-title">Informasjonsinnsamling</div>
+          <div class="sp-desc">Page maps, trust zones, debug-proxy og dorking — kartlegging er fase 1 i OWASP Web Security Testing Guide.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
       <a href="injection.html" class="subpage-card">
-        <div class="sp-icon">A03</div>
+        <div class="sp-icon">A05</div>
         <div class="sp-info">
           <div class="sp-title">Injection</div>
           <div class="sp-desc">SQL injection, command injection og NoSQL-varianter — og den parameteriserte løsningen som fikser alle tre.</div>
@@ -99,26 +121,26 @@
         <div class="sp-arrow">&rarr;</div>
       </a>
       <a href="xss-csrf.html" class="subpage-card">
-        <div class="sp-icon">XSS·CSRF</div>
+        <div class="sp-icon">A05·A01</div>
         <div class="sp-info">
           <div class="sp-title">XSS og CSRF</div>
-          <div class="sp-desc">Skript som sitter i databasen og venter, og forespørsler nettleseren sender uten å spørre.</div>
+          <div class="sp-desc">Skript som sitter i databasen og venter (XSS, nå under A05 Injection), og forespørsler nettleseren sender uten å spørre (CSRF, under A01 Broken Access Control).</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
       <a href="authn-autorisasjonsfeil.html" class="subpage-card">
-        <div class="sp-icon">A01·A04·A07</div>
+        <div class="sp-icon">A01·A06·A07·A09</div>
         <div class="sp-info">
-          <div class="sp-title">Broken access control, insecure design og autentiseringsfeil</div>
-          <div class="sp-desc">IDOR, manglende serversidekontroller, designfeil uten fix og svak autentisering — der identitet og tilgang kollapser.</div>
+          <div class="sp-title">Broken access control, insecure design, autentiseringsfeil og loggingsvikt</div>
+          <div class="sp-desc">IDOR, manglende serversidekontroller, designfeil uten fix, svak autentisering og mangelfull logging — der identitet, tilgang og oppdagelse kollapser.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
       <a href="konfig-krypto-ssrf.html" class="subpage-card">
-        <div class="sp-icon">A02·A05·A06·A08·A10</div>
+        <div class="sp-icon">A02·A03·A04·A08·A01</div>
         <div class="sp-info">
-          <div class="sp-title">Konfigurasjon, krypto, komponenter og SSRF</div>
-          <div class="sp-desc">Default credentials, ECB-modus, Log4Shell, usignerte build-artefakter og servere som henter URL-er de ikke burde.</div>
+          <div class="sp-title">Konfigurasjon, krypto, supply chain og SSRF</div>
+          <div class="sp-desc">Default credentials, ECB-modus, Log4Shell, usignerte build-artefakter og servere som henter URL-er de ikke burde. SSRF er nå under A01 Broken Access Control i 2025.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
@@ -129,7 +151,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">20 spørsmål — fra definisjon til angrepsscenario.</p>
+    <p class="section-intro">30 spørsmål — fra definisjon til angrepsscenario.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -269,6 +291,76 @@
       <div class="q-text">Et API eksponerer <code>/api/faktura/{id}</code>. Beskriv den komplette access-control-sjekken som må implementeres på serversiden.</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer">1. <strong>Autentisering:</strong> er brukeren innlogget og sesjonen gyldig? Hvis ikke → 401.<br>2. <strong>Autorisasjon — rollesjekk:</strong> har brukeren en rolle som tillater tilgang til faktura-ressurser? Hvis ikke → 403.<br>3. <strong>Autorisasjon — eiersjekk:</strong> eier denne spesifikke brukeren fakturaen med dette ID-et? Spørr databasen: <code>SELECT * FROM invoices WHERE id=? AND owner_id=current_user.id</code>. Returnerer ingenting → 403 (aldri 404, som avslører eksistens).<br>4. <strong>Rate limiting og logging:</strong> logg tilgangsforsøk, begrens kall per bruker for å hindre enumerering.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 21 · Middels</div>
+      <div class="q-text">Hva er et session fixation-angrep, og hva er den definerende sårbarheten på serversiden?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Angriperen planter sin egen anonyme session-token i offerets nettleser (via XSS eller MITM på HTTP). Når offeret logger inn, eleverer serveren <em>samme token</em> fra anonym til logged-in. Angriperen bruker så samme token og er innlogget som offeret.<br><br><strong>Sårbarhet:</strong> serveren beholder samme session-ID gjennom autentisering. <strong>Fix:</strong> generer en ny, fersk session-ID etter vellykket login og invalider den anonyme.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 22 · Middels</div>
+      <div class="q-text">Hva er XXE, og hva gjør denne payloaden? <code>&lt;!DOCTYPE t [&lt;!ENTITY x SYSTEM "file:///etc/passwd"&gt;]&gt;&lt;t&gt;&amp;x;&lt;/t&gt;</code></div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">XXE (XML External Entities) utnytter at en XML-parser løser opp eksterne entiteter med URI-er. Payloaden definerer entiteten <code>&amp;x;</code> til å være innholdet i <code>/etc/passwd</code>. Når parseren ekspanderer entiteten i <code>&lt;t&gt;</code>, leses filen og inkluderes i svaret — angriperen får tilgang til serverside-filer. <strong>Fix:</strong> deaktiver eksterne entiteter og DTD-prosessering i parseren (Python: <code>defusedxml</code>).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 23 · Middels</div>
+      <div class="q-text">Hva er forskjellen på salt og pepper i passordhashing? Hvor lagres hver?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Salt:</strong> tilfeldig verdi <em>per bruker</em>, lagres ved siden av hashen i databasen. Hindrer at to brukere med samme passord får samme hash, og gjør forhåndsberegnede rainbow tables ubrukelige.<br><br><strong>Pepper:</strong> én <em>global</em> hemmelig verdi som applikasjonen henter fra secrets manager / miljøvariabel — aldri fra DB. Hvis bare DB lekker (og ikke applikasjonsserveren), mangler angriperen pepper og kan ikke gjennomføre offline brute-force.<br><br>Endelig form: <code>bcrypt(passord + salt + PEPPER)</code>.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 24 · Lett</div>
+      <div class="q-text">Hva skiller online dictionary-angrep fra offline?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Online:</strong> angriperen prøver kombinasjoner mot live-systemet via login-endepunktet. Begrenset av rate-limiting, account lockout og nettverkslatens. Tregt.<br><br><strong>Offline:</strong> angriperen har stjålet passordfilen / hash-databasen og kjører gjetninger lokalt på egen maskin. Begrenset bare av CPU/GPU. Milliarder av forsøk per sekund med moderne GPU-er. Derfor må passordhasher være <em>trege</em> (bcrypt, Argon2id, ikke MD5/SHA-256).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 25 · Vanskelig</div>
+      <div class="q-text">Spot bug. Er denne Python-koden trygg mot SQL injection? <code>cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")</code></div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Nei. <code>f"…{user_id}"</code> er en f-streng som <em>først</em> bygger en ferdig SQL-streng med <code>user_id</code> interpolert inn — driveren får aldri sjansen til å parameterisere. En angriper sender <code>user_id = "1; DROP TABLE users"</code> og spørringen kjøres ordrett.<br><br><strong>Riktig:</strong> <code>cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))</code> — driverkonteksten håndterer escaping, brukerinput sendes separat fra spørringsstrengen.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 26 · Middels</div>
+      <div class="q-text">OWASP Top 10 2025 introduserte to nye kategorier som ikke fantes i 2021. Hvilke?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>A03:2025 — Software Supply Chain Failures:</strong> utvider den gamle A06 «Vulnerable Components» til hele leverandørkjeden — typosquatting, dependency confusion, kompromitterte vedlikeholdere, build-pipeline-angrep (SolarWinds-typen).<br><br><strong>A10:2025 — Mishandling of Exceptional Conditions:</strong> sikkerhetshull som oppstår når kode ikke håndterer uventede tilstander — for brede <code>catch</code>-blokker, manglende feilhåndtering, race conditions ved tidsavbrudd.<br><br>I tillegg ble SSRF (gammel A10) smeltet inn i A01 Broken Access Control, og «Cryptographic Failures» har gått fra A02 til A04.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 27 · Middels</div>
+      <div class="q-text">Hva er clickjacking, og hvilken HTTP-header er det enkleste forsvaret?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Clickjacking: angriperen legger en transparent <code>iframe</code> med <em>din</em> applikasjon over en lokkemiddel-side på <code>evil.com</code>. Offerets klikk treffer den usynlige iframen — som kan være «Slett konto» eller «Overfør 10 000».<br><br><strong>Forsvar:</strong> <code>X-Frame-Options: DENY</code> (siden kan aldri rammes inn) eller den nyere <code>Content-Security-Policy: frame-ancestors 'none'</code>. <code>SAMEORIGIN</code> tillater bare ramming fra eget domene. Frame-busting JS er ikke pålitelig — kan omgås av <code>sandbox</code>-attributtet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 28 · Vanskelig</div>
+      <div class="q-text">Hva er en SBOM, og hvorfor ble den så viktig etter Log4Shell?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SBOM = Software Bill of Materials — en komplett, maskinlesbar liste over alle komponenter (direkte og transitive avhengigheter), versjoner og lisenser i en applikasjon. Standardformater: CycloneDX, SPDX.<br><br>Etter Log4Shell (CVE-2021-44228) sto tusenvis av organisasjoner uten å vite hvilke av deres applikasjoner faktisk inneholdt sårbar Log4j2 — fordi den ofte var en transitiv avhengighet flere ledd ned. Med en SBOM tar svaret minutter, ikke uker. SBOM er en av kjernemekanismene i A03:2025 Software Supply Chain Failures.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 29 · Middels</div>
+      <div class="q-text">Hva er logout-problemet, og hvorfor er det en sårbarhet å bare slette cookien på klientsiden?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Logout skal gjøre to ting: (1) slette session-cookien fra klienten, og (2) markere session-tokenet som ugyldig på serveren. Mange systemer gjør bare (1).<br><br>Hvis en angriper allerede har stjålet sessionet (via XSS, sniffing eller skuldersurfing), spiller (1) ingen rolle — angriperen bruker fortsatt det opprinnelige tokenet, og serveren fortsetter å akseptere det inntil naturlig timeout. Klassisk eksempel: Twitter 2013, der tokens ikke ble invalidert ved logout og kunne brukes til replay-angrep.<br><br><strong>Fix:</strong> server-side blacklist eller invaliderings-flagg på session-tokenet, sjekkes ved hver request.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 30 · Vanskelig</div>
+      <div class="q-text">Forklar hvorfor <code>Content-Security-Policy: script-src 'self' 'unsafe-inline'</code> i praksis er ekvivalent med å ikke ha CSP for XSS-formål.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><code>'unsafe-inline'</code> tillater alle inline <code>&lt;script&gt;</code>-tagger og <code>onclick=</code>-attributter — som er nettopp det stored og reflected XSS injiserer. CSP-en blokkerer dermed ingenting den var ment å blokkere; den eneste effekten er at scripts fra eksterne domener nektes (som ofte ikke er XSS-vektoren uansett).<br><br>For at CSP skal være effektiv mot XSS må <code>'unsafe-inline'</code> droppes. Inline scripts erstattes med eksterne script-filer, eller gis nonce / hash som CSP-en eksplisitt tillater (<code>script-src 'self' 'nonce-rAnd0m'</code>). For DOM-XSS bør <code>require-trusted-types-for 'script'</code> legges til.</div></div>
     </div>
 
   </div>

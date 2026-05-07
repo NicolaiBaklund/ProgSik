@@ -27,10 +27,13 @@
     <p class="lede">Seks trusselkategorier som dekker nesten alt som kan gå galt i et system — og den kontrollen som adresserer hver av dem.</p>
     <nav class="toc">
       <a href="#stride-oversikt"><span class="toc-num">01</span>STRIDE-oversikt</a>
-      <a href="#stride-per-element"><span class="toc-num">02</span>STRIDE per DFD-element</a>
-      <a href="#dread"><span class="toc-num">03</span>DREAD-scoring</a>
-      <a href="#mitigasjoner"><span class="toc-num">04</span>Mitigasjoner</a>
-      <a href="#praktisk-eksempel"><span class="toc-num">05</span>Praktisk eksempel</a>
+      <a href="#eksempler"><span class="toc-num">02</span>Konkrete hendelser</a>
+      <a href="#matcher"><span class="toc-num">03</span>Tren deg på STRIDE</a>
+      <a href="#stride-per-element"><span class="toc-num">04</span>STRIDE per DFD-element</a>
+      <a href="#abstraksjon"><span class="toc-num">05</span>Abstraksjonsnivåer</a>
+      <a href="#dread"><span class="toc-num">06</span>DREAD-scoring</a>
+      <a href="#mitigasjoner"><span class="toc-num">07</span>Mitigasjoner</a>
+      <a href="#praktisk-eksempel"><span class="toc-num">08</span>Praktisk eksempel</a>
     </nav>
   </div>
 </header>
@@ -56,9 +59,119 @@
   </div>
 </section>
 
+<section id="eksempler">
+  <div class="container">
+    <div class="section-badge">02 · Konkrete hendelser</div>
+    <h2>Hver bokstav som <em>ekte hendelse</em></h2>
+    <p class="section-intro">STRIDE-tabeller er abstrakte. Konkrete eksempler fester kategoriene i hodet — og viser at trusler ikke er teori.</p>
+
+    <h3>S — Spoofing</h3>
+    <p>Pretending å være noen eller noe du ikke er. Eksempler: AI-genererte deepfakes av politikere (Jonas Gahr Støre-deepfake fra desember 2024 — manipulerte bilder spredt på LinkedIn), forfalskede e-poster (CEO-fraud), GPS-spoofing av skip i Persiabukta, DNS-spoofing for phishing-sider, IP-spoofing i DDoS, JWT med <code>alg:none</code> som server feilaktig aksepterer. <strong>Mitigasjon:</strong> autentisering på alle nivåer — MFA, mTLS, FIDO2, signaturverifisering med eksplisitt algoritme-allowlist.</p>
+
+    <h3>T — Tampering</h3>
+    <p>Endring av data eller kode du ikke skal endre. Eksempler: NotPetya og Conti ransomware som krypterer filer i hele organisasjoner; SQL-form-tampering i URL-parametere; modifikasjon av hidden form fields; Stuxnet som modifiserte SCADA-PLC-kode for sentrifuger; supply chain-angrep der angriperen modifiserer en npm-pakke. <strong>Mitigasjon:</strong> integritetskontroll — HMAC, digital signatur, parameteriserte spørringer, code signing, immutabel infrastruktur.</p>
+
+    <h3>R — Repudiation</h3>
+    <p>Nekte å ha gjort noe — uavhengig av om man faktisk gjorde det. Eksempel: Capitol-stormingen 6. januar 2021 hvor mange senere benektet å ha vært inne i bygningen, til tross for at egne selfies viste det motsatte. Andre eksempler: bruker hevder at de ikke autoriserte en betaling fra mistet telefon; angriper sletter eller endrer logger etter et innbrudd; admin nekter å ha endret en regel i konfigurasjonen. <strong>Mitigasjon:</strong> uavviselig logging — kryptografisk signerte revisjonsspor, append-only logstores (CloudTrail, AWS Audit Manager), tidsstemplede hash-kjeder, sentralisert SIEM med skrivebeskyttelse.</p>
+
+    <h3>I — Information disclosure</h3>
+    <p>Eksponering av data til uvedkommende. Eksempler: Conti-leakene i 2022 hvor en intern misnøyd medlem dumpet hele Conti-gruppens chat-logger og verktøy; Equifax-bruddet (2017) — 147 millioner records; verbose stack traces i produksjon som avslører biblioteksversjoner; S3-bucket satt til public; Bluetooth-pairing i klartekst som avlyttes; URL-parametere med session-tokens som lagres i nettleserhistorikk. <strong>Mitigasjon:</strong> kryptering (TLS i transit, AES-GCM at rest) + tilgangskontroll (RBAC/ABAC, least privilege) + minimering (ikke logg det du ikke trenger).</p>
+
+    <h3>D — Denial of Service</h3>
+    <p>Hindre legitime brukere i å bruke systemet. Eksempler: russisk regjeringsinfrastruktur (kremlin.ru, gazprom.com) tatt ned av distribuerte angrep i 2022; SYN flood mot DNS-rotservere; Slowloris mot webservere med få connections; ressursutmatting via krypto-thrashing; ZIP bombs som krasjer parsere; ledelsesplan-DoS hvor en angriper bevisst trigger rate-limiting for å sperre legitime brukere. <strong>Mitigasjon:</strong> rate-limiting per IP og per konto, redundans (CDN, load balancer), auto-scaling, circuit breakers, WAF-regler, anomalideteksjon.</p>
+
+    <h3>E — Elevation of Privilege</h3>
+    <p>Bruker eller program oppnår tilgang den ikke skal ha. Eksempler: privilege escalation via kjernesårbarheter (Dirty COW, Linux 2016); SQL injection som returnerer admin-rolle; XSS som høster session-cookies fra admin-brukere; deserialiserings-RCE i Java/Python; misconfigured sudoers; container-escape via /proc-mount. Adam Shostack laget kortspillet <em>Elevation of Privilege</em> for å trene utviklere — finnes på <a href="https://shostack.org/games/elevation-of-privilege" target="_blank" rel="noopener">shostack.org</a>. <strong>Mitigasjon:</strong> autorisasjon på hvert endepunkt, least privilege på prosesser og kontoer, deny-by-default, sandboxing, regelmessig SAST/DAST.</p>
+  </div>
+</section>
+
+<section id="matcher">
+  <div class="container">
+    <div class="section-badge">03 · Tren deg</div>
+    <h2>STRIDE-<em>matcher</em></h2>
+    <p class="section-intro">Klassifiser hver hendelse til riktig STRIDE-kategori før du klikker «Sjekk svar». Ingen poengsum — bare øvelse.</p>
+
+    <div class="stride-matcher" id="stride-matcher">
+      <div class="sm-item" data-correct="S">
+        <div class="sm-scenario"><strong>1.</strong> En angriper sender e-post som ser ut til å komme fra <code>noreply@bankid.no</code>. Mottakeren klikker, oppgir BankID-passord på en falsk side.</div>
+        <div class="sm-buttons">
+          <button data-letter="S">S</button><button data-letter="T">T</button><button data-letter="R">R</button>
+          <button data-letter="I">I</button><button data-letter="D">D</button><button data-letter="E">E</button>
+        </div>
+        <div class="sm-feedback"></div>
+      </div>
+
+      <div class="sm-item" data-correct="T">
+        <div class="sm-scenario"><strong>2.</strong> En kompromittert npm-pakke i build-pipelinen bytter ut en signaturverifiseringsfunksjon med en som alltid returnerer <code>true</code>.</div>
+        <div class="sm-buttons">
+          <button data-letter="S">S</button><button data-letter="T">T</button><button data-letter="R">R</button>
+          <button data-letter="I">I</button><button data-letter="D">D</button><button data-letter="E">E</button>
+        </div>
+        <div class="sm-feedback"></div>
+      </div>
+
+      <div class="sm-item" data-correct="R">
+        <div class="sm-scenario"><strong>3.</strong> En insider sletter sine egne admin-handlinger fra audit-loggen før hen slutter, slik at det ikke kan bevises at hen kopierte ut kundedata.</div>
+        <div class="sm-buttons">
+          <button data-letter="S">S</button><button data-letter="T">T</button><button data-letter="R">R</button>
+          <button data-letter="I">I</button><button data-letter="D">D</button><button data-letter="E">E</button>
+        </div>
+        <div class="sm-feedback"></div>
+      </div>
+
+      <div class="sm-item" data-correct="I">
+        <div class="sm-scenario"><strong>4.</strong> Feilmeldingen <code>"User foo@bar.no exists but password is wrong"</code> i innloggingsskjema lar en angriper enumerere gyldige brukerkontoer.</div>
+        <div class="sm-buttons">
+          <button data-letter="S">S</button><button data-letter="T">T</button><button data-letter="R">R</button>
+          <button data-letter="I">I</button><button data-letter="D">D</button><button data-letter="E">E</button>
+        </div>
+        <div class="sm-feedback"></div>
+      </div>
+
+      <div class="sm-item" data-correct="D">
+        <div class="sm-scenario"><strong>5.</strong> Et innloggingsendepunkt utfører bcrypt med cost-faktor 14. En angriper sender 1000 ugyldige forespørsler i sekundet og knekker serveren under last.</div>
+        <div class="sm-buttons">
+          <button data-letter="S">S</button><button data-letter="T">T</button><button data-letter="R">R</button>
+          <button data-letter="I">I</button><button data-letter="D">D</button><button data-letter="E">E</button>
+        </div>
+        <div class="sm-feedback"></div>
+      </div>
+
+      <div class="sm-item" data-correct="E">
+        <div class="sm-scenario"><strong>6.</strong> En vanlig bruker sender <code>POST /api/users/42/role</code> med <code>{"role":"admin"}</code> fordi endepunktet kun sjekker autentisering, ikke autorisasjon.</div>
+        <div class="sm-buttons">
+          <button data-letter="S">S</button><button data-letter="T">T</button><button data-letter="R">R</button>
+          <button data-letter="I">I</button><button data-letter="D">D</button><button data-letter="E">E</button>
+        </div>
+        <div class="sm-feedback"></div>
+      </div>
+
+      <div class="sm-item" data-correct="I">
+        <div class="sm-scenario"><strong>7.</strong> Backup-filer av databasen dumpes uten kryptering på en S3-bucket som er satt til <code>public-read</code>. Indekseres av Google.</div>
+        <div class="sm-buttons">
+          <button data-letter="S">S</button><button data-letter="T">T</button><button data-letter="R">R</button>
+          <button data-letter="I">I</button><button data-letter="D">D</button><button data-letter="E">E</button>
+        </div>
+        <div class="sm-feedback"></div>
+      </div>
+
+      <div class="sm-item" data-correct="S">
+        <div class="sm-scenario"><strong>8.</strong> En IoT-enhet uten egen identitet kobler seg til MQTT-brokeren med felles delt nøkkel. En angriper med samme nøkkel publiserer falske sensormålinger.</div>
+        <div class="sm-buttons">
+          <button data-letter="S">S</button><button data-letter="T">T</button><button data-letter="R">R</button>
+          <button data-letter="I">I</button><button data-letter="D">D</button><button data-letter="E">E</button>
+        </div>
+        <div class="sm-feedback"></div>
+      </div>
+    </div>
+
+    <p style="font-size: 14px; color: var(--ink-faded); font-style: italic; margin-top: 18px;">Merk: enkelte hendelser kan plausibelt klassifiseres til to kategorier (f.eks. tampering som leder til EoP). I tabellene viser vi den primære.</p>
+  </div>
+</section>
+
 <section id="stride-per-element">
   <div class="container">
-    <div class="section-badge">02 · Mapping</div>
+    <div class="section-badge">04 · Mapping</div>
     <h2>STRIDE per <em>DFD-element</em></h2>
     <p class="section-intro">Ikke alle STRIDE-kategorier gjelder for alle DFD-elementer — denne mappingen hjelper deg å fokusere analysen.</p>
     <p class="lead">En prosess kan spoofes, tamperes med, nektes tjeneste, og brukes til privilege escalation. Et datalager kan utsettes for tampering, information disclosure og denial of service — men et datalager i seg selv spoofes vanligvis ikke. En dataflykt kan avlyttes (information disclosure) eller manipuleres (tampering). Ekstern entitet: Spoofing er den primære bekymringen.</p>
@@ -77,34 +190,74 @@
   </div>
 </section>
 
+<section id="abstraksjon">
+  <div class="container">
+    <div class="section-badge">05 · Abstraksjon</div>
+    <h2>Fra STRIDE til <em>konkret kontroll</em></h2>
+    <p class="section-intro">STRIDE er bevisst abstrakt. For å koble en trusselkategori til faktisk kode trenger du flere lag.</p>
+    <p class="lead">En STRIDE-kategori som «Spoofing» dekker hundrevis av konkrete angrepsmønstre. For at threat modeling skal bli handlingsbar må du kunne bevege deg fra det abstrakte til det spesifikke. Lagene under forteller deg hvordan.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs><marker id="aa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
+        <text x="20" y="40" font-style="italic" fill="#6b6257">Abstrakt</text>
+        <text x="700" y="40" text-anchor="end" font-style="italic" fill="#6b6257">Konkret</text>
+
+        <rect x="20" y="60" width="140" height="60" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="90" y="84" text-anchor="middle" font-weight="600" fill="#b04428">STRIDE</text>
+        <text x="90" y="100" text-anchor="middle" font-size="10" fill="#6b6257">6 kategorier</text>
+        <text x="90" y="113" text-anchor="middle" font-size="10" fill="#6b6257">Spoofing, Tampering…</text>
+
+        <line x1="162" y1="90" x2="188" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#aa)"/>
+
+        <rect x="190" y="60" width="140" height="60" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="260" y="84" text-anchor="middle" font-weight="600" fill="#2d4a7a">OWASP Top 10</text>
+        <text x="260" y="100" text-anchor="middle" font-size="10" fill="#6b6257">10 kategorier</text>
+        <text x="260" y="113" text-anchor="middle" font-size="10" fill="#6b6257">A01 BAC, A03 Injection…</text>
+
+        <line x1="332" y1="90" x2="358" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#aa)"/>
+
+        <rect x="360" y="60" width="140" height="60" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="430" y="84" text-anchor="middle" font-weight="600" fill="#3d6b3a">CAPEC</text>
+        <text x="430" y="100" text-anchor="middle" font-size="10" fill="#6b6257">~600 angrepsmønstre</text>
+        <text x="430" y="113" text-anchor="middle" font-size="10" fill="#6b6257">CAPEC-66 SQLi, CAPEC-148…</text>
+
+        <line x1="502" y1="90" x2="528" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#aa)"/>
+
+        <rect x="530" y="60" width="160" height="60" rx="3" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="610" y="84" text-anchor="middle" font-weight="600" fill="#c68a1f">Sjekklister / kode</text>
+        <text x="610" y="100" text-anchor="middle" font-size="10" fill="#6b6257">ASVS, Cheat Sheets</text>
+        <text x="610" y="113" text-anchor="middle" font-size="10" fill="#6b6257">«Bruk parameterized queries»</text>
+      </svg>
+      <figcaption>Trusselen blir mer konkret jo lengre høyre du beveger deg. STRIDE-kategorien «Tampering» konkretiseres til OWASP A03 Injection, deretter CAPEC-66 (SQL Injection), og endelig til kodepraksis fra OWASP Cheat Sheet Series.</figcaption>
+    </figure>
+
+    <ul>
+      <li><strong>STRIDE:</strong> hjelper deg <em>finne</em> trusler under threat modeling — bredt vokabular.</li>
+      <li><strong>OWASP Top 10:</strong> bro mellom abstrakt kategori og web-spesifikke svakheter — godt egnet for opplæring og prioritering.</li>
+      <li><strong>CAPEC (Common Attack Pattern Enumeration):</strong> MITRE-vedlikeholdt katalog over konkrete angrepsmønstre med pre-conditions, ressurser, mitigasjoner.</li>
+      <li><strong>OWASP ASVS / Cheat Sheets:</strong> konkrete kontroller på kode- og konfig-nivå.</li>
+    </ul>
+  </div>
+</section>
+
 <section id="dread">
   <div class="container">
-    <div class="section-badge">03 · DREAD</div>
-    <h2>DREAD-<em>scoring</em></h2>
-    <p class="section-intro">DREAD gir en kvantitativ score til trusler slik at de kan prioriteres — men med bevissthet om at scoren er subjektiv.</p>
-    <p class="lead">DREAD scores trusler på fem dimensjoner, hver fra 1 til 10. Summen gir en total score som brukes til å prioritere hvilke trusler som skal mitigeres først. En SQL injection mot en åpen innloggingsside scorer høyt på alle dimensjoner. En XML injection mot et internt verktøy brukt av én person scorer lavt på Affected users.</p>
-
-    <table>
-      <thead><tr><th>Dimensjon</th><th>Spørsmål</th><th>Lav (1–3)</th><th>Høy (8–10)</th></tr></thead>
-      <tbody>
-        <tr><td><strong>D</strong>amage</td><td>Hva er skadeomfanget?</td><td>Lokal, begrenset</td><td>Full kontokompromittering</td></tr>
-        <tr><td><strong>R</strong>eproducibility</td><td>Hvor enkelt er det å gjenta angrepet?</td><td>Krever spesielle omstendigheter</td><td>Alltid reproduserbart</td></tr>
-        <tr><td><strong>E</strong>xploitability</td><td>Hva kreves for å utnytte trusselen?</td><td>Expert, fysisk tilgang</td><td>Ingen skills, remote</td></tr>
-        <tr><td><strong>A</strong>ffected users</td><td>Hvor mange berøres?</td><td>Én bruker</td><td>Alle brukere</td></tr>
-        <tr><td><strong>D</strong>iscoverability</td><td>Hvor lett er trusselen å oppdage?</td><td>Krever intern kunnskap</td><td>Offentlig kjent</td></tr>
-      </tbody>
-    </table>
+    <div class="section-badge">06 · DREAD</div>
+    <h2>DREAD-<em>scoring</em> (kort om en deprecated metode)</h2>
+    <p class="section-intro">DREAD var en kvantitativ scoringsmetode fra Microsoft. Den er forlatt i SDL — du møter den i pensum, men ikke i moderne praksis.</p>
+    <p class="lead">DREAD scorer trusler på fem dimensjoner — Damage, Reproducibility, Exploitability, Affected users, Discoverability — hver fra 1 til 10. Summen prioriterer trusler. Microsoft gikk bort fra DREAD fordi to team gjerne ga vidt forskjellige scores for samme trussel; metoden ga falsk presisjon. Microsoft byttet til enkle Høy/Middels/Lav-vurderinger, og for kjente sårbarheter bruker industrien <strong>CVSS</strong> (dekkes i kapittel 6).</p>
 
     <div class="callout callout-blue">
-      <h4>DREAD vs. CVSS</h4>
-      <p>DREAD er subjektiv og egnet for intern prioritering. CVSS (Common Vulnerability Scoring System) er en industristandard for kjente sårbarheter med mer presise beregningsregler. For threat modeling av ukjente trusler er DREAD enklere; for rapportering av kjente CVEer er CVSS standarden.</p>
+      <h4>Hvorfor DREAD står igjen i pensum</h4>
+      <p>Den er pedagogisk — viser hvilke dimensjoner som inngår i risikovurdering (skade, sannsynlighet, antall berørte). Kjenn forkortelsen og hvorfor den ble forlatt; ikke invester tid i å score med den i praksis.</p>
     </div>
   </div>
 </section>
 
 <section id="mitigasjoner">
   <div class="container">
-    <div class="section-badge">04 · Mitigasjoner</div>
+    <div class="section-badge">07 · Mitigasjoner</div>
     <h2>Mitigasjoner per <em>STRIDE-kategori</em></h2>
     <p class="section-intro">Hver STRIDE-kategori har en naturlig motpart — den kontrollen som direkte adresserer trusselen.</p>
 
@@ -126,7 +279,7 @@
 
 <section id="praktisk-eksempel">
   <div class="container">
-    <div class="section-badge">05 · Eksempel</div>
+    <div class="section-badge">08 · Eksempel</div>
     <h2>Praktisk <em>eksempel</em></h2>
     <p class="section-intro">Threat modeling av et JWT-basert API — fra DFD til trusselregisteret til mitigasjoner.</p>
     <p class="lead">System: et REST API med JWT-autentisering. Klienten (nettleser) sender JWT i Authorization-header. API-et verifiserer tokenet og returnerer brukerdata. En database lagrer brukerdata. Trust boundaries: klient ↔ API (internett-grense), API ↔ database (intern grense).</p>
@@ -147,6 +300,9 @@
       <h4>Husk</h4>
       <p>Et trusselregister er en levende liste. T-01 kan endres til «Løst — algoritme whitelist implementert» når mitigasjonen er verifisert i kode. Threat modeling er ikke ferdig ved første økt.</p>
     </div>
+
+    <h3>Verktøy: OWASP Threat Dragon</h3>
+    <p><a href="https://owasp.org/www-project-threat-dragon/" target="_blank" rel="noopener">OWASP Threat Dragon</a> lar deg tegne DFD-er, klassifisere hver komponent som <em>«stores credentials»</em>, <em>«is encrypted»</em>, <em>«is signed»</em>, og deretter automatisk generere et utkast til trusselregisteret per element basert på STRIDE. Web, Windows, macOS, Linux. Open source. Bruk det til å øve på flyt-modellen — selve diskusjonen forblir likevel verktøyets viktigste del.</p>
   </div>
 </section>
 </main>
@@ -158,5 +314,41 @@
 </footer>
 <script src="../chat-widget.js"></script>
 <script src="../nav-search.js"></script>
+<script>
+(function () {
+  var FEEDBACK = {
+    S: 'Spoofing — angriperen utgir seg for å være noen / noe annet (legitim kilde, signatur, identitet).',
+    T: 'Tampering — uautorisert modifikasjon av data, kode eller tilstand.',
+    R: 'Repudiation — angriperen kan benekte at handlingen er gjort fordi sporene er manipulert eller mangler.',
+    I: 'Information disclosure — data lekker til noen som ikke skal se den.',
+    D: 'Denial of Service — legitim bruk hindres ved overbelastning eller ressursutmatting.',
+    E: 'Elevation of Privilege — bruker eller program oppnår høyere tilgang enn tildelt.'
+  };
+  document.querySelectorAll('.sm-item').forEach(function (item) {
+    var correct = item.getAttribute('data-correct');
+    var feedback = item.querySelector('.sm-feedback');
+    item.querySelectorAll('.sm-buttons button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (item.classList.contains('sm-correct') || item.classList.contains('sm-wrong')) return;
+        var picked = btn.getAttribute('data-letter');
+        var ok = picked === correct;
+        item.classList.add(ok ? 'sm-correct' : 'sm-wrong');
+        btn.classList.add(ok ? 'sm-picked-correct' : 'sm-picked-wrong');
+        if (!ok) {
+          item.querySelectorAll('.sm-buttons button').forEach(function (b) {
+            if (b.getAttribute('data-letter') === correct) b.classList.add('sm-was-correct');
+          });
+        }
+        item.querySelectorAll('.sm-buttons button').forEach(function (b) { b.disabled = true; });
+        var msg = ok
+          ? 'Riktig. ' + FEEDBACK[correct]
+          : 'Feil. Riktig svar: ' + correct + ' — ' + FEEDBACK[correct];
+        feedback.textContent = msg;
+        feedback.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>

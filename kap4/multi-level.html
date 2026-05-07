@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-level security — Kapittel 4</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 4</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 4: Autentisering og autorisasjon">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 4 · Multi-level security</div>
+    <h1>Klassiske <em>tilgangsmodeller</em></h1>
+    <p class="lede">DAC, MAC, Bell-LaPadula og Biba — modellene som ligger under operativsystemets <code>rwxrw----</code>, iOS-tillatelser, militær klassifisering og moderne sandboxer.</p>
+    <nav class="toc">
+      <a href="#rammeverk"><span class="toc-num">01</span>Rammeverk</a>
+      <a href="#niva"><span class="toc-num">02</span>Nivåer</a>
+      <a href="#dac"><span class="toc-num">03</span>DAC</a>
+      <a href="#matrise"><span class="toc-num">04</span>Tilgangsmatrise</a>
+      <a href="#mekanismer"><span class="toc-num">05</span>ACL og capabilities</a>
+      <a href="#trojan"><span class="toc-num">06</span>Trojan-svakhet i DAC</a>
+      <a href="#mac"><span class="toc-num">07</span>MAC</a>
+      <a href="#blp"><span class="toc-num">08</span>Bell-LaPadula</a>
+      <a href="#biba"><span class="toc-num">09</span>Biba</a>
+      <a href="#sammenligning"><span class="toc-num">10</span>DAC vs. MAC</a>
+    </nav>
+  </div>
+</header>
+
+<section id="rammeverk">
+  <div class="container">
+    <div class="section-badge">01 · Rammeverk</div>
+    <h2>Tilgangskontroll i <em>fem lag</em></h2>
+    <p class="section-intro">Fra abstrakt regelverk til konkret kode — tilgangskontroll lever i fem lag som må henge sammen for at modellen skal holde i praksis.</p>
+    <p class="lead">En tilgangskontroll består ikke bare av kode. Helt øverst ligger <strong>policy</strong> — de menneskelige reglene om hvem som skal ha tilgang til hva. Under det formaliseres policy som en <strong>modell</strong>, som så implementeres som <strong>mekanisme</strong> i kode. To lag til binder det hele: <strong>awareness</strong> (utdanning og bevissthet) og <strong>management</strong> (drift). Når laget for awareness eller management svikter, oppstår <em>privilege creep</em>: brukere ender opp med flere rettigheter enn de trenger, fordi ingen passer på å fjerne dem.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="13">
+        <ellipse cx="160" cy="40" rx="100" ry="22" fill="rgba(45,74,122,0.12)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="160" y="45" text-anchor="middle" font-weight="600" fill="#2d4a7a">Policy</text>
+        <text x="290" y="44" font-size="12" fill="#6b6257">Hva er, og ikke er, lov</text>
+
+        <ellipse cx="160" cy="90" rx="100" ry="22" fill="rgba(45,74,122,0.10)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="160" y="95" text-anchor="middle" font-weight="600" fill="#2d4a7a">Modell</text>
+        <text x="290" y="94" font-size="12" fill="#6b6257">Formell representasjon av policy</text>
+
+        <ellipse cx="160" cy="140" rx="100" ry="22" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="160" y="145" text-anchor="middle" font-weight="600" fill="#2d4a7a">Mekanisme</text>
+        <text x="290" y="144" font-size="12" fill="#6b6257">Kode som gjennomfører modellen</text>
+
+        <ellipse cx="160" cy="190" rx="100" ry="22" fill="rgba(163,152,134,0.20)" stroke="#a39886" stroke-width="1.5"/>
+        <text x="160" y="195" text-anchor="middle" font-weight="600" fill="#6b6257">Awareness</text>
+        <text x="290" y="194" font-size="12" fill="#6b6257">Utdanning og bevissthet</text>
+
+        <ellipse cx="160" cy="240" rx="100" ry="22" fill="rgba(163,152,134,0.15)" stroke="#a39886" stroke-width="1.5"/>
+        <text x="160" y="245" text-anchor="middle" font-weight="600" fill="#6b6257">Management</text>
+        <text x="290" y="244" font-size="12" fill="#6b6257">Drift og oppfølging</text>
+
+        <rect x="510" y="160" width="200" height="80" rx="3" fill="rgba(176,68,40,0.10)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="610" y="185" text-anchor="middle" font-weight="600" fill="#b04428">Privilege creep</text>
+        <text x="610" y="205" text-anchor="middle" font-size="11" fill="#6b6257">Brukere akkumulerer</text>
+        <text x="610" y="220" text-anchor="middle" font-size="11" fill="#6b6257">rettigheter de ikke</text>
+        <text x="610" y="235" text-anchor="middle" font-size="11" fill="#6b6257">trenger lenger</text>
+      </svg>
+      <figcaption>De fem lagene i tilgangskontroll. Awareness og management er der de fleste systemer faktisk svikter — ikke i koden.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="niva">
+  <div class="container">
+    <div class="section-badge">02 · Nivåer</div>
+    <h2>Tilgangskontroll på <em>fire nivåer</em></h2>
+    <p class="section-intro">Hvert lag i programvarestakken har sin egen tilgangskontroll. Et hull i ett lag kan undergrave de andre.</p>
+    <p class="lead">Tilgangskontroll skjer på fire nivåer samtidig: applikasjon, middleware, operativsystem og hardware. Et webrammeverk sjekker rolle (applikasjon), databasen sjekker SQL-rettigheter (middleware), Linux sjekker filrettigheter (OS), og CPUen sjekker ringnivåer (hardware). <em>Environmental creep</em> oppstår når omgivelsene endrer seg — sky-migrasjon, fjernarbeid, nye integrasjoner — og sikkerhetsmodellen ikke lenger passer virkeligheten.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="13">
+        <rect x="100" y="20" width="400" height="38" rx="3" fill="rgba(45,74,122,0.10)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="300" y="44" text-anchor="middle" font-weight="600" fill="#2d4a7a">Applikasjon</text>
+        <text x="520" y="43" font-size="11" fill="#6b6257">RBAC, ABAC, autorisasjonslogikk</text>
+
+        <rect x="100" y="68" width="400" height="38" rx="3" fill="rgba(45,74,122,0.16)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="300" y="92" text-anchor="middle" font-weight="600" fill="#2d4a7a">Middleware</text>
+        <text x="520" y="91" font-size="11" fill="#6b6257">DB-roller, message broker ACL</text>
+
+        <rect x="100" y="116" width="400" height="38" rx="3" fill="rgba(61,107,58,0.14)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="300" y="140" text-anchor="middle" font-weight="600" fill="#3d6b3a">Operativsystem</text>
+        <text x="520" y="139" font-size="11" fill="#6b6257">Filrettigheter, prosess-isolasjon</text>
+
+        <rect x="100" y="164" width="400" height="38" rx="3" fill="rgba(176,68,40,0.14)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="300" y="188" text-anchor="middle" font-weight="600" fill="#b04428">Hardware</text>
+        <text x="520" y="187" font-size="11" fill="#6b6257">Ringnivåer, SGX, secure enclave</text>
+      </svg>
+      <figcaption>Tilgangskontroll må håndheves på alle fire nivåer. Et brudd på ett nivå kan føre til full kompromittering av nivåene over.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="dac">
+  <div class="container">
+    <div class="section-badge">03 · DAC</div>
+    <h2>Discretionary <em>Access Control</em></h2>
+    <p class="section-intro">Eieren av en ressurs bestemmer hvem som skal ha tilgang — fleksibelt, men sårbart for misbruk.</p>
+    <p class="lead">DAC er den vanligste modellen i hverdagen: når du oppretter en fil i hjemmemappa, bestemmer du selv hvem som kan lese eller endre den. Linux-filrettigheter, Google Docs-deling og GitHub-repotilgang er alle DAC. Modellen er enkel og skalerer godt — men eierens skjønn er også svakheten. En bruker kan dele en sensitiv fil med feil person, eller en kompromittert konto kan dele alt med angriperen.</p>
+
+    <ul>
+      <li><strong>Eieren bestemmer:</strong> hvem som får read, write, eller execute på objektet.</li>
+      <li><strong>Implementasjoner:</strong> Linux-filsystem, Windows NTFS, RDBMS-grants, S3-bøtte-policies.</li>
+      <li><strong>Styrke:</strong> enkel og fleksibel — passer godt for samarbeid.</li>
+      <li><strong>Svakhet:</strong> ingen sentral kontroll. Eieren kan utlevere sensitiv data — bevisst eller via ondsinnet program.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="matrise">
+  <div class="container">
+    <div class="section-badge">04 · Tilgangsmatrise</div>
+    <h2>Tilgangs-<em>matrisen</em></h2>
+    <p class="section-intro">Den abstrakte modellen bak nesten all DAC: subjekter på radene, objekter på kolonnene, rettigheter i cellene.</p>
+    <p class="lead">Tilgangsmatrisen er konseptuell — du bygger den aldri som én stor tabell i praksis (matrisen blir gigantisk og glissen). Men den er nyttig som referansepunkt: en celle <code>(Ann, Fil 1)</code> inneholder rettighetene Ann har på Fil 1. Tre praktiske implementasjoner faller ut av matrisen avhengig av hvilken «retning» du lagrer langs.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <text x="200" y="30" text-anchor="middle" font-weight="600" fill="#6b6257">Fil 1</text>
+        <text x="320" y="30" text-anchor="middle" font-weight="600" fill="#6b6257">Fil 2</text>
+        <text x="440" y="30" text-anchor="middle" font-weight="600" fill="#6b6257">Fil 3</text>
+        <text x="560" y="30" text-anchor="middle" font-weight="600" fill="#6b6257">Program 1</text>
+
+        <text x="120" y="75" text-anchor="end" font-weight="600" fill="#b04428">Ann</text>
+        <text x="120" y="125" text-anchor="end" font-weight="600" fill="#b04428">Bob</text>
+        <text x="120" y="175" text-anchor="end" font-weight="600" fill="#b04428">Carl</text>
+
+        <line x1="140" y1="40" x2="620" y2="40" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="140" y1="90" x2="620" y2="90" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="140" y1="140" x2="620" y2="140" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="140" y1="190" x2="620" y2="190" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="140" y1="40" x2="140" y2="190" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="260" y1="40" x2="260" y2="190" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="380" y1="40" x2="380" y2="190" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="500" y1="40" x2="500" y2="190" stroke="#c9c0ae" stroke-width="1"/>
+        <line x1="620" y1="40" x2="620" y2="190" stroke="#c9c0ae" stroke-width="1"/>
+
+        <text x="200" y="58" text-anchor="middle" fill="#6b6257">own</text>
+        <text x="200" y="72" text-anchor="middle" fill="#6b6257">read</text>
+        <text x="200" y="86" text-anchor="middle" fill="#6b6257">write</text>
+        <text x="320" y="65" text-anchor="middle" fill="#6b6257">read</text>
+        <text x="320" y="79" text-anchor="middle" fill="#6b6257">write</text>
+        <text x="560" y="72" text-anchor="middle" fill="#6b6257">execute</text>
+
+        <text x="200" y="120" text-anchor="middle" fill="#6b6257">read</text>
+        <text x="440" y="115" text-anchor="middle" fill="#6b6257">read</text>
+        <text x="440" y="129" text-anchor="middle" fill="#6b6257">write</text>
+
+        <text x="320" y="170" text-anchor="middle" fill="#6b6257">read</text>
+        <text x="560" y="163" text-anchor="middle" fill="#6b6257">execute</text>
+        <text x="560" y="177" text-anchor="middle" fill="#6b6257">read</text>
+      </svg>
+      <figcaption>Tilgangsmatrise: subjekter på radene, objekter på kolonnene, rettigheter i cellene. Få celler er fylt — matrisen er glissen.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="mekanismer">
+  <div class="container">
+    <div class="section-badge">05 · Mekanismer</div>
+    <h2>ACL, capabilities og <em>autorisasjonstabell</em></h2>
+    <p class="section-intro">Tre måter å lagre tilgangsmatrisen — etter celle, etter kolonne, eller etter rad.</p>
+    <p class="lead">Glissen matrise lagres aldri direkte. Tre praktiske mekanismer fanger samme informasjon i forskjellige strukturer:</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <rect x="20" y="20" width="220" height="240" rx="3" fill="rgba(176,68,40,0.06)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="130" y="44" text-anchor="middle" font-weight="600" fill="#b04428">Autorisasjonstabell</text>
+        <text x="130" y="60" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">celle for celle</text>
+        <line x1="40" y1="72" x2="220" y2="72" stroke="#c9c0ae"/>
+        <text x="55" y="92" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Ann   own       Fil 1</text>
+        <text x="55" y="108" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Ann   read      Fil 1</text>
+        <text x="55" y="124" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Ann   write     Fil 1</text>
+        <text x="55" y="140" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Ann   read      Fil 2</text>
+        <text x="55" y="156" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Bob   read      Fil 1</text>
+        <text x="55" y="172" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Bob   read      Fil 3</text>
+        <text x="55" y="188" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Carl  read      Fil 2</text>
+        <text x="55" y="204" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Carl  execute   Prog 1</text>
+        <text x="130" y="240" text-anchor="middle" font-size="11" fill="#a39886" font-style="italic">DBMS-relasjoner</text>
+
+        <rect x="250" y="20" width="220" height="240" rx="3" fill="rgba(45,74,122,0.06)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="44" text-anchor="middle" font-weight="600" fill="#2d4a7a">ACL</text>
+        <text x="360" y="60" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">per objekt (kolonne)</text>
+        <line x1="270" y1="72" x2="450" y2="72" stroke="#c9c0ae"/>
+        <text x="270" y="92" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Fil 1 → Ann (own,r,w),</text>
+        <text x="282" y="106" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Bob (r)</text>
+        <text x="270" y="128" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Fil 2 → Ann (r,w),</text>
+        <text x="282" y="142" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Carl (r)</text>
+        <text x="270" y="164" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Fil 3 → Bob (r,w)</text>
+        <text x="270" y="186" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Prog 1 → Ann (x),</text>
+        <text x="282" y="200" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Carl (x,r)</text>
+        <text x="360" y="240" text-anchor="middle" font-size="11" fill="#a39886" font-style="italic">Linux ls -l, NTFS</text>
+
+        <rect x="480" y="20" width="220" height="240" rx="3" fill="rgba(61,107,58,0.06)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="590" y="44" text-anchor="middle" font-weight="600" fill="#3d6b3a">Capabilities</text>
+        <text x="590" y="60" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">per subjekt (rad)</text>
+        <line x1="500" y1="72" x2="680" y2="72" stroke="#c9c0ae"/>
+        <text x="500" y="92" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Ann: Fil 1 (own,r,w),</text>
+        <text x="512" y="106" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Fil 2 (r,w),</text>
+        <text x="512" y="120" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Prog 1 (x)</text>
+        <text x="500" y="142" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Bob: Fil 1 (r),</text>
+        <text x="512" y="156" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Fil 3 (r,w)</text>
+        <text x="500" y="178" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Carl: Fil 2 (r),</text>
+        <text x="512" y="192" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">Prog 1 (x,r)</text>
+        <text x="590" y="240" text-anchor="middle" font-size="11" fill="#a39886" font-style="italic">iOS, Android-runtime</text>
+      </svg>
+      <figcaption>Tre måter å lagre samme matrise. ACL er enklest å spørre fra objektets side («hvem kan lese denne fila?»). Capabilities er enklest fra subjektets side («hva kan denne brukeren?»).</figcaption>
+    </figure>
+
+    <p><strong>Linux-rettigheter</strong> (<code>ls -l</code> viser <code>rwxrw----</code>) er en kompakt ACL: tre triplet for eier, gruppe og «andre». Hvert triplet er <code>read/write/execute</code>.</p>
+    <p><strong>iOS-tillatelser</strong> (kontakter, kalender, kamera) er capabilities: hver app har en liste av rettigheter den har fått fra brukeren. Apper må be om utvidede rettigheter ved kjøretid.</p>
+  </div>
+</section>
+
+<section id="trojan">
+  <div class="container">
+    <div class="section-badge">06 · Trojan-svakhet</div>
+    <h2>Trojan-hesten i <em>DAC</em></h2>
+    <p class="section-intro">DAC sjekker bare hvem brukeren er — ikke hva prosessen gjør på vegne av brukeren.</p>
+    <p class="lead">DAC har en grunnleggende svakhet: tilgangskontrollen ser ikke forskjell på <em>brukeren</em> og <em>prosessen brukeren kjører</em>. Hvis administrerende direktør kjører en app som er kompromittert med skjult kode, kjører den koden med direktørens rettigheter. Klassisk eksempel: en ansatt lager filen <code>steal.txt</code> som direktøren har skrivetilgang til. Direktøren kjører en applikasjon med skjulte instruksjoner: <em>les den hemmelige filen, skriv til steal.txt</em>. DAC sjekker bare at direktøren har tilgang — og innvilger begge operasjoner. Dataene er stjålet uten at direktøren merker noe.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs>
+          <marker id="ta" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker>
+        </defs>
+        <rect x="20" y="40" width="120" height="50" rx="3" fill="rgba(176,68,40,0.10)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="80" y="60" text-anchor="middle" font-weight="600" fill="#b04428">Ansatt</text>
+        <text x="80" y="78" text-anchor="middle" font-size="10" fill="#6b6257">(angriper)</text>
+
+        <rect x="280" y="40" width="160" height="50" rx="3" fill="rgba(45,74,122,0.10)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="60" text-anchor="middle" font-weight="600" fill="#2d4a7a">Direktør</text>
+        <text x="360" y="78" text-anchor="middle" font-size="10" fill="#6b6257">kjører ondsinnet app</text>
+
+        <line x1="142" y1="65" x2="278" y2="65" stroke="#b04428" stroke-width="1.5" marker-end="url(#ta)"/>
+        <text x="210" y="58" text-anchor="middle" font-size="10" fill="#b04428">1. lager steal.txt + gir skrive-tilgang</text>
+
+        <rect x="490" y="40" width="180" height="50" rx="3" fill="rgba(61,107,58,0.10)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="580" y="60" text-anchor="middle" font-weight="600" fill="#3d6b3a">App</text>
+        <text x="580" y="78" text-anchor="middle" font-size="10" fill="#6b6257">skjulte instruksjoner</text>
+
+        <line x1="442" y1="65" x2="488" y2="65" stroke="#2d4a7a" stroke-width="1.5"/>
+
+        <rect x="20" y="140" width="200" height="50" rx="3" fill="rgba(176,68,40,0.10)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="120" y="160" text-anchor="middle" font-weight="600" fill="#b04428">Hemmelig fil</text>
+        <text x="120" y="178" text-anchor="middle" font-size="10" fill="#6b6257">direktør har lesetilgang</text>
+
+        <rect x="500" y="140" width="180" height="50" rx="3" fill="rgba(176,68,40,0.10)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="590" y="160" text-anchor="middle" font-weight="600" fill="#b04428">steal.txt</text>
+        <text x="590" y="178" text-anchor="middle" font-size="10" fill="#6b6257">eid av angriper</text>
+
+        <line x1="220" y1="160" x2="498" y2="160" stroke="#b04428" stroke-width="1.5" marker-end="url(#ta)"/>
+        <text x="360" y="153" text-anchor="middle" font-size="10" fill="#b04428">2. app leser → 3. app skriver. DAC stopper ingen.</text>
+      </svg>
+      <figcaption>Trojan-angrep mot DAC: app kjører med direktørens rettigheter, kopierer hemmelig data til fil angriperen kontrollerer.</figcaption>
+    </figure>
+
+    <div class="callout callout-blue">
+      <h4>Hvorfor MAC løser dette</h4>
+      <p>MAC merker både subjekt og prosess med klassifisering. Hvis appen kjører som «ukklassifisert» kan den ikke lese den hemmelige fila. Hvis den kjører som «hemmelig» kan den ikke skrive til ukklassifisert fil. Begge angrepsstegene blokkeres av modellen, ikke av brukerens skjønn.</p>
+    </div>
+  </div>
+</section>
+
+<section id="mac">
+  <div class="container">
+    <div class="section-badge">07 · MAC</div>
+    <h2>Mandatory <em>Access Control</em></h2>
+    <p class="section-intro">Sentral autoritet definerer reglene — ingen bruker kan endre dem, ikke engang eier av ressursen.</p>
+    <p class="lead">MAC snur DAC på hodet: brukerne kan ikke bestemme tilgangen, systemet håndhever en sentralt definert policy. Hvert objekt og subjekt får tildelt en <strong>tilgangsklasse</strong> — typisk en hierarkisk klassifisering. Originalt utviklet for militær bruk, men finnes i dag i SELinux, AppArmor, iOS Secure Enclave og Windows Mandatory Integrity Control.</p>
+
+    <ul>
+      <li><strong>Objekt-klassifisering:</strong> Top Secret, Secret, Confidential, Unclassified.</li>
+      <li><strong>Subjekt-klassifisering:</strong> tilsvarende nivåer for personer, prosesser og systemer.</li>
+      <li><strong>Sentral autoritet:</strong> kun systemadministrator kan endre klassifiseringer — ikke eier.</li>
+      <li><strong>To berømte modeller:</strong> Bell-LaPadula (konfidensialitet) og Biba (integritet).</li>
+    </ul>
+  </div>
+</section>
+
+<section id="blp">
+  <div class="container">
+    <div class="section-badge">08 · Bell-LaPadula</div>
+    <h2>Bell-LaPadula: <em>konfidensialitet</em></h2>
+    <p class="section-intro">«No read up, no write down» — hemmeligheter lekker ikke nedover, og hemmelighetsstemplet data finner aldri veien til offentligheten.</p>
+    <p class="lead">Bell-LaPadula (BLP) sikrer konfidensialitet via to enkle regler. <strong>No read up (NRU):</strong> en bruker kan ikke lese data klassifisert høyere enn sitt eget nivå. <strong>No write down (NWD), * (star) property:</strong> en bruker (eller prosess) kan ikke skrive til et lavere nivå. Den siste regelen er den ikke-åpenbare: hvorfor kan ikke en general skrive en offentlig pressemelding? Fordi prosessen kan inneholde Trojan-kode som kopierer hemmelig data til offentlig nivå. <em>Strong star</em> krever at all skriving skjer på samme nivå som leseren.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <rect x="120" y="30" width="240" height="40" fill="rgba(176,68,40,0.20)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="240" y="55" text-anchor="middle" font-weight="600" fill="#b04428">TOP SECRET</text>
+
+        <rect x="120" y="78" width="240" height="40" fill="rgba(176,68,40,0.14)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="240" y="103" text-anchor="middle" font-weight="600" fill="#b04428">SECRET</text>
+
+        <rect x="120" y="126" width="240" height="40" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="240" y="151" text-anchor="middle" font-weight="600" fill="#b04428">CONFIDENTIAL</text>
+
+        <rect x="120" y="174" width="240" height="40" fill="rgba(176,68,40,0.04)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="240" y="199" text-anchor="middle" font-weight="600" fill="#b04428">UNCLASSIFIED</text>
+
+        <circle cx="450" cy="98" r="14" fill="rgba(45,74,122,0.20)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="450" y="103" text-anchor="middle" font-size="10" font-weight="600" fill="#2d4a7a">U</text>
+        <text x="450" y="125" text-anchor="middle" font-size="10" fill="#6b6257">SECRET</text>
+        <text x="450" y="138" text-anchor="middle" font-size="10" fill="#6b6257">bruker</text>
+
+        <line x1="436" y1="92" x2="365" y2="55" stroke="#b04428" stroke-width="2" marker-end="url(#blp-x)"/>
+        <text x="395" y="68" text-anchor="middle" font-size="11" fill="#b04428" font-weight="600">read ✗</text>
+        <text x="395" y="80" text-anchor="middle" font-size="10" fill="#b04428">No read up</text>
+
+        <line x1="436" y1="105" x2="365" y2="195" stroke="#b04428" stroke-width="2" marker-end="url(#blp-x)"/>
+        <text x="395" y="155" text-anchor="middle" font-size="11" fill="#b04428" font-weight="600">write ✗</text>
+        <text x="395" y="167" text-anchor="middle" font-size="10" fill="#b04428">No write down</text>
+
+        <line x1="436" y1="98" x2="370" y2="98" stroke="#3d6b3a" stroke-width="2" marker-end="url(#blp-ok)"/>
+        <text x="490" y="180" font-size="11" fill="#6b6257">read ↓ OK</text>
+        <text x="490" y="195" font-size="11" fill="#6b6257">write ↑ OK (svak *)</text>
+        <text x="490" y="210" font-size="11" fill="#6b6257">samme nivå (sterk *)</text>
+
+        <text x="240" y="245" text-anchor="middle" font-style="italic" font-size="13" fill="#6b6257">Konfidensialitet — hemmeligheter går ikke nedover</text>
+
+        <defs>
+          <marker id="blp-x" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker>
+          <marker id="blp-ok" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#3d6b3a"/></marker>
+        </defs>
+      </svg>
+      <figcaption>Bell-LaPadula. Secret-bruker kan ikke lese Top Secret (NRU), og kan ikke skrive til Confidential eller Unclassified (NWD).</figcaption>
+    </figure>
+
+    <p><strong>iOS Secure Enclave</strong> er et praktisk eksempel: applikasjoner (lavere nivå) kan be Secure Enclave om å verifisere fingeravtrykk, men kan aldri lese de underliggende biometriske nøklene (no read up). Secure Enclave kan signere på vegne av app, men eksporterer aldri nøkkelmateriale ned til appens minne.</p>
+  </div>
+</section>
+
+<section id="biba">
+  <div class="container">
+    <div class="section-badge">09 · Biba</div>
+    <h2>Biba: <em>integritet</em></h2>
+    <p class="section-intro">Biba er Bell-LaPadula speilvendt — der BLP beskytter konfidensialitet, beskytter Biba integritet.</p>
+    <p class="lead">Biba snur BLP: <strong>no write up (NWU)</strong> og <strong>no read down (NRD)</strong>. Tenk hva det betyr: en lavt klassifisert (lite betrodd) prosess kan ikke skrive til et høyere (mer kritisk) nivå — programvare lastet ned fra nettet kan ikke skrive til OS-kjernen. Og en høyt klassifisert prosess kan ikke lese fra et lavere nivå — navigasjonssystemet i en bil kan ikke ta data fra underholdningssystemet, fordi underholdningsdata er upålitelige.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <rect x="120" y="30" width="240" height="40" fill="rgba(61,107,58,0.20)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="240" y="55" text-anchor="middle" font-weight="600" fill="#3d6b3a">VERY CRUCIAL</text>
+
+        <rect x="120" y="78" width="240" height="40" fill="rgba(61,107,58,0.14)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="240" y="103" text-anchor="middle" font-weight="600" fill="#3d6b3a">CRUCIAL</text>
+
+        <rect x="120" y="126" width="240" height="40" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="240" y="151" text-anchor="middle" font-weight="600" fill="#3d6b3a">IMPORTANT</text>
+
+        <rect x="120" y="174" width="240" height="40" fill="rgba(61,107,58,0.04)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="240" y="199" text-anchor="middle" font-weight="600" fill="#3d6b3a">UNKNOWN</text>
+
+        <circle cx="450" cy="98" r="14" fill="rgba(45,74,122,0.20)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="450" y="103" text-anchor="middle" font-size="10" font-weight="600" fill="#2d4a7a">U</text>
+        <text x="450" y="125" text-anchor="middle" font-size="10" fill="#6b6257">CRUCIAL</text>
+        <text x="450" y="138" text-anchor="middle" font-size="10" fill="#6b6257">prosess</text>
+
+        <line x1="436" y1="92" x2="365" y2="55" stroke="#b04428" stroke-width="2" marker-end="url(#biba-x)"/>
+        <text x="395" y="68" text-anchor="middle" font-size="11" fill="#b04428" font-weight="600">write ✗</text>
+        <text x="395" y="80" text-anchor="middle" font-size="10" fill="#b04428">No write up</text>
+
+        <line x1="436" y1="105" x2="365" y2="195" stroke="#b04428" stroke-width="2" marker-end="url(#biba-x)"/>
+        <text x="395" y="155" text-anchor="middle" font-size="11" fill="#b04428" font-weight="600">read ✗</text>
+        <text x="395" y="167" text-anchor="middle" font-size="10" fill="#b04428">No read down</text>
+
+        <text x="240" y="245" text-anchor="middle" font-style="italic" font-size="13" fill="#6b6257">Integritet — kritiske data forurenses ikke av upålitelige kilder</text>
+
+        <defs>
+          <marker id="biba-x" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker>
+        </defs>
+      </svg>
+      <figcaption>Biba. Crucial-prosess kan ikke skrive til Very Crucial (NWU) og kan ikke lese fra Important eller Unknown (NRD).</figcaption>
+    </figure>
+
+    <ul>
+      <li><strong>NWU eksempel:</strong> nedlastet programvare kan ikke endre OS-kjernefiler. Stopper Trojan-modifikasjon av kritiske systemkomponenter.</li>
+      <li><strong>NRD eksempel:</strong> bilens navigasjonssystem leser ikke fra underholdningssystemet — passasjerinput skal ikke kunne påvirke kjørehjelp.</li>
+    </ul>
+
+    <div class="callout callout-green">
+      <h4>BLP + Biba kombinert</h4>
+      <p>Hvis både konfidensialitet og integritet skal håndheves, får hvert objekt og subjekt to klassifiseringer — én for hver dimensjon. Multics og enkelte SELinux-policies bruker dette mønsteret. Kompleksitet vokser, men gir formell sikkerhetsanalyse.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sammenligning">
+  <div class="container">
+    <div class="section-badge">10 · DAC vs. MAC</div>
+    <h2>Avveiningen: <em>fleksibilitet vs. kontroll</em></h2>
+    <p class="section-intro">Hver modell svarer på et spørsmål den andre ikke kan: hvor enkelt versus hvor strengt.</p>
+
+    <table>
+      <thead><tr><th></th><th>DAC</th><th>MAC</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Hvem bestemmer?</strong></td><td>Eieren av objektet</td><td>Sentral autoritet</td></tr>
+        <tr><td><strong>Fleksibilitet</strong></td><td>Høy — eier kan dele fritt</td><td>Lav — sentral policy</td></tr>
+        <tr><td><strong>Skalerbarhet</strong></td><td>God</td><td>Tung administrasjon</td></tr>
+        <tr><td><strong>Informasjonsflyt</strong></td><td>Svak kontroll</td><td>Streng kontroll</td></tr>
+        <tr><td><strong>Trojan-motstand</strong></td><td>Svak — prosess arver brukerrettigheter</td><td>Sterk — prosess har egen klassifisering</td></tr>
+        <tr><td><strong>Typisk bruk</strong></td><td>Linux-fil, Google Docs, GitHub</td><td>Militær, iOS Secure Enclave, SELinux</td></tr>
+      </tbody>
+    </table>
+
+    <p>Moderne systemer kombinerer ofte begge: Linux har DAC som standard, men SELinux/AppArmor legger MAC-policies på toppen. iOS bruker capabilities (DAC-aktig) for app-tillatelser, men Secure Enclave håndhever MAC for kryptografiske nøkler. Sky-systemer bruker DAC for ressursdeling og MAC-aktige policies for compliance-data.</p>
+
+    <div class="callout">
+      <h4>Lærdom fra modellene</h4>
+      <p>RBAC og ABAC (forrige delside) er ofte hybrider — de tar fleksibiliteten fra DAC, men formaliserer regler som ligner MAC. Forstår du DAC-svakheten med Trojan-hesten og BLP/Biba-løsningen, ser du hvorfor moderne sandboxer (browser, mobil-OS, container-runtimes) er bygd som de er.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

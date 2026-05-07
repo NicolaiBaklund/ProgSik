@@ -23,7 +23,7 @@
 <main data-chapter="Kapittel 2: OWASP Top 10">
 <header class="hero">
   <div class="container">
-    <div class="eyebrow">Kapittel 2 · XSS · CSRF</div>
+    <div class="eyebrow">Kapittel 2 · A05 (XSS) · A01 (CSRF) (2025)</div>
     <h1>XSS og <em>CSRF</em></h1>
     <p class="lede">Skriptet som sitter i databasen og venter på alle som åpner siden — og forespørselen nettleseren sender uten å spørre brukeren.</p>
     <nav class="toc">
@@ -158,6 +158,82 @@ document.getElementById('result').textContent = søkeord;</code></pre>
     </figure>
 
     <p>CSRF rammer alt som endrer tilstand på serveren via en forespørsel med cookies: passordendring, e-postendring, overføringer, slettinger.</p>
+
+    <h3>Fix: CSRF-token-validering</h3>
+    <p>En angriper kan tvinge nettleseren til å sende cookies, men kan ikke <em>lese</em> innholdet i en respons fra et annet domene (same-origin policy). Vi utnytter dette: server legger en uforutsigbar token inn i hver state-endrende form, og krever at samme token kommer tilbake i request body. Angriperens evil.com kan ikke lese tokenet, og kan dermed ikke konstruere en gyldig forespørsel.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <defs>
+          <marker id="ctarr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#3d6b3a"/>
+          </marker>
+          <marker id="ctred" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#b04428"/>
+          </marker>
+        </defs>
+
+        <!-- Lifelines -->
+        <text x="80" y="20" font-weight="600" fill="#3d6b3a" text-anchor="middle">Bruker</text>
+        <text x="360" y="20" font-weight="600" fill="#2d4a7a" text-anchor="middle">bank.no</text>
+        <text x="640" y="20" font-weight="600" fill="#b04428" text-anchor="middle">evil.com</text>
+        <line x1="80" y1="30" x2="80" y2="305" stroke="#c9c0ae" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="360" y1="30" x2="360" y2="305" stroke="#c9c0ae" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="640" y1="30" x2="640" y2="305" stroke="#c9c0ae" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- 1. Bruker henter form -->
+        <line x1="82" y1="55" x2="358" y2="55" stroke="#3d6b3a" stroke-width="1.5" marker-end="url(#ctarr)"/>
+        <text x="220" y="50" text-anchor="middle" font-size="10" fill="#6b6257">1. GET /overfør-form (cookie sessionID=1234)</text>
+
+        <!-- Server genererer token -->
+        <rect x="270" y="65" width="180" height="30" rx="3" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a"/>
+        <text x="360" y="84" text-anchor="middle" font-size="10" fill="#2d4a7a">server lagrer token=6878 i sesjon</text>
+
+        <!-- 2. Form med token -->
+        <line x1="358" y1="115" x2="82" y2="115" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#ctarr)"/>
+        <text x="220" y="110" text-anchor="middle" font-size="10" fill="#6b6257">2. HTML-form med &lt;input type=hidden value="6878"&gt;</text>
+
+        <!-- 3. Bruker submitter -->
+        <line x1="82" y1="145" x2="358" y2="145" stroke="#3d6b3a" stroke-width="1.5" marker-end="url(#ctarr)"/>
+        <text x="220" y="140" text-anchor="middle" font-size="10" fill="#6b6257">3. POST /overfør (cookie + token=6878 i body)</text>
+
+        <!-- Server validerer -->
+        <rect x="280" y="155" width="160" height="30" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a"/>
+        <text x="360" y="174" text-anchor="middle" font-size="10" fill="#3d6b3a" font-weight="600">token matcher → ✓ utfør</text>
+
+        <!-- Separator -->
+        <line x1="20" y1="200" x2="700" y2="200" stroke="#c9c0ae" stroke-width="1" stroke-dasharray="2,4"/>
+        <text x="360" y="195" text-anchor="middle" font-size="10" fill="#a39886" font-style="italic">— angripers forsøk —</text>
+
+        <!-- 4. Bruker besøker evil.com -->
+        <line x1="82" y1="225" x2="638" y2="225" stroke="#b04428" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#ctred)"/>
+        <text x="360" y="220" text-anchor="middle" font-size="10" fill="#b04428" font-style="italic">4. bruker besøker evil.com (lurt av phishing)</text>
+
+        <!-- 5. Evil tries to forge -->
+        <line x1="638" y1="255" x2="362" y2="255" stroke="#b04428" stroke-width="1.5" marker-end="url(#ctred)"/>
+        <text x="500" y="250" text-anchor="middle" font-size="10" fill="#b04428">5. forsøker POST /overfør (cookie sendes auto…</text>
+        <text x="500" y="270" text-anchor="middle" font-size="10" fill="#b04428" font-weight="600">…men evil.com kan ikke lese token=6878)</text>
+
+        <!-- Server rejects -->
+        <rect x="270" y="278" width="180" height="25" rx="3" fill="rgba(176,68,40,0.1)" stroke="#b04428"/>
+        <text x="360" y="295" text-anchor="middle" font-size="10" fill="#b04428" font-weight="600">token mangler/feil → 403 Forbidden</text>
+      </svg>
+      <figcaption>CSRF-token-validering: server genererer uforutsigbar token, embedder i form, krever match i body. Same-origin policy hindrer evil.com fra å lese tokenet ⇒ kan ikke forfalske gyldig forespørsel.</figcaption>
+    </figure>
+
+    <pre><code><span class="comment">&lt;!-- Django-template med innebygd csrf_token --&gt;</span>
+&lt;form method="post" action="/overfør"&gt;
+  {% csrf_token %}
+  &lt;input name="beløp" type="number"&gt;
+  &lt;input name="til" type="text"&gt;
+  &lt;button&gt;Overfør&lt;/button&gt;
+&lt;/form&gt;
+
+<span class="comment"># Express + csurf middleware</span>
+app.use(csrf());
+app.get('/overfør-form', (req, res) =&gt; {
+  res.render('form', { csrfToken: req.csrfToken() });
+});</code></pre>
   </div>
 </section>
 

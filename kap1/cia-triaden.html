@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CIA-triaden og kjerneprinsipper — Kapittel 1</title>
+<title>Sikkerhetsmål og kjerneprinsipper — Kapittel 1</title>
 <link rel="stylesheet" href="../style.css">
 <link rel="icon" type="image/png" href="../favicon.png">
 </head>
@@ -24,14 +24,17 @@
 <header class="hero">
   <div class="container">
     <div class="eyebrow">Kapittel 1 · Fundament</div>
-    <h1>CIA-triaden og <em>kjerneprinsipper</em></h1>
-    <p class="lede">Konfidensialitet, integritet og tilgjengelighet er ikke tre separate mål — de er tre sider av samme designbeslutning.</p>
+    <h1>Sikkerhetsmål og <em>kjerneprinsipper</em></h1>
+    <p class="lede">Seks egenskaper et system skal ivareta — og fire designprinsipper som styrer hvordan de skal nås.</p>
     <nav class="toc">
       <a href="#cia"><span class="toc-num">01</span>CIA-triaden</a>
-      <a href="#defense-in-depth"><span class="toc-num">02</span>Defense in depth</a>
-      <a href="#least-privilege"><span class="toc-num">03</span>Least privilege</a>
-      <a href="#fail-safe"><span class="toc-num">04</span>Fail-safe defaults</a>
-      <a href="#security-vs-safety"><span class="toc-num">05</span>Security vs. safety</a>
+      <a href="#privacy"><span class="toc-num">02</span>Personvern</a>
+      <a href="#accountability"><span class="toc-num">03</span>Sporbarhet</a>
+      <a href="#non-repudiation"><span class="toc-num">04</span>Ikke-benektelse</a>
+      <a href="#defense-in-depth"><span class="toc-num">05</span>Defense in depth</a>
+      <a href="#least-privilege"><span class="toc-num">06</span>Least privilege</a>
+      <a href="#fail-safe"><span class="toc-num">07</span>Fail-safe defaults</a>
+      <a href="#security-vs-safety"><span class="toc-num">08</span>Security vs. safety</a>
     </nav>
   </div>
 </header>
@@ -78,15 +81,160 @@
       <h4>Merk</h4>
       <p>I praksis prioriteres CIA ulikt avhengig av domene. Et etterretningssystem prioriterer konfidensialitet. Et finanssystem prioriterer integritet. Et nødetatssystem prioriterer tilgjengelighet. Å forstå domenet er forutsetningen for å prioritere riktig.</p>
     </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk forståelse</div>
+      <div class="q-text">Et sykehus krypterer alle journaler med en nøkkel som bare oppbevares lokalt på serveren. Hvilke CIA-egenskaper styrkes og hvilke svekkes?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Konfidensialitet</strong> styrkes (uautoriserte får ikke lest data). <strong>Tilgjengelighet</strong> svekkes betydelig: hvis serveren krasjer eller nøkkelen mistes, er journalene uopprettelige. <strong>Integritet</strong> påvirkes ikke direkte av kryptering alene — den krever signaturer eller MAC-er. Mønsteret viser at å maksimere én CIA-egenskap typisk koster en annen.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <div class="container">
+    <div class="section-badge">02 · Personvern</div>
+    <h2>Person<em>vern</em></h2>
+    <p class="section-intro">Retten til å bli latt i fred — og plikten til å behandle persondata som den juridiske og menneskelige verdien de er.</p>
+    <p class="lead">Personvern (privacy) er ikke det samme som konfidensialitet. Konfidensialitet handler om <em>hvem som får lese</em> data — gjerne forretningsdata. Personvern handler om <em>hvilke persondata som overhodet samles inn</em>, hvorfor, og hva som skjer med dem etterpå. Et system kan være perfekt konfidensielt og likevel grovt brudd på personvernet hvis det samler inn data det ikke trenger.</p>
+
+    <table>
+      <thead>
+        <tr><th>Egenskap</th><th>Konfidensialitet</th><th>Personvern</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Hovedfokus</td><td>Hvem som får tilgang</td><td>Hva som samles inn og hvorfor</td></tr>
+        <tr><td>Datatype</td><td>All sensitiv informasjon</td><td>Personopplysninger</td></tr>
+        <tr><td>Verktøy</td><td>Kryptering, tilgangskontroll</td><td>Datamininalisering, samtykke, anonymisering</td></tr>
+        <tr><td>Regulering</td><td>Forretningsmessig</td><td>GDPR, CCPA, Helsepersonelloven</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>«Nice-to-have» vs. nødvendig</h4>
+      <p>Standard test for innsamling: kan tjenesten levere kjernefunksjonen uten dette feltet? Hvis ja — ikke samle. Den enkleste måten å unngå datalekkasje på er å ikke ha dataene i utgangspunktet.</p>
+    </div>
+  </div>
+</section>
+
+<section id="accountability">
+  <div class="container">
+    <div class="section-badge">03 · Sporbarhet</div>
+    <h2>Spor<em>barhet</em></h2>
+    <p class="section-intro">Hvem gjorde hva, når? Uten et troverdig svar kan ingenting etterforskes — og det som ikke kan etterforskes, vil fortsette.</p>
+    <p class="lead">Sporbarhet (accountability) krever at alle sikkerhetsrelevante hendelser logges på en måte som senere kan brukes som bevis. «Vi vet at noen lastet ned databasen i mars» er ubrukelig. «Bruker <code>jane.doe@firma.no</code> kjørte forespørsel <code>SELECT * FROM users</code> kl. 03:14 fra IP <code>185.x.x.x</code>» kan etterforskes, ansvarliggjøres og lærdom trekkes fra.</p>
+
+    <p>Forutsetninger for at logger faktisk er beviskraftige:</p>
+    <ul>
+      <li><strong>Sikker tidsstempling:</strong> klokker må synkroniseres (NTP) og være vanskelige å manipulere.</li>
+      <li><strong>Integritet på loggene selv:</strong> append-only lagring, hash-kjeder, sikker overføring til en separat loggtjeneste.</li>
+      <li><strong>Tilstrekkelig kontekst:</strong> bruker, handling, ressurs, IP, sesjons-ID — ikke bare «error 500».</li>
+      <li><strong>Bevisst retensjon:</strong> for kort, og du har ikke historikk; for lang, og du bryter personvern.</li>
+    </ul>
+
+    <div class="margin-note">
+      Sporbarhet er en ettervirknings­egenskap: den hindrer ikke angrepet, men gjør det dyrt å fornekte og mulig å lære av. Et system uten audit-spor er et system uten hukommelse.
+    </div>
+  </div>
+</section>
+
+<section id="non-repudiation">
+  <div class="container">
+    <div class="section-badge">04 · Ikke-benektelse</div>
+    <h2>Ikke-<em>benektelse</em></h2>
+    <p class="section-intro">Ingen part skal etterpå kunne hevde at de ikke gjorde det de gjorde — verken avsender eller mottaker.</p>
+    <p class="lead">Ikke-benektelse (non-repudiation) er sporbarhet med kryptografisk garanti. Hvis Alice signerer en transaksjon med sin private nøkkel, kan hun ikke senere si «det var ikke meg» — fordi bare hun hadde nøkkelen. Hvis Bob mottar og kvitterer for en signert melding, kan han ikke nekte å ha mottatt den. En tiltrodd tredjepart (Trent) kan brukes som vitne der direkte signering ikke holder.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <!-- Alice -->
+        <circle cx="120" cy="110" r="40" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="2"/>
+        <text x="120" y="115" font-size="14" font-weight="600" fill="#b04428" text-anchor="middle">Alice</text>
+        <!-- Bob -->
+        <circle cx="600" cy="110" r="40" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="2"/>
+        <text x="600" y="115" font-size="14" font-weight="600" fill="#2d4a7a" text-anchor="middle">Bob</text>
+        <!-- Trent -->
+        <rect x="320" y="170" width="80" height="36" fill="rgba(198,138,31,0.1)" stroke="#c68a1f" stroke-width="2"/>
+        <text x="360" y="194" font-size="13" font-weight="600" fill="#c68a1f" text-anchor="middle">Trent</text>
+        <!-- Pile Alice -> Bob -->
+        <line x1="160" y1="100" x2="560" y2="100" stroke="#6b6257" stroke-width="2" marker-end="url(#nr-arr)"/>
+        <text x="360" y="92" font-size="12" fill="#6b6257" text-anchor="middle" font-style="italic">signert(transaksjon)</text>
+        <!-- Pile Bob -> Alice (kvittering) -->
+        <line x1="560" y1="125" x2="160" y2="125" stroke="#6b6257" stroke-width="2" marker-end="url(#nr-arr)"/>
+        <text x="360" y="142" font-size="12" fill="#6b6257" text-anchor="middle" font-style="italic">signert(kvittering)</text>
+        <!-- Trent vitne -->
+        <line x1="360" y1="165" x2="360" y2="115" stroke="#c68a1f" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <defs>
+          <marker id="nr-arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#6b6257"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>Ikke-benektelse: signerte meldinger og en tiltrodd tredjepart gjør at hver part kan bevise hva som faktisk skjedde — uavhengig av hva motparten senere hevder.</figcaption>
+    </figure>
+
+    <div class="callout callout-green">
+      <h4>Hvor det er kritisk</h4>
+      <p>Banktransaksjoner, signerte kontrakter, e-resepter, valgsystemer, byggekontrolldokumentasjon. Overalt der noen senere vil kunne anke saken til en domstol eller revisor.</p>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk forståelse</div>
+      <div class="q-text">Hva er forskjellen mellom integritet og ikke-benektelse?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Integritet</strong> beviser at meldingen ikke er endret (en hash er nok). <strong>Ikke-benektelse</strong> beviser i tillegg <em>hvem</em> som sendte den — og at vedkommende ikke kan nekte for det. Det krever asymmetrisk kryptografi: avsenderens private nøkkel signerer, alle med offentlig nøkkel kan verifisere. En MAC gir integritet og autentisitet for begge parter, men ingen ikke-benektelse — fordi begge har samme nøkkel og kunne ha laget MAC-en.</div></div>
+    </div>
   </div>
 </section>
 
 <section id="defense-in-depth">
   <div class="container">
-    <div class="section-badge">02 · Lagdelt forsvar</div>
+    <div class="section-badge">05 · Lagdelt forsvar</div>
     <h2>Defense in <em>depth</em></h2>
     <p class="section-intro">Ingen enkelt sikkerhetskontroll er ugjennomtrengelig. Defense in depth er prinsippet om at kompromittering av ett lag ikke skal gi tilgang til alt.</p>
     <p class="lead">Et middelalderslott hadde vollgraven, muren, portene, vakttårnene og borgmesteren bak sin egen dør. Ikke fordi hvert lag var uovervinnelig, men fordi angriperen måtte bryte gjennom alle av dem — og for hvert lag øker prisen på angrepet og sjansen for at forsvaret rekker å reagere.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <!-- Swiss cheese model -->
+        <defs>
+          <marker id="dd-arr" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#b04428"/>
+          </marker>
+        </defs>
+        <!-- Plate 1 -->
+        <rect x="80" y="50" width="100" height="180" fill="rgba(198,138,31,0.18)" stroke="#c68a1f" stroke-width="2" rx="4"/>
+        <circle cx="120" cy="100" r="14" fill="#f4f1ea"/>
+        <circle cx="140" cy="170" r="10" fill="#f4f1ea"/>
+        <text x="130" y="250" font-size="11" fill="#a39886" text-anchor="middle">Nettverk</text>
+        <!-- Plate 2 -->
+        <rect x="220" y="50" width="100" height="180" fill="rgba(198,138,31,0.18)" stroke="#c68a1f" stroke-width="2" rx="4"/>
+        <circle cx="270" cy="135" r="14" fill="#f4f1ea"/>
+        <circle cx="245" cy="200" r="9" fill="#f4f1ea"/>
+        <text x="270" y="250" font-size="11" fill="#a39886" text-anchor="middle">Applikasjon</text>
+        <!-- Plate 3 -->
+        <rect x="360" y="50" width="100" height="180" fill="rgba(198,138,31,0.18)" stroke="#c68a1f" stroke-width="2" rx="4"/>
+        <circle cx="395" cy="170" r="11" fill="#f4f1ea"/>
+        <circle cx="430" cy="100" r="13" fill="#f4f1ea"/>
+        <text x="410" y="250" font-size="11" fill="#a39886" text-anchor="middle">Identitet</text>
+        <!-- Plate 4 -->
+        <rect x="500" y="50" width="100" height="180" fill="rgba(198,138,31,0.18)" stroke="#c68a1f" stroke-width="2" rx="4"/>
+        <circle cx="540" cy="120" r="10" fill="#f4f1ea"/>
+        <circle cx="565" cy="195" r="11" fill="#f4f1ea"/>
+        <text x="550" y="250" font-size="11" fill="#a39886" text-anchor="middle">Data</text>
+        <!-- Stoppet angrep -->
+        <line x1="40" y1="100" x2="180" y2="100" stroke="#b04428" stroke-width="2.5"/>
+        <circle cx="180" cy="100" r="5" fill="#b04428"/>
+        <text x="60" y="92" font-size="10" fill="#b04428" font-style="italic">stoppet</text>
+        <!-- Stoppet -->
+        <line x1="40" y1="170" x2="320" y2="170" stroke="#b04428" stroke-width="2.5" opacity="0.8"/>
+        <circle cx="320" cy="170" r="5" fill="#b04428"/>
+        <!-- Gjennomslag (sjelden — alle hull rettet ut) -->
+        <line x1="40" y1="135" x2="660" y2="135" stroke="#b04428" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#dd-arr)"/>
+        <text x="640" y="128" font-size="10" fill="#b04428" font-style="italic" text-anchor="end">sjelden gjennomslag</text>
+      </svg>
+      <figcaption>Swiss cheese-modellen: hver kontroll har hull. Defense in depth fungerer fordi hullene sjelden står på linje — ett lag stopper det forrige slapp gjennom.</figcaption>
+    </figure>
 
     <p>I programvaresystemer ser defense in depth slik ut:</p>
     <ul>
@@ -97,16 +245,57 @@
       <li><strong>Overvåkingslaget:</strong> logging, alerting, anomalideteksjon.</li>
     </ul>
 
+    <h3 style="font-family: var(--serif); font-size: 22px; margin-top: 36px;">Forsvarets fire faser</h3>
+    <p>Defense in depth strekker seg ikke bare i bredden (lag), men også i tid: når et angrep skjer, går forsvaret gjennom fire faser.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <defs>
+          <marker id="phase-arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#6b6257"/>
+          </marker>
+        </defs>
+        <!-- Forebygging -->
+        <rect x="40" y="50" width="140" height="60" fill="rgba(61,107,58,0.12)" stroke="#3d6b3a" stroke-width="2" rx="4"/>
+        <text x="110" y="78" font-size="14" font-weight="600" fill="#3d6b3a" text-anchor="middle">Forebygging</text>
+        <text x="110" y="98" font-size="11" fill="#3d6b3a" text-anchor="middle" font-style="italic">stopp før</text>
+        <!-- Pil -->
+        <line x1="180" y1="80" x2="210" y2="80" stroke="#6b6257" stroke-width="1.5" marker-end="url(#phase-arr)"/>
+        <!-- Deteksjon -->
+        <rect x="210" y="50" width="140" height="60" fill="rgba(45,74,122,0.12)" stroke="#2d4a7a" stroke-width="2" rx="4"/>
+        <text x="280" y="78" font-size="14" font-weight="600" fill="#2d4a7a" text-anchor="middle">Deteksjon</text>
+        <text x="280" y="98" font-size="11" fill="#2d4a7a" text-anchor="middle" font-style="italic">se det skje</text>
+        <line x1="350" y1="80" x2="380" y2="80" stroke="#6b6257" stroke-width="1.5" marker-end="url(#phase-arr)"/>
+        <!-- Respons -->
+        <rect x="380" y="50" width="140" height="60" fill="rgba(198,138,31,0.12)" stroke="#c68a1f" stroke-width="2" rx="4"/>
+        <text x="450" y="78" font-size="14" font-weight="600" fill="#c68a1f" text-anchor="middle">Respons</text>
+        <text x="450" y="98" font-size="11" fill="#c68a1f" text-anchor="middle" font-style="italic">begrens skade</text>
+        <line x1="520" y1="80" x2="550" y2="80" stroke="#6b6257" stroke-width="1.5" marker-end="url(#phase-arr)"/>
+        <!-- Gjenoppretting -->
+        <rect x="550" y="50" width="140" height="60" fill="rgba(176,68,40,0.12)" stroke="#b04428" stroke-width="2" rx="4"/>
+        <text x="620" y="78" font-size="14" font-weight="600" fill="#b04428" text-anchor="middle">Gjenoppretting</text>
+        <text x="620" y="98" font-size="11" fill="#b04428" text-anchor="middle" font-style="italic">tilbake i drift</text>
+      </svg>
+      <figcaption>Forebygging-Deteksjon-Respons-Gjenoppretting (PDRR): forsvaret må fungere i hver fase. Et system som bare forebygger er blindt; et som bare detekterer er hjelpeløst.</figcaption>
+    </figure>
+
     <div class="callout callout-blue">
       <h4>Merk</h4>
       <p>Defense in depth er ikke det samme som å stable kontroller tilfeldig. Hvert lag skal adressere en spesifikk trussel mot et spesifikt sårbarhetsnivå. Fem lag av brannmurer uten applikasjonssikkerhet er ikke defense in depth — det er security theater.</p>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk forståelse</div>
+      <div class="q-text">Et team har investert tungt i en sofistikert WAF (web application firewall) men ingen logging i selve applikasjonen. Hvilken fase mangler de — og hva er konsekvensen?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">De har <strong>forebygging</strong> men mangler <strong>deteksjon</strong> (og dermed også effektiv respons og gjenoppretting). Konsekvens: hvis WAF-en bommer på ett angrep — og alle WAF-er gjør det noen ganger — har de ingen måte å oppdage det på før skaden er gjort. Logging i applikasjonen ville gitt et uavhengig deteksjonslag som ser hva som faktisk skjer i applikasjonens forretningslogikk.</div></div>
     </div>
   </div>
 </section>
 
 <section id="least-privilege">
   <div class="container">
-    <div class="section-badge">03 · Minimal tilgang</div>
+    <div class="section-badge">06 · Minimal tilgang</div>
     <h2>Least <em>privilege</em></h2>
     <p class="section-intro">Gi enhver bruker, prosess og tjeneste nøyaktig de tilgangene de trenger — ingenting mer, ingenting mindre.</p>
     <p class="lead">Et selskaps HR-system bruker en databasekonto for å hente ut ansattopplysninger. Kontoen har SELECT, INSERT, UPDATE og DELETE på alle tabeller — inkludert lønnstabellen, loggene og admin-tabellen. Når applikasjonen kompromitteres, har angriperen nøkkelen til hele bygget. Med least privilege ville kontoen kun hatt SELECT på de tabellene HR-appen faktisk leser.</p>
@@ -123,12 +312,19 @@
       <h4>I praksis</h4>
       <p>Start med å nekte alt, og innvilg eksplisitt. Det er lettere enn å innvilge bredt og forsøke å trekke tilbake — fordi «vi trenger det kanskje» alltid vinner over «vi bruker det ikke».</p>
     </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk forståelse</div>
+      <div class="q-text">En Lambda-funksjon trenger å lese fra én S3-bøtte. En utvikler gir den <code>AmazonS3FullAccess</code> «for å være sikker på at det fungerer». Hva er problemet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Hvis Lambda-funksjonen kompromitteres (gjennom kodefeil, sårbar avhengighet eller injection), har angriperen nå tilgang til alle S3-bøtter i kontoen — inkludert backups, logger og data fra andre tjenester. Riktig: en policy som kun gir <code>s3:GetObject</code> på <code>arn:aws:s3:::min-bucket/*</code>. Skadeomfanget begrenses fra «hele organisasjonen» til «én bøtte».</div></div>
+    </div>
   </div>
 </section>
 
 <section id="fail-safe">
   <div class="container">
-    <div class="section-badge">04 · Sikre standarder</div>
+    <div class="section-badge">07 · Sikre standarder</div>
     <h2>Fail-safe <em>defaults</em></h2>
     <p class="section-intro">Når systemet ikke vet hva det skal gjøre, skal det gjøre det sikreste — ikke det enkleste.</p>
     <p class="lead">En ny bruker opprettes i et system. Hva er standardtilgangen? Ingen. En ny API-rute defineres. Er den åpen for alle? Nei — lukket inntil eksplisitt åpnet. En konfigurasjonsfil mangler. Systemet nekter å starte fremfor å gjette seg frem til usikre innstillinger.</p>
@@ -149,7 +345,7 @@
 
 <section id="security-vs-safety">
   <div class="container">
-    <div class="section-badge">05 · To disipliner</div>
+    <div class="section-badge">08 · To disipliner</div>
     <h2>Security vs. <em>safety</em></h2>
     <p class="section-intro">Begge handler om å hindre skade — men aktøren er forskjellig, og prioriteringene kolliderer.</p>
     <p class="lead">Safety handler om å beskytte mennesker mot systemfeil — utilsiktede hendelser. Security handler om å beskytte systemer mot ondsinnede aktører — tilsiktede hendelser. En autopilot som stenger seg av ved motstridende sensordata er god safety-design. Den samme autopiloten som stenger seg av fordi en angriper sender falske sensordata, er et security-problem som nå også er et safety-problem.</p>
@@ -171,6 +367,12 @@
     <div class="margin-note">
       <strong>Eksempel på konflikt:</strong> Et industrielt kontrollsystem (ICS) for vannforsyning designer en nødkobling som stenger pumpene ved sensorsvikt (god safety). En angriper sender falske sensordata for å aktivere nødkoblingen og stanse vannforsyningen (security bryter safety).
     </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk forståelse</div>
+      <div class="q-text">Hvorfor kan ikke safety-prinsipper brukes uendret i security-design?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Safety antar at feil er tilfeldige og uavhengige; den optimaliserer for forventede fordelinger. Security har en <em>intelligent motstander</em> som aktivt søker den minst forventede feilmoden. En safety-mekanisme som åpner kanaler for å varsle om brann er en gave til en angriper som ønsker DoS. Verktøyene overlapper (redundans, feiltoleranse), men trusselmodellen — og dermed valget mellom fail-open og fail-closed — er forskjellig.</div></div>
   </div>
 </section>
 </main>
@@ -184,5 +386,6 @@
 
 <script src="../chat-widget.js"></script>
 <script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
 </body>
 </html>

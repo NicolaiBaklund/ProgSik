@@ -81,6 +81,11 @@
       <h4>Kapittelets kjerneidé</h4>
       <p>Kryptografi brukes feil langt oftere enn den brytes matematisk. ECB-modus, MD5-passord, hard-kodede nøkler og gjenbrukte nonces er alle eksempler på riktige algoritmer brukt feil. Forstå forutsetningene — ikke bare navnene.</p>
     </div>
+
+    <div class="callout callout-blue">
+      <h4>Kerckhoffs prinsipp (1883)</h4>
+      <p>Krypteringsalgoritmen skal antas kjent — kun nøkkelen er hemmelig. «Security through obscurity» er ikke sikkerhet. Konsekvenser: (1) bruk åpne, peer-reviewed algoritmer (AES, ChaCha20, SHA-3); (2) byttes nøkkel er enkelt, byttes algoritme er kostbart; (3) ikke skriv din egen krypto — la matematikerne ta den jobben.</p>
+    </div>
   </div>
 </section>
 
@@ -120,7 +125,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">18 spørsmål om kryptografi — fra begreper til fallgruver.</p>
+    <p class="section-intro">22 spørsmål om kryptografi — fra begreper til fallgruver.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -246,6 +251,34 @@
       <div class="q-text">Hva er Argon2id og hvorfor velges det fremfor bcrypt i nye systemer?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer">Argon2id (vinner av Password Hashing Competition 2015) er minne-hard: den krever store mengder RAM i tillegg til tid. bcrypt er bare tid-hard. ASIC og GPU-er er gode på tidsintensive beregninger men har begrenset minne — Argon2id gjør massevis av parallelle crack-forsøk vesentlig dyrere. Argon2id har konfigurerbare parametre for tid, minnebruk og parallellisme, noe som gjør den mer fleksibel enn bcrypt.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 19 · Middels</div>
+      <div class="q-text">Hva sier Kerckhoffs prinsipp, og hvorfor følger vi det?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Krypteringsalgoritmen skal antas offentlig kjent — bare nøkkelen er hemmelig. Vi følger det fordi (1) det er langt enklere å bytte en lekket nøkkel enn en lekket algoritme, (2) åpne algoritmer kan analyseres av hele forskningsmiljøet og dermed bli sterkere over tid, og (3) historien er full av proprietære «hemmelige» algoritmer som har vist seg trivielt brytbare når de ble reversed (A5/1, DVD CSS, Mifare Crypto-1).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 20 · Vanskelig</div>
+      <div class="q-text">Beskriv Diffie-Hellman-nøkkelutveksling og det klassiske MITM-angrepet mot den.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>DH:</strong> Alice og Bob velger felles primtall <em>p</em> og generator <em>g</em>. Alice sender <code>g^a mod p</code>, Bob sender <code>g^b mod p</code>. Begge regner ut <code>g^(ab) mod p</code> som delt nøkkel uten at den krysser nettet. <strong>MITM:</strong> Mallory mellom Alice og Bob etablerer to parallelle DH-utvekslinger — én med Alice (delt nøkkel <code>g^(am)</code>) og én med Bob (<code>g^(bm)</code>). Han dekrypterer og rekrypterer all trafikk. Forsvar: autentisere DH-meldinger med signaturer (TLS gjør dette via sertifikater).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 21 · Vanskelig</div>
+      <div class="q-text">Hva er padding oracle-angrep, og hvilken modus er sårbar?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">CBC krever PKCS#7-padding av siste blokk. Hvis serveren skiller mellom «ugyldig padding» og «ugyldig MAC» (via feilmelding eller responstid), kan en angriper sende manipulerte chiffertekstblokker og iterativt utlede klartekst byte-for-byte. Vaudenay oppdaget angrepet i 2002; Lucky13 (2013) viste timing-varianten i TLS. Forsvar: bruk AEAD (AES-GCM) som autentiserer før dekryptering, eller konstant-tids feilhåndtering med encrypt-then-MAC.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 22 · Vanskelig</div>
+      <div class="q-text">Hvorfor må RSA brukes med OAEP-padding og ikke direkte på meldingen?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Rå RSA er <em>deterministisk</em> og <em>multiplikativt homomorfisk</em>: <code>E(m₁)·E(m₂) = E(m₁·m₂)</code>. Dette åpner for: (1) ordbokangrep mot lite klartekstrom (kryptér «attack» og «retreat», sammenlign), (2) low-exponent-angrep når samme melding sendes til flere mottakere, (3) bevisste-chiffertekst-angrep. OAEP (Optimal Asymmetric Encryption Padding) blander meldingen med tilfeldighet via en hashfunksjon før RSA — bryter homomorfismen og gjør hver kryptering unik. Bleichenbacher (1998) viste hvor galt det går uten: PKCS#1 v1.5-padding ble brutt via feilmelding-orakel.</div></div>
     </div>
   </div>
 </section>

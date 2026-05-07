@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notasjoner — Kapittel 5</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 5</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 5: Threat modeling">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 5 · Notasjoner</div>
+    <h1>Notasjoner — <em>utover DFD</em></h1>
+    <p class="lede">DFD viser strukturen, men avdekker ikke alt. Misuse cases gir krav-perspektiv, attack trees gir kvantifiserbar dybde, bow-tie kobler årsak til konsekvens. Hver representasjon belyser ulike problemer.</p>
+    <nav class="toc">
+      <a href="#hvorfor"><span class="toc-num">01</span>Hvorfor flere notasjoner</a>
+      <a href="#misuse"><span class="toc-num">02</span>Misuse cases</a>
+      <a href="#attack-trees"><span class="toc-num">03</span>Attack trees</a>
+      <a href="#adt"><span class="toc-num">04</span>Attack-defense trees</a>
+      <a href="#bowtie"><span class="toc-num">05</span>Bow-tie-diagrammer</a>
+      <a href="#valg"><span class="toc-num">06</span>Valg av notasjon</a>
+    </nav>
+  </div>
+</header>
+
+<section id="hvorfor">
+  <div class="container">
+    <div class="section-badge">01 · Motivasjon</div>
+    <h2>Hvorfor flere <em>notasjoner</em></h2>
+    <p class="section-intro">Adam Shostack, Microsoft (2008): «There is no single best or correct way of performing threat modeling, it is a question of trade-offs and what we want to achieve by doing it.»</p>
+    <p class="lead">DFD er nyttig for å se dataflyt og trust boundaries. Men det forteller deg ikke hvordan en angriper faktisk vil bevege seg gjennom systemet, hvilke sub-mål som må oppnås for et angrep, eller hvilke konsekvenser et brudd får. Hver notasjon i dette kapittelet svarer på et annet spørsmål.</p>
+
+    <table>
+      <thead><tr><th>Notasjon</th><th>Sterkest når du vil…</th><th>Nivå</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Misuse case</strong></td><td>kommunisere trusler til produkteiere og krav-team</td><td>Krav</td></tr>
+        <tr><td><strong>Attack tree</strong></td><td>bryte ned ett konkret angrepsmål teknisk</td><td>Design / analyse</td></tr>
+        <tr><td><strong>Attack-defense tree</strong></td><td>vise hvordan kontroller adresserer konkrete grener</td><td>Design / analyse</td></tr>
+        <tr><td><strong>DFD</strong></td><td>se systemstruktur, dataflyt og trust boundaries</td><td>Design</td></tr>
+        <tr><td><strong>Bow-tie</strong></td><td>knytte årsaker, hendelse, konsekvenser og kontroller</td><td>Risikoanalyse</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>Pattern: Varied Viewpoints</h4>
+      <p>Threat Modeling Manifesto anbefaler eksplisitt flere representasjoner. En misuse case kan gjøre at produkteier forstår en trussel; en attack tree kan gjøre at utvikler vet hva som må kodes; en bow-tie kan gjøre at sikkerhetsledelsen ser hvilke konsekvenser som er udekket. Bygger du bare DFD-er, snakker du bare med utviklere.</p>
+    </div>
+  </div>
+</section>
+
+<section id="misuse">
+  <div class="container">
+    <div class="section-badge">02 · Misuse cases</div>
+    <h2>Misuse <em>cases</em></h2>
+    <p class="section-intro">UML use cases utvidet med ondsinnede aktører — utviklet av Sindre og Opdahl (NTNU/UiB, 2001) for å fange sikkerhetskrav på samme språk som funksjonelle krav.</p>
+    <p class="lead">Et use case beskriver hva en bruker ønsker å gjøre. Et misuse case beskriver hva en angriper ønsker å gjøre. Når du tegner dem i samme diagram, ser du umiddelbart hvilke ondsinnede scenarier som truer hvilke legitime, og hvilke mitigasjoner som kan settes inn.</p>
+
+    <h3>Notasjon</h3>
+    <ul>
+      <li><strong>Hvit ellipse:</strong> use case (legitim handling).</li>
+      <li><strong>Svart ellipse:</strong> misuse case (ondsinnet handling).</li>
+      <li><strong>Stikkfigur:</strong> bruker eller eksamen-aktør.</li>
+      <li><strong>Svart stikkfigur:</strong> angriper.</li>
+      <li><strong>«threaten»:</strong> misuse case truer use case.</li>
+      <li><strong>«mitigate»:</strong> use case (kontroll) demper misuse case.</li>
+      <li><strong>«exploit»:</strong> misuse case utnytter en svakhet (grå ellipse) i en use case.</li>
+    </ul>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs>
+          <marker id="ma" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#6b6257"/></marker>
+        </defs>
+
+        <!-- User stick figure -->
+        <circle cx="80" cy="100" r="10" fill="none" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="80" y1="110" x2="80" y2="150" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="80" y1="120" x2="60" y2="135" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="80" y1="120" x2="100" y2="135" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="80" y1="150" x2="65" y2="180" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="80" y1="150" x2="95" y2="180" stroke="#1a1612" stroke-width="1.5"/>
+        <text x="80" y="200" text-anchor="middle" font-weight="600">Bruker</text>
+
+        <!-- Use case 1: Logg inn -->
+        <ellipse cx="240" cy="100" rx="70" ry="28" fill="#fff" stroke="#1a1612" stroke-width="1.5"/>
+        <text x="240" y="105" text-anchor="middle">Logg inn</text>
+        <line x1="100" y1="120" x2="172" y2="105" stroke="#1a1612" stroke-width="1"/>
+
+        <!-- Use case 2: Innlevering -->
+        <ellipse cx="240" cy="200" rx="70" ry="28" fill="#fff" stroke="#1a1612" stroke-width="1.5"/>
+        <text x="240" y="205" text-anchor="middle">Lever besvarelse</text>
+        <line x1="100" y1="160" x2="172" y2="195" stroke="#1a1612" stroke-width="1"/>
+
+        <!-- Mitigate: Sanitize -->
+        <ellipse cx="240" cy="280" rx="70" ry="22" fill="#fff" stroke="#1a1612" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="240" y="285" text-anchor="middle" font-size="11">Valider input</text>
+
+        <!-- Misuse 1: Stjel cred -->
+        <ellipse cx="430" cy="100" rx="80" ry="28" fill="#1a1612" stroke="#c68a1f" stroke-width="2"/>
+        <text x="430" y="105" text-anchor="middle" fill="#fff">Stjel passord</text>
+
+        <!-- Misuse 2: Inject -->
+        <ellipse cx="430" cy="200" rx="80" ry="28" fill="#1a1612" stroke="#c68a1f" stroke-width="2"/>
+        <text x="430" y="205" text-anchor="middle" fill="#fff">Inject SQL</text>
+
+        <!-- threaten arrows -->
+        <line x1="350" y1="100" x2="312" y2="100" stroke="#b04428" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ma)"/>
+        <text x="330" y="90" text-anchor="middle" font-size="10" fill="#b04428" font-style="italic">«threaten»</text>
+        <line x1="350" y1="200" x2="312" y2="200" stroke="#b04428" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ma)"/>
+        <text x="330" y="190" text-anchor="middle" font-size="10" fill="#b04428" font-style="italic">«threaten»</text>
+
+        <!-- mitigate arrow -->
+        <line x1="270" y1="258" x2="395" y2="220" stroke="#3d6b3a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ma)"/>
+        <text x="350" y="250" text-anchor="middle" font-size="10" fill="#3d6b3a" font-style="italic">«mitigate»</text>
+
+        <!-- Attacker -->
+        <circle cx="640" cy="150" r="10" fill="#1a1612"/>
+        <line x1="640" y1="160" x2="640" y2="200" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="640" y1="170" x2="620" y2="185" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="640" y1="170" x2="660" y2="185" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="640" y1="200" x2="625" y2="230" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="640" y1="200" x2="655" y2="230" stroke="#1a1612" stroke-width="1.5"/>
+        <text x="640" y="250" text-anchor="middle" font-weight="600">Angriper</text>
+        <line x1="510" y1="100" x2="620" y2="145" stroke="#1a1612" stroke-width="1"/>
+        <line x1="510" y1="200" x2="620" y2="155" stroke="#1a1612" stroke-width="1"/>
+      </svg>
+      <figcaption>Misuse case-diagram for en eksamenstjeneste. Sorte ellipser med oker-kant er ondsinnede handlinger; «threaten» peker på legitime use cases som angripes; «mitigate» peker på kontroller som demper trusselen.</figcaption>
+    </figure>
+
+    <h3>Når misuse cases er nyttige</h3>
+    <ul>
+      <li><strong>Sammen med produkteiere:</strong> de leser allerede use cases — utvidelsen er gratis.</li>
+      <li><strong>Tidlig i krav-fasen:</strong> sikkerhetskrav blir til konkrete «som angriper, ønsker jeg…» — sporbare og testbare.</li>
+      <li><strong>For ikke-tekniske trusler:</strong> social engineering, juridiske trusler, fysiske angrep er like enkle å tegne som tekniske.</li>
+    </ul>
+    <p>Begrensning: misuse cases blir grunne. De viser at en trussel finnes, men ikke hvordan angriperen faktisk gjennomfører den. For dybde, bytt til attack tree.</p>
+  </div>
+</section>
+
+<section id="attack-trees">
+  <div class="container">
+    <div class="section-badge">03 · Attack trees</div>
+    <h2>Attack <em>trees</em></h2>
+    <p class="section-intro">Bruce Schneier (Dr. Dobb's Journal, 1999) — bryter ned ett angrepsmål i del-mål via AND/OR-noder. Lar deg kvantifisere hva som kreves for å lykkes med et angrep.</p>
+    <p class="lead">Roten i treet er angriperens mål. Hver node er et sub-mål, og barna er måter å oppnå sub-målet på. <strong>OR-noder</strong> betyr at ett av barna er tilstrekkelig. <strong>AND-noder</strong> krever at alle barna gjennomføres. Bladene er konkrete handlinger — pick lock, eavesdrop, bribe.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Root -->
+        <rect x="280" y="20" width="160" height="40" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="2"/>
+        <text x="360" y="38" text-anchor="middle" font-weight="600" fill="#b04428">Endre eksamenresultat</text>
+        <text x="360" y="52" text-anchor="middle" font-size="10" fill="#6b6257">(OR)</text>
+
+        <!-- Level 2: 3 OR children -->
+        <rect x="60" y="120" width="150" height="40" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="135" y="138" text-anchor="middle">Modifiser DB</text>
+        <text x="135" y="152" text-anchor="middle" font-size="10" fill="#6b6257">direkte</text>
+
+        <rect x="280" y="120" width="160" height="40" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="138" text-anchor="middle">Kompromitter</text>
+        <text x="360" y="152" text-anchor="middle" font-size="10" fill="#6b6257">faglærers konto</text>
+
+        <rect x="510" y="120" width="150" height="40" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="585" y="138" text-anchor="middle">Bestikk</text>
+        <text x="585" y="152" text-anchor="middle" font-size="10" fill="#6b6257">karaktermelder</text>
+
+        <line x1="360" y1="60" x2="135" y2="120" stroke="#1a1612" stroke-width="1"/>
+        <line x1="360" y1="60" x2="360" y2="120" stroke="#1a1612" stroke-width="1"/>
+        <line x1="360" y1="60" x2="585" y2="120" stroke="#1a1612" stroke-width="1"/>
+
+        <!-- Level 3 under "compromise teacher's account" -->
+        <text x="360" y="172" text-anchor="middle" font-size="10" fill="#6b6257">(AND)</text>
+        <rect x="200" y="220" width="140" height="40" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="270" y="238" text-anchor="middle">Phish brukernavn</text>
+        <text x="270" y="252" text-anchor="middle" font-size="10" fill="#6b6257">+ passord</text>
+
+        <rect x="380" y="220" width="140" height="40" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="450" y="238" text-anchor="middle">Omgå MFA</text>
+        <text x="450" y="252" text-anchor="middle" font-size="10" fill="#6b6257">(SIM-swap)</text>
+
+        <line x1="360" y1="160" x2="270" y2="220" stroke="#1a1612" stroke-width="1.5"/>
+        <line x1="360" y1="160" x2="450" y2="220" stroke="#1a1612" stroke-width="1.5"/>
+        <!-- AND arc -->
+        <path d="M 320 195 Q 360 180 400 195" fill="none" stroke="#b04428" stroke-width="1.5"/>
+
+        <!-- Attributes -->
+        <text x="135" y="190" text-anchor="middle" font-size="10" fill="#b04428">Cost: høy · Skill: høy</text>
+        <text x="585" y="190" text-anchor="middle" font-size="10" fill="#b04428">Cost: middels · Risk: avsløring</text>
+        <text x="360" y="290" text-anchor="middle" font-size="10" fill="#3d6b3a">Begge må lykkes for at grenen skal lykkes</text>
+
+        <text x="360" y="335" text-anchor="middle" font-style="italic" fill="#6b6257">Bladene kan dekoreres med kost, sannsynlighet, ferdighet, oppdagelsesgrad…</text>
+      </svg>
+      <figcaption>Attack tree for «endre eksamenresultat». Roten er målet (OR — én gren er nok). «Kompromitter faglærers konto» er en AND-node — krever både phishing av credentials og MFA-omgåelse.</figcaption>
+    </figure>
+
+    <h3>Attribut­dekorasjon</h3>
+    <p>Hver node kan dekoreres med attributter som lar deg sammenligne grener kvantitativt:</p>
+    <ul>
+      <li><strong>Cost</strong> — hva koster angrepet i kr/timer?</li>
+      <li><strong>Probability</strong> — hvor sannsynlig er suksess?</li>
+      <li><strong>Special skill</strong> — kreves det reverse-engineering, kryptoanalyse?</li>
+      <li><strong>Detectability</strong> — hvor lett blir angrepet oppdaget?</li>
+      <li><strong>Penalty</strong> — hva er straffen om angriperen blir tatt?</li>
+      <li><strong>Time</strong> — hvor lenge tar det?</li>
+    </ul>
+    <p>For en OR-node tar du minimum kost / maksimum sannsynlighet. For en AND-node summerer du kost og multipliserer sannsynlighet. Det gir deg en grov kvantitativ rangering av hvilke grener angriperen mest sannsynlig velger — og dermed hvor du bør fokusere kontroller.</p>
+  </div>
+</section>
+
+<section id="adt">
+  <div class="container">
+    <div class="section-badge">04 · Attack-Defense Trees</div>
+    <h2>Attack-defense <em>trees</em></h2>
+    <p class="section-intro">Utvidelse av attack trees med eksplisitte forsvarsnoder. Lar deg modellere kappløpet mellom angriper og forsvarer.</p>
+    <p class="lead">I et standard attack tree er kontroller usynlige — de bare reduserer sannsynligheten for et blad. I et attack-defense tree (Bagnato, Kordy, Meland, Schweitzer 2012) tegnes forsvar som egne noder, og angriperen kan «counter» et forsvar med sub-angrep.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Root attack -->
+        <rect x="290" y="20" width="140" height="36" rx="2" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="2"/>
+        <text x="360" y="42" text-anchor="middle" font-weight="600" fill="#b04428">Bryt seg inn i lager</text>
+
+        <!-- attack 1 -->
+        <rect x="120" y="110" width="130" height="36" rx="2" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="185" y="132" text-anchor="middle" fill="#b04428">Klatre over gjerde</text>
+
+        <!-- attack 2 -->
+        <rect x="470" y="110" width="130" height="36" rx="2" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="535" y="132" text-anchor="middle" fill="#b04428">Bruk port med kort</text>
+
+        <line x1="360" y1="56" x2="185" y2="110" stroke="#1a1612" stroke-width="1"/>
+        <line x1="360" y1="56" x2="535" y2="110" stroke="#1a1612" stroke-width="1"/>
+
+        <!-- defense for klatre -->
+        <rect x="120" y="190" width="130" height="36" rx="2" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="185" y="212" text-anchor="middle" fill="#3d6b3a">Piggtråd</text>
+        <line x1="185" y1="146" x2="185" y2="190" stroke="#3d6b3a" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+        <!-- counter to defense -->
+        <rect x="120" y="260" width="130" height="36" rx="2" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-width="1"/>
+        <text x="185" y="282" text-anchor="middle" fill="#b04428">Hanske + matte</text>
+        <line x1="185" y1="226" x2="185" y2="260" stroke="#b04428" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- defense for kort -->
+        <rect x="470" y="190" width="130" height="36" rx="2" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="535" y="212" text-anchor="middle" fill="#3d6b3a">Biometri</text>
+        <line x1="535" y1="146" x2="535" y2="190" stroke="#3d6b3a" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+        <!-- legend -->
+        <rect x="40" y="20" width="14" height="14" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1"/>
+        <text x="60" y="32" font-size="10" fill="#6b6257">Angrep</text>
+        <rect x="40" y="40" width="14" height="14" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1"/>
+        <text x="60" y="52" font-size="10" fill="#6b6257">Forsvar</text>
+      </svg>
+      <figcaption>Attack-defense tree: røde noder er angrep, grønne er forsvar. Angriperen kan motvirke et forsvar med et sub-angrep (hanske + matte mot piggtråd). Brukbart for å vise at en kontroll alene sjelden er nok.</figcaption>
+    </figure>
+
+    <p>Brukes for å gjøre eksplisitt at sikkerhet er et iterativt kappløp: angriperen tilpasser seg forsvaret. Et threat model uten forsvarsnoder undervurderer denne dynamikken.</p>
+  </div>
+</section>
+
+<section id="bowtie">
+  <div class="container">
+    <div class="section-badge">05 · Bow-tie</div>
+    <h2>Bow-tie-<em>diagrammer</em></h2>
+    <p class="section-intro">Modellerer én uønsket hendelse — med årsaker til venstre, konsekvenser til høyre, og kontroller som filter på begge sider. Tradisjon fra fysisk sikkerhet og safety engineering.</p>
+    <p class="lead">Et bow-tie er en hybrid mellom årsaksanalyse (fault tree) og konsekvensanalyse (event tree), bundet sammen av én kritisk hendelse. Det er den eneste notasjonen som tvinger deg til å tenke på <em>etter</em> at brudden inntreffer — hvilke skadelige konsekvenser kan utløses, og hvilke reaktive kontroller demper dem?</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Hazard / asset -->
+        <polygon points="360,20 380,40 360,60 340,40" fill="#fffbe5" stroke="#c68a1f" stroke-width="2"/>
+        <text x="360" y="44" text-anchor="middle" font-size="10" font-style="italic" fill="#c68a1f">Asset</text>
+
+        <!-- Central event -->
+        <ellipse cx="360" cy="180" rx="80" ry="32" fill="#fff4d6" stroke="#c68a1f" stroke-width="2.5"/>
+        <text x="360" y="178" text-anchor="middle" font-weight="600" fill="#1a1612">Eksamen</text>
+        <text x="360" y="194" text-anchor="middle" font-weight="600" fill="#1a1612">forstyrret</text>
+
+        <line x1="360" y1="60" x2="360" y2="148" stroke="#c68a1f" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Threats (left) -->
+        <rect x="20" y="80" width="120" height="32" rx="3" fill="#fff" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="80" y="100" text-anchor="middle" fill="#2d4a7a">Wifi-jamming</text>
+        <rect x="20" y="160" width="120" height="32" rx="3" fill="#fff" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="80" y="180" text-anchor="middle" fill="#2d4a7a">Server-DDoS</text>
+        <rect x="20" y="240" width="120" height="32" rx="3" fill="#fff" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="80" y="260" text-anchor="middle" fill="#2d4a7a">Strømbrudd</text>
+
+        <!-- Preventive controls (left barriers) -->
+        <rect x="180" y="92" width="14" height="14" fill="#a06b3a" stroke="#1a1612"/>
+        <rect x="180" y="172" width="14" height="14" fill="#a06b3a" stroke="#1a1612"/>
+        <rect x="180" y="252" width="14" height="14" fill="#a06b3a" stroke="#1a1612"/>
+        <text x="225" y="80" font-size="10" fill="#1a1612" font-style="italic">Preventive</text>
+
+        <line x1="140" y1="96" x2="180" y2="100" stroke="#2d4a7a" stroke-width="1.5"/>
+        <line x1="194" y1="100" x2="280" y2="170" stroke="#2d4a7a" stroke-width="1.5"/>
+        <line x1="140" y1="176" x2="180" y2="180" stroke="#2d4a7a" stroke-width="1.5"/>
+        <line x1="194" y1="180" x2="280" y2="180" stroke="#2d4a7a" stroke-width="1.5"/>
+        <line x1="140" y1="256" x2="180" y2="260" stroke="#2d4a7a" stroke-width="1.5"/>
+        <line x1="194" y1="260" x2="280" y2="190" stroke="#2d4a7a" stroke-width="1.5"/>
+
+        <!-- Reactive controls (right barriers) -->
+        <rect x="525" y="92" width="14" height="14" fill="#a06b3a" stroke="#1a1612"/>
+        <rect x="525" y="172" width="14" height="14" fill="#a06b3a" stroke="#1a1612"/>
+        <rect x="525" y="252" width="14" height="14" fill="#a06b3a" stroke="#1a1612"/>
+        <text x="495" y="80" font-size="10" fill="#1a1612" font-style="italic">Reaktive</text>
+
+        <!-- Consequences (right) -->
+        <rect x="580" y="80" width="120" height="32" rx="3" fill="#fff" stroke="#b04428" stroke-width="2"/>
+        <text x="640" y="100" text-anchor="middle" fill="#b04428">Forsinkelse</text>
+        <rect x="580" y="160" width="120" height="32" rx="3" fill="#fff" stroke="#b04428" stroke-width="2"/>
+        <text x="640" y="180" text-anchor="middle" fill="#b04428">Bytte til papir</text>
+        <rect x="580" y="240" width="120" height="32" rx="3" fill="#fff" stroke="#b04428" stroke-width="2"/>
+        <text x="640" y="260" text-anchor="middle" fill="#b04428">Ny eksamensdato</text>
+
+        <line x1="440" y1="170" x2="525" y2="100" stroke="#b04428" stroke-width="1.5"/>
+        <line x1="539" y1="100" x2="580" y2="96" stroke="#b04428" stroke-width="1.5"/>
+        <line x1="440" y1="180" x2="525" y2="180" stroke="#b04428" stroke-width="1.5"/>
+        <line x1="539" y1="180" x2="580" y2="176" stroke="#b04428" stroke-width="1.5"/>
+        <line x1="440" y1="190" x2="525" y2="260" stroke="#b04428" stroke-width="1.5"/>
+        <line x1="539" y1="260" x2="580" y2="256" stroke="#b04428" stroke-width="1.5"/>
+
+        <!-- Labels -->
+        <text x="80" y="335" text-anchor="middle" font-size="11" font-style="italic" fill="#6b6257">Trusler / årsaker</text>
+        <text x="640" y="335" text-anchor="middle" font-size="11" font-style="italic" fill="#6b6257">Konsekvenser</text>
+        <text x="360" y="240" text-anchor="middle" font-size="11" font-style="italic" fill="#6b6257">Hendelse</text>
+      </svg>
+      <figcaption>Bow-tie for «eksamen forstyrret». Venstre side: trusler og preventive kontroller (brune barrierer). Høyre side: konsekvenser og reaktive kontroller. Notasjonen tvinger frem etterspørselen om respons-plan, ikke bare angrepsforebygging.</figcaption>
+    </figure>
+
+    <h3>Eskaleringsfaktorer</h3>
+    <p>I tillegg til trusler kan venstresiden ha <strong>eskaleringsfaktorer</strong> — forhold som forsterker trusler eller svekker kontroller. Eksempel: «sårbart treningsdatasett» er en eskaleringsfaktor for «kompromittering av AI-modell»; den gjør ikke angrepet selv, men gjør hver eksisterende trussel mer alvorlig.</p>
+
+    <div class="callout callout-green">
+      <h4>Hva bow-tie tvinger frem</h4>
+      <p>Threat modeling-økter ender ofte med en lang liste preventive kontroller og null reaktive. Bow-tie-strukturen gjør det visuelt åpenbart om høyresiden er tom — og det er den ofte. «Hva gjør vi når breach faktisk skjer?» er like viktig spørsmål som «hvordan unngår vi det?»</p>
+    </div>
+  </div>
+</section>
+
+<section id="valg">
+  <div class="container">
+    <div class="section-badge">06 · Valg</div>
+    <h2>Hvilken notasjon — <em>når?</em></h2>
+    <p class="section-intro">Det er ingen «riktig» notasjon. Velg etter hvem du snakker med og hvilket spørsmål du forsøker å svare på.</p>
+
+    <table>
+      <thead><tr><th>Situasjon</th><th>Anbefalt notasjon</th></tr></thead>
+      <tbody>
+        <tr><td>Krav-workshop med produkt­eier</td><td>Misuse case</td></tr>
+        <tr><td>Designgjennomgang av nytt system</td><td>DFD + STRIDE per element</td></tr>
+        <tr><td>Skal vurdere én konkret høyrisiko-trussel</td><td>Attack tree (med attributter)</td></tr>
+        <tr><td>Skal vise hvor effektive kontroller er</td><td>Attack-defense tree</td></tr>
+        <tr><td>Skal sikre at incident response er dekket</td><td>Bow-tie-diagram</td></tr>
+        <tr><td>CISO-rapport med kvantifisert risiko</td><td>Attack tree + bow-tie</td></tr>
+      </tbody>
+    </table>
+
+    <p>Praksis: bygg DFD først for å forstå systemet og finne trust boundaries. Velg ut to–tre kritiske trusler og lag attack trees eller bow-ties for dem. Bruk misuse cases når du må kommunisere ut av sikkerhetsteamet. Ingen ber deg om å lage alle for hvert system — målet er kommunikasjon, ikke fullstendighet.</p>
+
+    <h3>Verktøy</h3>
+    <p><strong>OWASP Threat Dragon</strong> (<a href="https://owasp.org/www-project-threat-dragon/" target="_blank" rel="noopener">owasp.org/www-project-threat-dragon</a>) — open source, web/desktop. Tegne DFD-er, mappe STRIDE per element, generere trusselregisteret. Microsofts <strong>Threat Modeling Tool</strong> er Windows-spesifikk men gratis. For attack trees finnes <strong>ADTool</strong> og <strong>SecurITree</strong>; for bow-tie er Excel ofte mer enn nok.</p>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

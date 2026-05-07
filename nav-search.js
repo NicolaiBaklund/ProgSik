@@ -3,6 +3,7 @@
   var PAGES = [
     'kap1/index.html',
     'kap1/cia-triaden.html',
+    'kap1/kjerneprinsipper.html',
     'kap1/trusselbilde.html',
     'kap2/index.html',
     'kap2/injection.html',
@@ -16,7 +17,9 @@
     'kap4/index.html',
     'kap4/autentisering.html',
     'kap4/jwt.html',
+    'kap4/multi-level.html',
     'kap4/tilgangskontroll.html',
+    'kap4/kontrollhijacking.html',
     'kap5/index.html',
     'kap5/metodikk.html',
     'kap5/stride.html',

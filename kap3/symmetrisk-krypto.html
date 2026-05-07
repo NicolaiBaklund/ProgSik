@@ -26,18 +26,72 @@
     <h1>Symmetrisk <em>kryptografi</em></h1>
     <p class="lede">Rask, effektiv, og full av fallgruver som ikke handler om matematikken men om hvordan du bruker den.</p>
     <nav class="toc">
-      <a href="#aes"><span class="toc-num">01</span>AES og blokkchiffer</a>
-      <a href="#driftsmodus"><span class="toc-num">02</span>Driftsmodus</a>
-      <a href="#stromchiffer"><span class="toc-num">03</span>Strømchiffer</a>
-      <a href="#nokkelhandtering"><span class="toc-num">04</span>Nøkkelhåndtering</a>
-      <a href="#vanlige-feil"><span class="toc-num">05</span>Vanlige feil</a>
+      <a href="#historisk"><span class="toc-num">01</span>Historisk grunnlag</a>
+      <a href="#aes"><span class="toc-num">02</span>AES og blokkchiffer</a>
+      <a href="#driftsmodus"><span class="toc-num">03</span>Driftsmodus</a>
+      <a href="#stromchiffer"><span class="toc-num">04</span>Strømchiffer</a>
+      <a href="#nokkelhandtering"><span class="toc-num">05</span>Nøkkelhåndtering</a>
+      <a href="#vanlige-feil"><span class="toc-num">06</span>Vanlige feil</a>
     </nav>
   </div>
 </header>
 
+<section id="historisk">
+  <div class="container">
+    <div class="section-badge">01 · Historisk grunnlag</div>
+    <h2>Fra Caesar til <em>OTP</em></h2>
+    <p class="section-intro">Moderne kryptografi er bygget på lærdommen av tre hundre år med brutte chiffer. Du forstår hvorfor AES-GCM ser ut som det gjør først når du har sett hvordan de tidligere taklet det.</p>
+    <p class="lead">Skift-chifferet (Caesar) flytter hver bokstav <em>K</em> posisjoner: <code>C = (M + K) mod 26</code>. Bare 26 nøkler — brute force er trivielt. Vigenère (1500-tallet) bruker en nøkkelstreng i stedet for én bokstav: bedre, men angriperen kan først bruteforce nøkkellengden ved å lete etter sub-sekvenser med engelsk bokstavfrekvens, deretter løse hver delsekvens som et skiftchiffer.</p>
+    <p>One-Time Pad (OTP) løser problemet matematisk: XOR-er klartekst med en tilfeldig nøkkel like lang som meldingen. <strong>Bevist perfekt sikkert</strong> hvis nøkkelen er (a) virkelig tilfeldig, (b) brukt nøyaktig én gang, (c) like lang som meldingen, (d) holdt hemmelig. Misbruk: gjenbruk samme nøkkel på to meldinger, og <code>C₁ ⊕ C₂ = M₁ ⊕ M₂</code> — nøkkelen forsvinner og klartekstene lekker (Venona-prosjektet brøt sovjetiske OTP-meldinger på akkurat denne feilen).</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <text x="20" y="25" font-weight="600" fill="#b04428">OTP-misbruk: nøkkelgjenbruk</text>
+        <!-- m1 -->
+        <text x="20" y="60" fill="#6b6257">m₁</text>
+        <text x="60" y="60" font-family="ui-monospace, monospace" fill="#2d4a7a">01001000 01101001</text>
+        <text x="240" y="60" fill="#6b6257" font-style="italic">"Hi"</text>
+        <text x="20" y="78" fill="#6b6257">⊕ k</text>
+        <text x="60" y="78" font-family="ui-monospace, monospace" fill="#a39886">10110011 01010111</text>
+        <line x1="20" y1="85" x2="240" y2="85" stroke="#a39886" stroke-width="0.8"/>
+        <text x="20" y="100" fill="#6b6257">c₁</text>
+        <text x="60" y="100" font-family="ui-monospace, monospace" fill="#b04428">11111011 00111110</text>
+        <!-- m2 -->
+        <text x="350" y="60" fill="#6b6257">m₂</text>
+        <text x="390" y="60" font-family="ui-monospace, monospace" fill="#2d4a7a">01001110 01101111</text>
+        <text x="570" y="60" fill="#6b6257" font-style="italic">"No"</text>
+        <text x="350" y="78" fill="#6b6257">⊕ k</text>
+        <text x="390" y="78" font-family="ui-monospace, monospace" fill="#a39886">10110011 01010111</text>
+        <line x1="350" y1="85" x2="570" y2="85" stroke="#a39886" stroke-width="0.8"/>
+        <text x="350" y="100" fill="#6b6257">c₂</text>
+        <text x="390" y="100" font-family="ui-monospace, monospace" fill="#b04428">11111101 00111000</text>
+        <!-- xor -->
+        <text x="20" y="140" fill="#3d6b3a" font-weight="600">c₁ ⊕ c₂ = m₁ ⊕ m₂  (nøkkelen kansellerer!)</text>
+        <text x="20" y="160" font-family="ui-monospace, monospace" fill="#3d6b3a">00000110 00000110</text>
+        <text x="220" y="160" fill="#6b6257" font-style="italic">→ statistikk avslører klartekstene</text>
+      </svg>
+      <figcaption>Bruker du samme OTP-nøkkel to ganger forsvinner den når chiffertekstene XOR-es — angriperen sitter igjen med bokstavfrekvens på begge meldingene.</figcaption>
+    </figure>
+
+    <p>Stream- og blokkchiffer arvet OTP-ideen, men erstatter den umulige nøkkelhåndteringen med en pseudotilfeldig generator (PRG) seedet av en kort nøkkel. Dette gir praktisk kryptografi — men <strong>nøkkelgjenbruk er fortsatt katastrofalt</strong>. Det er hele grunnen til at AES-GCM krever unik nonce per kall.</p>
+
+    <div class="callout callout-blue">
+      <h4>Kerckhoffs prinsipp (1883)</h4>
+      <p>«Algoritmen skal antas kjent — kun nøkkelen er hemmelig.» Auguste Kerckhoffs formulerte dette under den fransk-prøyssiske krigen, og det er fundamentet for moderne krypto. Begrunnelse: nøkler kan byttes, algoritmer kan ikke; åpne algoritmer får kontinuerlig kryptanalyse fra forskningsmiljøet. Konsekvens: <strong>aldri rull din egen krypto</strong>. Bruk AES, ChaCha20, SHA-256 — la matematikerne ta jobben.</p>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Lett</div>
+      <div class="q-text">Hvorfor er OTP teoretisk perfekt, men praktisk ubrukelig for de fleste applikasjoner?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Perfekt: tilfeldig nøkkel like lang som meldingen gir Shannon-bevist informasjons-teoretisk sikkerhet. Ubrukelig: nøkkelen må (1) være like lang som all data du noensinne sender, (2) leveres sikkert til mottaker på forhånd, (3) aldri gjenbrukes. Kjøp 1 TB krypterte filer? Du må først levere 1 TB nøkkel sikkert. Brukes i praksis bare i nisje-bruk som diplomatiske «red telephone»-linjer.</div></div>
+    </div>
+  </div>
+</section>
+
 <section id="aes">
   <div class="container">
-    <div class="section-badge">01 · AES</div>
+    <div class="section-badge">02 · AES</div>
     <h2>AES og <em>blokkchiffer</em></h2>
     <p class="section-intro">AES er industristandarden for symmetrisk kryptering — valgt av NIST i 2001 etter en åpen konkurranse og fortsatt kryptografisk solid.</p>
     <p class="lead">Et blokkchiffer tar en fast-lengde blokk med klartekst og en nøkkel, og produserer en chiffreblokk av samme lengde. AES opererer på 128-bits blokker og støtter nøkkellengder på 128, 192 og 256 bits. Algoritmen kjører klarteksten gjennom en serie transformasjoner (SubBytes, ShiftRows, MixColumns, AddRoundKey) — 10 runder for AES-128, 14 runder for AES-256.</p>
@@ -46,12 +100,18 @@
       <h4>Merk</h4>
       <p>AES i seg selv er ikke «sikker kryptering» — det er en byggekloss. Sikkerheten avhenger av driftsmodus, IV-håndtering og autentisering. Et blokkchiffer uten autentisering gir konfidensialitet, ikke integritet.</p>
     </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Lett</div>
+      <div class="q-text">Hvorfor blir DES og 3DES regnet som utdatert i dag?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">DES har 56-bits nøkkel — EFFs «Deep Crack» brukte 56 timer på en DES-nøkkel allerede i 1998. 3DES utvider til 112/168 bit, men har 64-bits blokkstørrelse: bursdagsangrep slår inn etter ~2³² blokker (Sweet32-angrepet, 2016). NIST forbød 3DES etter 31. desember 2023. AES har 128-bits blokk og 128/192/256-bits nøkkel, og er rask både i programvare og maskinvare (AES-NI).</div></div>
   </div>
 </section>
 
 <section id="driftsmodus">
   <div class="container">
-    <div class="section-badge">02 · Driftsmodus</div>
+    <div class="section-badge">03 · Driftsmodus</div>
     <h2>Drifts<em>modus</em></h2>
     <p class="section-intro">Siden AES opererer på 128-bits blokker, trengs en driftsmodus for å håndtere meldinger av vilkårlig lengde — og valget av modus er kritisk.</p>
     <p class="lead">ECB (Electronic Codebook) er den naive løsningen: kryptér hver blokk uavhengig. Problemet: identiske klartekstblokker gir identiske chiffreblokker. Mønstre i dataene er synlige i chifferteksten. Bruk aldri ECB for meningsfull data.</p>
@@ -98,25 +158,77 @@
     </table>
 
     <p>AES-GCM er AEAD (Authenticated Encryption with Associated Data): krypterer og autentiserer i én operasjon. En unik 96-bits nonce (number used once) må genereres for hvert kall — gjenbruk av nonce er katastrofalt og ødelegger både konfidensialitet og autentisering.</p>
+
+    <h3>CBC og padding oracle-angrep</h3>
+    <p>CBC (Cipher Block Chaining) XOR-er forrige chiffreblokk inn i neste klartekstblokk før kryptering. Første blokk XOR-es mot en tilfeldig <strong>IV</strong>. Mønstre forsvinner — men CBC gir ingen autentisering, og siste blokk må padding fylles til full blokkstørrelse (PKCS#7). Hvis serveren skiller mellom «ugyldig padding» og «ugyldig MAC» — via feilmelding eller bare responstid — har angriperen et orakel.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Attacker -->
+        <rect x="20" y="20" width="120" height="40" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428"/>
+        <text x="80" y="45" text-anchor="middle" font-weight="600" fill="#b04428">Angriper</text>
+        <!-- Server -->
+        <rect x="560" y="20" width="140" height="40" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a"/>
+        <text x="630" y="45" text-anchor="middle" font-weight="600" fill="#2d4a7a">Server (CBC-decrypt)</text>
+        <!-- 1. Send tweaked ciphertext -->
+        <line x1="142" y1="42" x2="558" y2="80" stroke="#b04428" stroke-width="1.5" marker-end="url(#poa)"/>
+        <text x="350" y="58" text-anchor="middle" fill="#b04428" font-size="11">1. Send manipulert C′ = C₁ ⊕ guess  ||  C₂</text>
+        <!-- 2. Server response -->
+        <line x1="558" y1="105" x2="142" y2="135" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#pob)"/>
+        <text x="350" y="118" text-anchor="middle" fill="#2d4a7a" font-size="11">2. «Ugyldig padding» / 500 / kort responstid</text>
+        <!-- Iterate -->
+        <text x="80" y="170" font-weight="600" fill="#b04428">3. Itérér byte for byte</text>
+        <text x="80" y="188" fill="#6b6257" font-size="11">Når svaret blir «MAC-feil» (ikke padding-feil),</text>
+        <text x="80" y="204" fill="#6b6257" font-size="11">siste byte gir gyldig 0x01-padding → klartekst-byte avslørt.</text>
+        <text x="80" y="220" fill="#6b6257" font-size="11">256 forsøk per byte. 16 byte per blokk. Hele meldingen — i løpet av minutter.</text>
+        <defs>
+          <marker id="poa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker>
+          <marker id="pob" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2d4a7a"/></marker>
+        </defs>
+      </svg>
+      <figcaption>Padding oracle (Vaudenay 2002): en server som lekker padding-feil dekrypterer hele meldinger for angriperen. Lucky13 (2013) og POODLE (2014) er TLS-varianter. Forsvar: AEAD (GCM), eller konstant-tids feilhåndtering med encrypt-then-MAC.</figcaption>
+    </figure>
+
+    <p>I tillegg gir CBC <strong>cut-and-splice-angrep</strong>: bytt to chiffreblokker, og bare to klartekstblokker blir feil — resten dekrypterer korrekt. Bankmeldinger med kjent struktur («Betal konto X beløp Y») kan manipuleres ved å splice inn deler av andre meldinger. Konklusjon: bruk GCM. CBC trenger separat MAC og konstant-tids implementasjon for å være trygt.</p>
   </div>
 </section>
 
 <section id="stromchiffer">
   <div class="container">
-    <div class="section-badge">03 · Strømchiffer</div>
+    <div class="section-badge">04 · Strømchiffer</div>
     <h2>Strøm<em>chiffer</em></h2>
     <p class="section-intro">ChaCha20-Poly1305 er det moderne alternativet til AES-GCM — spesielt relevant på enheter uten AES-maskinvarestøtte.</p>
     <p class="lead">ChaCha20 er et strømchiffer designet av Daniel Bernstein. Det kombineres med Poly1305 MAC til en AEAD-konstruksjon: ChaCha20-Poly1305. TLS 1.3 støtter begge AES-256-GCM og ChaCha20-Poly1305 som cipher suites. På mobile enheter og IoT-enheter uten dedikert AES-akselerasjon er ChaCha20 raskere og like sikker.</p>
+    <table>
+      <thead><tr><th>Egenskap</th><th>Strømchiffer (ChaCha20)</th><th>Blokkchiffer (AES)</th></tr></thead>
+      <tbody>
+        <tr><td>Hastighet (uten HW-akselerasjon)</td><td>Rask</td><td>Tregere</td></tr>
+        <tr><td>Hastighet (med AES-NI)</td><td>Like rask</td><td>Svært rask</td></tr>
+        <tr><td>Minnebruk</td><td>Lav</td><td>Høyere</td></tr>
+        <tr><td>Egnet for</td><td>Ukjent eller kontinuerlig datamengde — nettverksstrømmer</td><td>Forhåndskjent meldingsstørrelse — filer, request/response</td></tr>
+        <tr><td>Integritet alene</td><td>Nei (krever Poly1305)</td><td>Nei (krever GCM/AEAD)</td></tr>
+      </tbody>
+    </table>
+
     <div class="callout callout-green">
       <h4>Praktisk valg</h4>
       <p>Bruk AES-256-GCM på server med maskinvare-AES (alle moderne x86). Bruk ChaCha20-Poly1305 på mobile enheter og IoT. Begge er kryptografisk robuste; valget handler om ytelse.</p>
     </div>
+
+    <h3>Diskkryptering: XTS-AES</h3>
+    <p>AEAD-modus utvider chifferteksten med IV og autentiseringstag — uakseptabelt for diskkryptering der hver sektor må være nøyaktig 4096 byte. XTS-AES (NIST 2007, brukt i BitLocker, FileVault, dm-crypt) er en «tweakable» blokkchiffer-modus: hver blokk får en sektor-avhengig tweak-nøkkel. Bytt to krypterte blokker, og hele 256-bits sektoren dekrypterer til søppel — angrep blir synlig, selv om autentisering ikke er innebygd. Trenger likevel høyere lag for å oppdage manipulasjon.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Middels</div>
+      <div class="q-text">Hvorfor brukes XTS — ikke GCM — for diskkryptering?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">GCM legger til IV (12 byte) og autentiseringstag (16 byte) per kryptering — ekspanderer plaintext. En disk-sektor er fast 512/4096 byte; det er ingen plass å ekspandere til. XTS bevarer plaintext-størrelsen via en tweak-nøkkel utledet fra sektornummer. Ulempen: ingen innebygd autentisering. Manipulering oppdages indirekte (sektoren dekrypterer til 4096 byte søppel) eller via filsystem-sjekksum.</div></div>
   </div>
 </section>
 
 <section id="nokkelhandtering">
   <div class="container">
-    <div class="section-badge">04 · Nøkkelhåndtering</div>
+    <div class="section-badge">05 · Nøkkelhåndtering</div>
     <h2>Nøkkel<em>håndtering</em></h2>
     <p class="section-intro">Nøkkelen er hemmeligheten — og den er ofte det svakeste leddet, ikke algoritmen.</p>
     <p class="lead">En krypteringsnøkkel lagret i kildekoden er ikke en hemmelighet. Den er tilgjengelig for alle med tilgang til kodebasen, alle CI/CD-systemer og alle som kloner repositoriet. Nøkkelen er ikke lenger hemmelig — og dermed er krypteringen meningsløs mot enhver som kjenner kodebasen.</p>
@@ -126,12 +238,18 @@
       <li><strong>HSM (Hardware Security Module):</strong> for kritiske nøkler (root CA, master krypteringsnøkler) — den private nøkkelen forlater aldri maskinvaren.</li>
       <li><strong>Key derivation:</strong> bruk HKDF eller PBKDF2 for å derivere nøkler fra masterpassord, ikke bruk passord direkte som krypteringsnøkkel.</li>
     </ul>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Middels</div>
+      <div class="q-text">Du committer en <code>.env</code>-fil med <code>SECRET_KEY=…</code> til et privat GitHub-repo. Hvorfor er nøkkelen ikke lenger hemmelig?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">«Privat repo» betyr ikke begrenset eksponering: alle utviklere, alle CI/CD-systemer, alle backupsystemer, alle git-historikk-eksporter har den nå. Selv om du fjerner filen, ligger den i historikken til den force-pushes. GitHub har offentlig API for «secret scanning» — angripere skanner kontinuerlig etter eksponerte nøkler. Forsvar: roter umiddelbart, og bruk secrets manager fremover. Konfigurasjon med hemmeligheter hører ikke hjemme i versjonskontroll.</div></div>
   </div>
 </section>
 
 <section id="vanlige-feil">
   <div class="container">
-    <div class="section-badge">05 · Fallgruver</div>
+    <div class="section-badge">06 · Fallgruver</div>
     <h2>Vanlige <em>feil</em></h2>
     <p class="section-intro">De vanligste feilene i symmetrisk kryptografi er ikke matematiske — de er implementeringsfeil.</p>
     <p class="lead">Nonce-gjenbruk i AES-GCM er det alvorligste. Hvis samme nonce brukes to ganger med samme nøkkel, kan angriperen XOR-e de to chiffertekstene og eliminere nøkkelen — begge klartekster avsløres, og autentiseringen ødelegges. I TLS 1.3 håndteres dette automatisk; i manuell kode er du selv ansvarlig.</p>
@@ -146,6 +264,12 @@
         <tr><td>Kryptering uten autentisering</td><td>Chiffertekst kan manipuleres</td><td class="mono-cell">Bruk AEAD-modus</td></tr>
       </tbody>
     </table>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Vanskelig</div>
+      <div class="q-text">En tjeneste bruker AES-GCM, men nonce hentes fra <code>random(0, 2³²)</code>. Hvor mange meldinger før et alvorlig problem?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Bursdagsparadokset: med 2³² mulige nonces forventer man en kollisjon etter ca. 2¹⁶ = 65 536 meldinger. GCM krever 96-bits unik nonce — men hvis utvikleren begrenser til 32 bit (kanskje fordi nonce er en sekvensteller som wrappet rundt), kollapser garantien. To meldinger med samme (key, nonce) under GCM gir XOR-sammenfall som med OTP-misbruk, OG autentiseringsnøkkelen utledes — angriper kan forfalske nye autentiserte chiffertekster. Forsvar: bruk full 96-bits tilfeldig nonce, eller deterministisk teller med backup ved nær overflow.</div></div>
   </div>
 </section>
 </main>
@@ -157,5 +281,6 @@
 </footer>
 <script src="../chat-widget.js"></script>
 <script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
 </body>
 </html>

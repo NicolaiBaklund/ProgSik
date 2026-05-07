@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kontrollflyt-hijacking — Kapittel 4</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 4</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 4: Autentisering og autorisasjon">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 4 · Kontrollflyt-hijacking</div>
+    <h1>Buffer <em>overflow</em></h1>
+    <p class="lede">Et tilgangskontrollsystem som er korrekt på papir, kan likevel kompromitteres hvis angriperen kan ta over selve programmets kontrollflyt. Buffer overflow er den klassiske angrepsmetoden — fortsatt levende i 2026.</p>
+    <nav class="toc">
+      <a href="#angripers-mal"><span class="toc-num">01</span>Angriperens mål</a>
+      <a href="#minne"><span class="toc-num">02</span>Prosessminne</a>
+      <a href="#stack-frame"><span class="toc-num">03</span>Stack-rammer</a>
+      <a href="#overflow"><span class="toc-num">04</span>Stack overflow</a>
+      <a href="#authme"><span class="toc-num">05</span>AuthMe-angrepet</a>
+      <a href="#kjor-kode"><span class="toc-num">06</span>Kjør angriperens kode</a>
+      <a href="#heartbleed"><span class="toc-num">07</span>Heartbleed</a>
+      <a href="#forsvar"><span class="toc-num">08</span>Forsvar</a>
+    </nav>
+  </div>
+</header>
+
+<section id="angripers-mal">
+  <div class="container">
+    <div class="section-badge">01 · Angriperens mål</div>
+    <h2>Hvorfor kontroll<em>flyt</em>?</h2>
+    <p class="section-intro">All tilgangskontroll bygger på antakelsen om at programmet faktisk gjør det koden sier. Kontrollflyt-hijacking bryter den antakelsen.</p>
+    <p class="lead">En angriper som tar over kontrollflyten i et program, kan utføre hvilken som helst handling programmet selv har rettigheter til. Webserveren leser brukerinput, applikasjonen håndterer en filopplasting, et bibliotek parser en dokumentfil — alle kan være innfallspunkter. Når angriperen får programmet til å hoppe til kode <em>de</em> kontrollerer, er CIA-triaden brutt: konfidensialitet, integritet og tilgjengelighet kompromitteres samtidig. Klassisk buffer overflow er fortsatt blant de vanligste teknikkene, særlig mot C og C++.</p>
+
+    <ul>
+      <li><strong>Morris-ormen (1988):</strong> overflow i <code>fingerd</code> på VAX. Spredte seg til ~10 % av internett.</li>
+      <li><strong>CodeRed (2001):</strong> overflow i Microsoft IIS. Defacet 359 000 servere på 14 timer.</li>
+      <li><strong>SQL Slammer (2003):</strong> 376-byte UDP-pakke mot SQL Server. Doblet seg hvert 8.5 sekund.</li>
+      <li><strong>Heartbleed (2014):</strong> read overflow i OpenSSL — lekket private nøkler fra millioner av servere.</li>
+      <li><strong>CVE-2026-20841:</strong> Windows RPC Runtime — buffer overflow er fortsatt aktuelt i 2026.</li>
+    </ul>
+
+    <p>Buffer overflow rammer hovedsakelig C og C++ fordi disse språkene gir programmereren ansvaret for minnehåndtering — ingen runtime sjekker grenser på arrays.</p>
+  </div>
+</section>
+
+<section id="minne">
+  <div class="container">
+    <div class="section-badge">02 · Prosessminne</div>
+    <h2>Linux-prosessens <em>minneoppsett</em></h2>
+    <p class="section-intro">Stack vokser ned, heap vokser opp — og angriperen jakter på det som ligger i mellom.</p>
+    <p class="lead">En Linux-prosess har minnet delt opp i seksjoner med klare roller. Tekstsegmentet er kompilert kode, skrivebeskyttet. Datasegmentet og BSS holder globale og statiske variabler. Heapen vokser oppover under kjøring (<code>malloc</code>, <code>new</code>). Stacken vokser nedover, og holder funksjonsrammer med argumenter, lokale variabler, rammepeker og returadresse. Det er denne nedoverveksten som gjør stack overflow farlig: en lokal buffer som overflødes, kan overskrive returadressen som ligger over.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <text x="170" y="20" text-anchor="middle" font-weight="600" fill="#6b6257">Adresse</text>
+        <text x="450" y="20" text-anchor="middle" font-weight="600" fill="#6b6257">Segment</text>
+        <text x="640" y="20" text-anchor="middle" font-weight="600" fill="#6b6257">Vekstretning</text>
+
+        <text x="170" y="50" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a39886">0xffff ffff</text>
+        <rect x="320" y="35" width="260" height="35" rx="2" fill="rgba(163,152,134,0.15)" stroke="#a39886" stroke-width="1.5"/>
+        <text x="450" y="58" text-anchor="middle" font-weight="600" fill="#6b6257">Kernel space</text>
+
+        <text x="170" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a39886">0xc000 0000</text>
+        <rect x="320" y="75" width="260" height="55" rx="2" fill="rgba(176,68,40,0.10)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="450" y="98" text-anchor="middle" font-weight="600" fill="#b04428">Stack</text>
+        <text x="450" y="115" text-anchor="middle" font-size="11" fill="#6b6257">argumenter, lokale, returadresse</text>
+        <text x="640" y="105" text-anchor="middle" font-size="11" fill="#b04428">↓ vokser ned</text>
+
+        <rect x="320" y="135" width="260" height="35" rx="2" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <text x="450" y="158" text-anchor="middle" font-size="11" fill="#a39886" font-style="italic">ledig</text>
+
+        <rect x="320" y="175" width="260" height="35" rx="2" fill="rgba(101,121,76,0.15)" stroke="#65794c" stroke-width="1.5"/>
+        <text x="450" y="198" text-anchor="middle" font-weight="600" fill="#65794c">Shared library</text>
+
+        <text x="170" y="225" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a39886">0x4000 0000</text>
+        <rect x="320" y="215" width="260" height="40" rx="2" fill="rgba(61,107,58,0.10)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="450" y="237" text-anchor="middle" font-weight="600" fill="#3d6b3a">Heap</text>
+        <text x="640" y="240" text-anchor="middle" font-size="11" fill="#3d6b3a">↑ vokser opp</text>
+
+        <rect x="320" y="260" width="260" height="22" rx="2" fill="rgba(163,152,134,0.10)" stroke="#a39886" stroke-width="1.5"/>
+        <text x="450" y="276" text-anchor="middle" font-size="11" fill="#6b6257">BSS / Data</text>
+
+        <rect x="320" y="285" width="260" height="22" rx="2" fill="rgba(163,152,134,0.20)" stroke="#a39886" stroke-width="1.5"/>
+        <text x="450" y="301" text-anchor="middle" font-size="11" fill="#6b6257">Text (kode)</text>
+
+        <text x="170" y="305" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a39886">0x0000 0000</text>
+      </svg>
+      <figcaption>Stack vokser nedover fra høye adresser, heap oppover fra lave. Tekstsegmentet er skrivebeskyttet — angriper må enten skrive til skrivbart minne eller hoppe til eksisterende kode.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="stack-frame">
+  <div class="container">
+    <div class="section-badge">03 · Stack-rammer</div>
+    <h2>Hvordan en <em>funksjonskall</em> ser ut i minnet</h2>
+    <p class="section-intro">Hvert funksjonskall pusher en ramme på stacken. Returadressen er det mest interessante feltet for en angriper.</p>
+    <p class="lead">Når <code>func1</code> kaller <code>func2</code>, allokeres en ny ramme på stacken under <code>func1</code>s. Rammen inneholder argumentene, returadressen (hvor CPU-en hopper når <code>func2</code> returnerer), forrige rammepeker, eventuelt en exception handler, og lokale variabler. Lokale variabler — inkludert buffere — ligger lavest i rammen. Returadressen ligger høyere oppe. Hvis en lokal buffer overflødes, vokser den oppover gjennom rammen og kan overskrive alt som ligger over.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <text x="180" y="22" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">void func1(char *arg1) {</text>
+        <text x="190" y="38" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">int loc1;</text>
+        <text x="190" y="54" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">func2(arg1);</text>
+        <text x="180" y="70" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">}</text>
+
+        <text x="180" y="100" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">void func2(char *arg2) {</text>
+        <text x="190" y="116" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">int loc2;</text>
+        <text x="190" y="132" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">char buf[128];</text>
+        <text x="190" y="148" font-family="IBM Plex Mono, monospace" font-size="11" fill="#b04428">strcpy(buf, arg2);</text>
+        <text x="180" y="164" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">}</text>
+
+        <text x="540" y="22" text-anchor="middle" font-size="11" fill="#a39886">↑ Høye adresser</text>
+
+        <rect x="430" y="35" width="220" height="22" fill="rgba(176,68,40,0.06)" stroke="#b04428" stroke-width="1"/>
+        <text x="540" y="50" text-anchor="middle" font-size="11" fill="#6b6257">argumenter: arg1</text>
+        <rect x="430" y="57" width="220" height="22" fill="rgba(176,68,40,0.06)" stroke="#b04428" stroke-width="1"/>
+        <text x="540" y="72" text-anchor="middle" font-size="11" fill="#6b6257">return address</text>
+        <rect x="430" y="79" width="220" height="22" fill="rgba(176,68,40,0.06)" stroke="#b04428" stroke-width="1"/>
+        <text x="540" y="94" text-anchor="middle" font-size="11" fill="#6b6257">stack frame pointer</text>
+        <rect x="430" y="101" width="220" height="22" fill="rgba(176,68,40,0.06)" stroke="#b04428" stroke-width="1"/>
+        <text x="540" y="116" text-anchor="middle" font-size="11" fill="#6b6257">exception handler</text>
+        <rect x="430" y="123" width="220" height="22" fill="rgba(176,68,40,0.06)" stroke="#b04428" stroke-width="1"/>
+        <text x="540" y="138" text-anchor="middle" font-size="11" fill="#6b6257">lokale: loc1</text>
+        <text x="670" y="92" font-size="11" fill="#b04428" font-weight="600">func1</text>
+
+        <rect x="430" y="155" width="220" height="22" fill="rgba(45,74,122,0.10)" stroke="#2d4a7a" stroke-width="1"/>
+        <text x="540" y="170" text-anchor="middle" font-size="11" fill="#6b6257">argumenter: arg2</text>
+        <rect x="430" y="177" width="220" height="22" fill="rgba(45,74,122,0.10)" stroke="#2d4a7a" stroke-width="1"/>
+        <text x="540" y="192" text-anchor="middle" font-size="11" fill="#2d4a7a" font-weight="600">return address</text>
+        <rect x="430" y="199" width="220" height="22" fill="rgba(45,74,122,0.10)" stroke="#2d4a7a" stroke-width="1"/>
+        <text x="540" y="214" text-anchor="middle" font-size="11" fill="#6b6257">stack frame pointer</text>
+        <rect x="430" y="221" width="220" height="22" fill="rgba(45,74,122,0.10)" stroke="#2d4a7a" stroke-width="1"/>
+        <text x="540" y="236" text-anchor="middle" font-size="11" fill="#6b6257">exception handler</text>
+        <rect x="430" y="243" width="220" height="22" fill="rgba(45,74,122,0.10)" stroke="#2d4a7a" stroke-width="1"/>
+        <text x="540" y="258" text-anchor="middle" font-size="11" fill="#6b6257">lokale: loc2</text>
+        <rect x="430" y="265" width="220" height="40" fill="rgba(45,74,122,0.20)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="540" y="280" text-anchor="middle" font-size="11" font-weight="600" fill="#2d4a7a">char buf[128]</text>
+        <text x="540" y="296" text-anchor="middle" font-size="10" fill="#6b6257" font-style="italic">— overflow vokser oppover ↑</text>
+        <text x="670" y="232" font-size="11" fill="#2d4a7a" font-weight="600">func2</text>
+
+        <text x="540" y="335" text-anchor="middle" font-size="11" fill="#a39886">↓ Lave adresser</text>
+      </svg>
+      <figcaption>Hvert funksjonskall lager ny stack-ramme. <code>buf</code> ligger lavest, returadressen høyere oppe — overflow over <code>buf</code>-grensa overskriver alt over.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="overflow">
+  <div class="container">
+    <div class="section-badge">04 · Stack overflow</div>
+    <h2>Hva skjer ved <em>overflow</em>?</h2>
+    <p class="section-intro">Problemet sitter i C-funksjoner som ikke sjekker lengde — <code>strcpy</code>, <code>strcat</code>, <code>gets</code>.</p>
+    <p class="lead"><code>strcpy(buf, arg2)</code> kopierer fra <code>arg2</code> til <code>buf</code> til den finner en null-byte. Ingen sjekk på om <code>buf</code> er stor nok. Hvis <code>arg2</code> er 200 bytes og <code>buf</code> er 128, skrives 72 bytes inn i minnet rett etter bufferen — som inkluderer andre lokale variabler, exception handler og returadresse.</p>
+
+    <p>Tre typer skade en angriper kan gjøre:</p>
+    <ol>
+      <li><strong>Overskrive lokale variabler</strong> — flagg, autentiseringsstatus, peker. Forandrer programmets logikk uten å bytte hvilken kode som kjøres.</li>
+      <li><strong>Overskrive exception handler</strong> — peker til kode som kjører ved unntak. Angriper kan velge hva som kjøres hvis exception trigges.</li>
+      <li><strong>Overskrive returadressen</strong> — når funksjonen returnerer, hopper CPU-en til adressen angriper valgte. Total kontrollflyt-hijacking.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="authme">
+  <div class="container">
+    <div class="section-badge">05 · AuthMe-angrepet</div>
+    <h2>Bypass <em>autentisering</em> via overflow</h2>
+    <p class="section-intro">Et klassisk eksempel: en lokal flag-variabel som overskrives av en buffer rett under.</p>
+    <p class="lead">Tenk en funksjon med en 4-byte buffer og en lokal <code>int authenticated = 0</code>. Etter passordsjekk settes flagget til 1 hvis riktig passord, ellers 0. Men funksjonen kopierer brukerinput til bufferen <em>med <code>strcpy</code></em>. Angriperen sender inn en streng som er lengre enn 4 byte — overflow-en overskriver <code>authenticated</code>-flagget med vilkårlige bytes som ikke er 0. Senere sjekker koden <code>if(authenticated)</code> — som gir <em>true</em>, og angriperen får tilgang uten gyldig passord.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <text x="40" y="22" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">void func(char *arg1) {</text>
+        <text x="50" y="38" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">int authenticated = 0;</text>
+        <text x="50" y="54" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">char buffer[4];</text>
+        <text x="50" y="70" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a39886">// passordsjekk her</text>
+        <text x="50" y="86" font-family="IBM Plex Mono, monospace" font-size="11" fill="#b04428">strcpy(buffer, arg1);</text>
+        <text x="50" y="102" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">if(authenticated) {</text>
+        <text x="60" y="118" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">  // kritisk operasjon</text>
+        <text x="50" y="134" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">}</text>
+        <text x="40" y="150" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6b6257">}</text>
+
+        <text x="50" y="180" font-size="11" fill="#b04428" font-weight="600">Angriper sender:</text>
+        <text x="50" y="198" font-family="IBM Plex Mono, monospace" font-size="12" fill="#b04428">"AuthMe."</text>
+        <text x="50" y="214" font-size="11" fill="#6b6257">7 bytes — 4 inn i buffer,</text>
+        <text x="50" y="230" font-size="11" fill="#6b6257">3 inn i authenticated</text>
+
+        <text x="500" y="22" text-anchor="middle" font-size="11" fill="#a39886">↑ Høye adresser</text>
+
+        <rect x="380" y="35" width="220" height="22" fill="rgba(163,152,134,0.10)" stroke="#a39886" stroke-width="1"/>
+        <text x="490" y="50" text-anchor="middle" font-size="11" fill="#6b6257">argumenter: arg1</text>
+        <rect x="380" y="57" width="220" height="22" fill="rgba(163,152,134,0.10)" stroke="#a39886" stroke-width="1"/>
+        <text x="490" y="72" text-anchor="middle" font-size="11" fill="#6b6257">return address</text>
+        <rect x="380" y="79" width="220" height="22" fill="rgba(163,152,134,0.10)" stroke="#a39886" stroke-width="1"/>
+        <text x="490" y="94" text-anchor="middle" font-size="11" fill="#6b6257">frame pointer</text>
+
+        <rect x="380" y="115" width="220" height="35" fill="rgba(176,68,40,0.20)" stroke="#b04428" stroke-width="2"/>
+        <text x="490" y="132" text-anchor="middle" font-size="11" font-weight="600" fill="#b04428">authenticated</text>
+        <text x="490" y="146" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#b04428">= 4d 65 2E 00 ≠ 0 ✓</text>
+
+        <rect x="380" y="155" width="220" height="35" fill="rgba(176,68,40,0.30)" stroke="#b04428" stroke-width="2"/>
+        <text x="490" y="172" text-anchor="middle" font-size="11" font-weight="600" fill="#b04428">buffer[4]</text>
+        <text x="490" y="186" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#b04428">= "Auth"</text>
+
+        <text x="500" y="225" text-anchor="middle" font-size="11" fill="#a39886">↓ Lave adresser</text>
+
+        <rect x="40" y="270" width="640" height="60" rx="3" fill="rgba(45,74,122,0.06)" stroke="#2d4a7a" stroke-width="1"/>
+        <text x="50" y="290" font-size="11" fill="#2d4a7a" font-weight="600">Hva skjer:</text>
+        <text x="50" y="307" font-size="11" fill="#6b6257">strcpy("AuthMe.") fyller buffer[4]="Auth", overflødes og setter authenticated = "Me." (3 bytes + null).</text>
+        <text x="50" y="322" font-size="11" fill="#6b6257">"M"=0x4D, "e"=0x65, "."=0x2E, null. Verdien 0x002E654D er ikke null → if(authenticated) er sann.</text>
+      </svg>
+      <figcaption>Overflow av en 4-byte buffer overskriver flag-variabelen rett over. Ingen returadresse er endret — likevel er autentiseringssjekken bypasset.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="kjor-kode">
+  <div class="container">
+    <div class="section-badge">06 · Kjør angriperens kode</div>
+    <h2>Returadresse-<em>hijacking</em></h2>
+    <p class="section-intro">Total kontrollflyt-overtakelse: overskriv returadressen, hopp dit angriperen vil.</p>
+    <p class="lead">Den klassiske «smashing the stack»-teknikken: angriperen plasserer shellcode (rå maskininstruksjoner) i selve bufferen, og overflødes returadressen så den peker tilbake inn i bufferen. Når funksjonen returnerer, hopper CPU-en inn i shellcoden og kjører den. Resultat: vilkårlig kjøring av angriperens kode med programmets rettigheter — typisk en remote shell.</p>
+
+    <p>Moderne varianter omgår grunnleggende forsvar:</p>
+    <ul>
+      <li><strong>Return-to-libc:</strong> i stedet for shellcode i bufferen, peker returadressen til eksisterende kode i libc, f.eks. <code>system("/bin/sh")</code>. Omgår «non-executable stack» (NX-bit).</li>
+      <li><strong>ROP (Return-Oriented Programming):</strong> kjeder sammen små kodebiter («gadgets») som ender med <code>ret</code>. Bygger arbitrary computation av eksisterende kodebiter. Omgår både NX og signaturbasert deteksjon.</li>
+      <li><strong>JOP/COP:</strong> varianter som bruker indirect jumps eller calls i stedet for ret.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="heartbleed">
+  <div class="container">
+    <div class="section-badge">07 · Heartbleed</div>
+    <h2>Heartbleed: <em>read overflow</em></h2>
+    <p class="section-intro">Ikke alle overflow er skrive-overflow. Heartbleed lekket data ved å lese forbi bufferens slutt.</p>
+    <p class="lead">Heartbleed (CVE-2014-0160, OpenSSL) var en read overflow. SSL-protokollen har en «heartbeat»-melding der klient og server bekrefter at forbindelsen er aktiv. Klienten sender en payload og en lengde, og serveren skal ekko payloaden tilbake. Bug: serveren stolte på lengdefeltet uten å sjekke at det stemte med faktisk payload-størrelse.</p>
+
+    <pre><code><span class="comment">// Forenklet — SSL-server</span>
+char buf[128];
+<span class="comment">// motta: client_payload + length-felt</span>
+for (int i = 0; i &lt; length; i++) {
+    putchar(buf[i]);   <span class="comment">// echo tilbake</span>
+}</code></pre>
+
+    <p>Angriperen sender en kort melding (1 byte) men hevder lengden er 65 535. Serveren leser 65 535 bytes fra minnet etter <code>buf</code> og sender dem tilbake. I praksis ble private SSL-nøkler, sesjonskoder og passord lekket fra millioner av webservere før patchen kom ut.</p>
+
+    <div class="callout">
+      <h4>Hvorfor det er ille</h4>
+      <p>Server-prosessen hadde tilgang til de private nøklene den brukte til TLS. Heartbleed lot enhver klient på internett lekke tilfeldig minne fra prosessen — og kunne gjentas til nøklene falt ut. Patch krevde at alle berørte servere både oppdaterte OpenSSL <em>og</em> roterte sertifikater og nøkler, fordi man ikke kunne vite hva som hadde blitt eksponert.</p>
+    </div>
+  </div>
+</section>
+
+<section id="forsvar">
+  <div class="container">
+    <div class="section-badge">08 · Forsvar</div>
+    <h2>Hvordan <em>stoppe</em> overflow</h2>
+    <p class="section-intro">Forsvaret er flerlags: trygge funksjoner, kompilatorforsvar, statisk analyse, og helst typesikre språk.</p>
+
+    <p><strong>Bytt ut usikre funksjoner:</strong></p>
+    <table>
+      <thead><tr><th>Usikker</th><th>Sikker erstatning</th><th>Merk</th></tr></thead>
+      <tbody>
+        <tr><td><code>strcpy(d, s)</code></td><td><code>strcpy_s(d, n, s)</code></td><td>Sjekker n, terminerer NULL</td></tr>
+        <tr><td><code>strcat(d, s)</code></td><td><code>strcat_s(d, n, s)</code></td><td>Samme</td></tr>
+        <tr><td><code>gets(buf)</code></td><td><code>fgets(buf, n, stdin)</code></td><td>Aldri bruk gets — fjernet i C11</td></tr>
+        <tr><td><code>sprintf(b, fmt, ...)</code></td><td><code>snprintf(b, n, fmt, ...)</code></td><td>Maks n bytes</td></tr>
+        <tr><td><code>strncpy(d, s, n)</code></td><td>Med forsiktighet</td><td>Terminerer ikke alltid med NULL — kan gi read overflow på <code>strlen</code></td></tr>
+      </tbody>
+    </table>
+
+    <p><code>strncpy</code>-fellen: <code>strncpy(str, "bye", 3)</code> kopierer 3 bytes uten null. Etterfølgende <code>strlen(str)</code> leser videre i minnet til den finner en null — read overflow som lekker data.</p>
+
+    <p><strong>Kompilatorforsvar:</strong></p>
+    <ul>
+      <li><strong>GCC <code>-fstack-protector</code>:</strong> setter en «canary»-verdi mellom lokale variabler og returadressen. Sjekker at den er uendret før retur — ellers crasher prosessen.</li>
+      <li><strong>MSVC <code>/GS</code>:</strong> tilsvarende stack canary i Visual Studio.</li>
+      <li><strong>MSVC <code>/SAFESEH</code>, <code>/SEHOP</code>:</strong> beskytter exception handler-pekere mot overskrivelse.</li>
+      <li><strong>ASLR (Address Space Layout Randomization):</strong> randomiserer stack/heap/library-adresser. Gjør det vanskelig å vite hvor man skal hoppe.</li>
+      <li><strong>NX-bit / DEP:</strong> markerer stack/heap som ikke-kjørbar. Stopper klassisk shellcode-injeksjon.</li>
+      <li><strong>Control Flow Integrity (CFI):</strong> verifiserer ved kjøretid at indirect calls/returns peker på lovlige mål.</li>
+    </ul>
+
+    <p><strong>Statisk analyse + fuzzing:</strong> verktøy som AFL, libFuzzer og clang static analyzer fanger overflow-mønstre i kildekoden eller via mutert input.</p>
+
+    <p><strong>Typesikre språk:</strong> Python, Java, Go, Rust, C# — runtime sjekker grenser eller eier-modellen forhindrer ugyldig minneaksess. <em>Ingen klassisk buffer overflow er mulig</em> i sikker Rust eller Go uten <code>unsafe</code>-blokker. Microsoft, Google og Linux-kjernen migrerer i økende grad sikkerhetskritisk kode til Rust.</p>
+
+    <div class="callout callout-green">
+      <h4>Lagdelt forsvar</h4>
+      <p>Ingen enkelt forsvar er nok. <code>-fstack-protector</code> stoppes av kompilatorflagg-glipp; ASLR omgås ved info leak; NX omgås av ROP. Forsvar dybde: trygge funksjoner + kompilatorforsvar + statisk analyse + fuzzing + minneovervåkning + helst migrering til typesikkert språk for nye komponenter.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

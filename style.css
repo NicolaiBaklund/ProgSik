@@ -175,6 +175,23 @@ pre .value { color: #9fb56b; }
 .quiz .answer { padding: 16px 20px; background: var(--paper); border-left: 3px solid var(--green); font-family: var(--serif); font-size: 16px; color: var(--ink); line-height: 1.5; display: none; }
 .quiz .answer.show { display: block; }
 
+/* ---------- STRIDE MATCHER ---------- */
+.stride-matcher { display: flex; flex-direction: column; gap: 18px; margin: 28px 0; }
+.sm-item { background: var(--paper-dark); border: 1px solid var(--line); border-radius: 3px; padding: 20px 24px; }
+.sm-item.sm-correct { border-color: var(--green); background: #eef2e7; }
+.sm-item.sm-wrong { border-color: var(--rust); background: #f5e9e3; }
+.sm-scenario { font-family: var(--serif); font-size: 16px; line-height: 1.55; margin-bottom: 14px; color: var(--ink); }
+.sm-scenario strong { color: var(--rust); margin-right: 4px; }
+.sm-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.sm-buttons button { font-family: var(--mono); font-size: 13px; font-weight: 600; background: var(--paper); border: 1px solid var(--line); color: var(--ink-soft); padding: 8px 14px; border-radius: 2px; cursor: pointer; min-width: 40px; transition: all 0.12s; }
+.sm-buttons button:hover { border-color: var(--rust); color: var(--rust); }
+.sm-buttons button.sm-picked-correct { background: var(--green); color: var(--paper); border-color: var(--green); }
+.sm-buttons button.sm-picked-wrong { background: var(--rust); color: var(--paper); border-color: var(--rust); }
+.sm-buttons button.sm-was-correct { background: rgba(61,107,58,0.18); border-color: var(--green); color: var(--green); }
+.sm-buttons button:disabled { cursor: default; }
+.sm-feedback { display: none; margin-top: 12px; font-family: var(--serif); font-size: 14px; font-style: italic; color: var(--ink-soft); padding: 10px 14px; background: var(--paper); border-left: 3px solid var(--ochre); }
+.sm-feedback.show { display: block; }
+
 /* ---------- FOOTER ---------- */
 footer { padding: 80px 0 60px; text-align: center; }
 footer .ornament { margin: 0 0 24px; }

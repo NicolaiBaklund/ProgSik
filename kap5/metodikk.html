@@ -27,10 +27,12 @@
     <p class="lede">Hva threat modeling faktisk er — og ikke er — og hvordan Data Flow Diagrams setter ord på hva systemet gjør.</p>
     <nav class="toc">
       <a href="#hva-er-tm"><span class="toc-num">01</span>Hva threat modeling er</a>
-      <a href="#dfd"><span class="toc-num">02</span>Data Flow Diagrams</a>
-      <a href="#pasta"><span class="toc-num">03</span>PASTA</a>
-      <a href="#naar-hvem"><span class="toc-num">04</span>Når og hvem</a>
-      <a href="#output"><span class="toc-num">05</span>Output</a>
+      <a href="#perspektiver"><span class="toc-num">02</span>Attacker- vs software-centric</a>
+      <a href="#aktorer"><span class="toc-num">03</span>Trusselaktører</a>
+      <a href="#dfd"><span class="toc-num">04</span>Data Flow Diagrams</a>
+      <a href="#pasta"><span class="toc-num">05</span>PASTA</a>
+      <a href="#naar-hvem"><span class="toc-num">06</span>Når og hvem</a>
+      <a href="#output"><span class="toc-num">07</span>Output</a>
     </nav>
   </div>
 </header>
@@ -54,9 +56,74 @@
   </div>
 </section>
 
+<section id="perspektiver">
+  <div class="container">
+    <div class="section-badge">02 · Perspektiv</div>
+    <h2>Attacker- vs <em>software-centric</em></h2>
+    <p class="section-intro">To måter å starte trusselanalysen på — og to ulike sett av blindsoner avhengig av valget.</p>
+    <p class="lead">En <strong>attacker-centric</strong> trusselmodell starter med motstanderen. Hvem er det realistisk å forvente? Hva er deres ferdigheter, motivasjon og ressurser? Ross Anderson åpner Security Engineering med dette: «One of the first things the security engineer needs to do when tackling a new problem is to identify the likely opponents.» Når du vet hvem du forsvarer deg mot, blir relevante trusler tydeligere.</p>
+    <p>En <strong>software-centric</strong> trusselmodell starter med systemet selv. Hvilke komponenter, dataflyter og trust boundaries finnes? For hvert element: hvilke trusler er relevante? Adam Shostack og STRIDE-tradisjonen følger denne tilnærmingen, og den passer bedre når motstanderen er ukjent eller diffus.</p>
+    <p>I praksis bruker du begge. Software-centric gir systematisk dekning av alle komponenter. Attacker-centric prioriterer hvilke trusler som faktisk vil bli realisert. Et threat model som bare lister trusler uten å spørre «hvem ville faktisk gjøre dette?» blir lett en uleselig liste.</p>
+
+    <div class="callout callout-blue">
+      <h4>Anti-pattern: Perfect Representation</h4>
+      <p>Threat Modeling Manifesto advarer mot å vente på den ene perfekte representasjonen. Bedre å ha flere ufullstendige modeller — én attacker-centric, én software-centric, kanskje også en bow-tie for hvert kritisk scenario — fordi hver representasjon kaster lys på ulike problemer.</p>
+    </div>
+  </div>
+</section>
+
+<section id="aktorer">
+  <div class="container">
+    <div class="section-badge">03 · Trusselaktører</div>
+    <h2>Hvem du <em>forsvarer deg mot</em></h2>
+    <p class="section-intro">Trusselaktører beskrives langs tre dimensjoner: ferdigheter, motivasjon og ressurser. Forskjellige profiler krever ulike kontroller.</p>
+    <p class="lead">Du kan ikke beskytte deg mot alle. Et lite e-handelsverksted og en kraftverkstrafikkstasjon har vidt forskjellige trusselbilder — og vidt forskjellige budsjetter. Trusselaktørprofiler hjelper deg å fokusere innsatsen der den faktisk har effekt.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- triangle: skills, motivation, resources -->
+        <polygon points="360,30 130,210 590,210" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-width="1.5"/>
+        <circle cx="360" cy="30" r="6" fill="#b04428"/>
+        <text x="360" y="20" text-anchor="middle" font-weight="600" fill="#b04428">Skills</text>
+        <text x="360" y="58" text-anchor="middle" font-size="11" fill="#6b6257">(kapabiliteter, ekspertise)</text>
+        <circle cx="130" cy="210" r="6" fill="#3d6b3a"/>
+        <text x="130" y="232" text-anchor="middle" font-weight="600" fill="#3d6b3a">Motivation</text>
+        <text x="130" y="248" text-anchor="middle" font-size="11" fill="#6b6257">(intent, persistens)</text>
+        <circle cx="590" cy="210" r="6" fill="#c68a1f"/>
+        <text x="590" y="232" text-anchor="middle" font-weight="600" fill="#c68a1f">Resources</text>
+        <text x="590" y="248" text-anchor="middle" font-size="11" fill="#6b6257">(tid, penger, infrastruktur)</text>
+        <text x="360" y="125" text-anchor="middle" font-style="italic" fill="#6b6257">Trusselaktør-profil</text>
+      </svg>
+      <figcaption>De tre dimensjonene som beskriver enhver trusselaktør. En statlig aktør scorer høyt på alle tre; en script kiddie lavt på alle tre.</figcaption>
+    </figure>
+
+    <h3>Aktørarketyper</h3>
+    <table>
+      <thead><tr><th>Arketype</th><th>Skills</th><th>Motivation</th><th>Resources</th><th>Eksempel</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Statlige aktører</strong> («The Spooks»)</td><td>Høy</td><td>Geopolitisk, langvarig</td><td>Nær ubegrenset</td><td>NSA/PRISM, Volt Typhoon (Kina, retter seg mot US-infrastruktur)</td></tr>
+        <tr><td><strong>Organiserte kriminelle</strong> («The Crooks»)</td><td>Middels–høy</td><td>Økonomisk gevinst</td><td>Profesjonelle</td><td>RaaS-økonomien (Ransomware-as-a-Service)</td></tr>
+        <tr><td><strong>Hacktivister</strong> («The Swamp»)</td><td>Variabel</td><td>Ideologisk</td><td>Begrenset</td><td>Anonymous-relaterte grupper</td></tr>
+        <tr><td><strong>Insidere</strong></td><td>Variabel</td><td>Misnøye, økonomi, tvang</td><td>Privilegert tilgang</td><td>Snowden, Manning</td></tr>
+        <tr><td><strong>«CEO Criminals»</strong></td><td>Lav teknisk</td><td>Konkurranse, profitt</td><td>Selskapsressurser</td><td>Bedriftsspionasje, datatyveri ved jobbskifte</td></tr>
+        <tr><td><strong>Geeks / script kiddies</strong></td><td>Lav</td><td>Status, kjedsomhet</td><td>Minimal</td><td>Bruker ferdige verktøy fra Metasploit, ExploitDB</td></tr>
+        <tr><td><strong>Terrorister</strong></td><td>Lav teknisk</td><td>Politisk, fysisk skade</td><td>Variabel</td><td>Sjelden teknisk; oftest fysiske angrep</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <h4>Volt Typhoon — eksempel på statlig aktør</h4>
+      <p>Microsoft sporet i 2023 en kinesisk aktør de kaller Volt Typhoon (også VANGUARD PANDA, BRONZE SILHOUETTE). Mål: kommunikasjons-infrastruktur, produksjon, forsvar, transport, utdanning i USA og Guam. Fokus på spionasje, datatyveri og credential access. Brukte «living-off-the-land»-teknikker (legitime systemverktøy) for å unngå deteksjon. <em>Defensiv konsekvens:</em> EDR-overvåkning av legitime verktøy (PowerShell, wmic, ntdsutil) er nødvendig — signaturbasert AV alene er utilstrekkelig.</p>
+    </div>
+
+    <h3>Bruk av aktørprofiler i praksis</h3>
+    <p>Når du har identifisert en trussel via STRIDE, spør: hvilke aktører ville faktisk realisere denne? En SQL injection mot en åpen påloggingsside er attraktiv for alle aktørtyper, fra script kiddie til statlig. En supply chain-kompromittering av en intern build-pipeline er realistisk kun for aktører med tid og kapabilitet — typisk statlige eller organiserte kriminelle. Denne filtreringen påvirker prioriteringen: trusler med mange potensielle aktører rangeres høyere enn trusler som krever en svært spesifikk profil.</p>
+  </div>
+</section>
+
 <section id="dfd">
   <div class="container">
-    <div class="section-badge">02 · DFD</div>
+    <div class="section-badge">04 · DFD</div>
     <h2>Data Flow <em>Diagrams</em></h2>
     <p class="section-intro">Et DFD visualiserer systemet slik det faktisk fungerer — prosesser, data, grenser og flyt — og gjør det mulig å peke på konkrete trusler.</p>
     <p class="lead">Et DFD har fire elementer: <strong>prosesser</strong> (behandler data — runde bokser), <strong>dataflyter</strong> (beveger data — piler), <strong>datalagre</strong> (lagrer data — doble horisontale linjer) og <strong>eksterne entiteter</strong> (utenfor systemets kontroll — firkanter). I tillegg markeres <strong>trust boundaries</strong> med stiplede linjer mellom soner med ulik tillitsnivå.</p>
@@ -110,7 +177,7 @@
 
 <section id="pasta">
   <div class="container">
-    <div class="section-badge">03 · PASTA</div>
+    <div class="section-badge">05 · PASTA</div>
     <h2><em>PASTA</em></h2>
     <p class="section-intro">Process for Attack Simulation and Threat Analysis er en helhetlig syvstegs-metodikk for risikobasert threat modeling.</p>
     <p class="lead">PASTA starter ikke med tekniske detaljer — det starter med forretningsmål. Hva er det vi egentlig prøver å beskytte, og hvilke konsekvenser har et brudd? Denne forankringen gjør threat modeling relevant for ledelse og produkteiere, ikke bare sikkerhetsfolk.</p>
@@ -128,7 +195,7 @@
 
 <section id="naar-hvem">
   <div class="container">
-    <div class="section-badge">04 · Timing</div>
+    <div class="section-badge">06 · Timing</div>
     <h2>Når og <em>hvem</em></h2>
     <p class="section-intro">Threat modeling gir størst verdi tidlig — men er verdifullt i alle faser.</p>
     <p class="lead">Ideelt starter threat modeling i arkitekturfasen, når kostnaden for å endre designbeslutninger er minimal. I praksis gjøres det i sprintplanlegging (for nye features), arkitekturgjennomganger (for store endringer) og etter hendelser (for å forstå hva som burde vært fanget opp).</p>
@@ -145,7 +212,7 @@
 
 <section id="output">
   <div class="container">
-    <div class="section-badge">05 · Output</div>
+    <div class="section-badge">07 · Output</div>
     <h2><em>Output</em> fra threat modeling</h2>
     <p class="section-intro">Et threat model er ikke verdifullt som et dokument — det er verdifullt som et sett handlinger.</p>
     <p class="lead">Output fra en threat modeling-økt bør inkludere: et DFD, en trusselregisteret (liste over identifiserte trusler med STRIDE-kategori, komponent og score), et mitigasjonskart (hvilke kontroller adresserer hvilke trusler), og en liste over akseptert residualrisiko (trusler du vet om men ikke mitigerer, med begrunnelse).</p>

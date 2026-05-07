@@ -23,16 +23,17 @@
 <main data-chapter="Kapittel 2: OWASP Top 10">
 <header class="hero">
   <div class="container">
-    <div class="eyebrow">Kapittel 2 · A01 · A04 · A07 · A09</div>
+    <div class="eyebrow">Kapittel 2 · A01 · A06 · A07 · A09 (2025)</div>
     <h1>Broken access control og <em>autentiseringsfeil</em></h1>
     <p class="lede">Den vanligste OWASP-kategorien er ikke en avansert utnyttelse — det er manglende sjekk på serversiden av hvem som spør og hva de har lov til.</p>
     <nav class="toc">
       <a href="#broken-access"><span class="toc-num">01</span>Broken access control</a>
       <a href="#idor"><span class="toc-num">02</span>IDOR</a>
       <a href="#broken-authn"><span class="toc-num">03</span>Broken authentication</a>
-      <a href="#insecure-design"><span class="toc-num">04</span>Insecure design</a>
-      <a href="#logging-failures"><span class="toc-num">05</span>Logging failures</a>
-      <a href="#forsvar-access"><span class="toc-num">06</span>Forsvar</a>
+      <a href="#session-fixation"><span class="toc-num">04</span>Session fixation</a>
+      <a href="#insecure-design"><span class="toc-num">05</span>Insecure design</a>
+      <a href="#logging-failures"><span class="toc-num">06</span>Logging failures</a>
+      <a href="#forsvar-access"><span class="toc-num">07</span>Forsvar</a>
     </nav>
   </div>
 </header>
@@ -130,9 +131,77 @@ invoice = Invoice.query.filter_by(id=invoice_id,
   </div>
 </section>
 
+<section id="session-fixation">
+  <div class="container">
+    <div class="section-badge">04 · A07</div>
+    <h2>Session <em>fixation</em></h2>
+    <p class="section-intro">Angriperen plasserer sin egen sesjons-ID i offerets nettleser før innlogging — når offeret autentiserer, blir angriperens token elevert til logged-in.</p>
+    <p class="lead">Sårbarheten er enkel: serveren beholder samme session-token når en bruker går fra anonym til autentisert. Hvis angriperen kan plante sitt eget token i offerets nettleser før innlogging — og deretter vente — vil offerets autentisering automatisk «adoptere» angriperens token. Angriperen bruker så det samme tokenet og er nå logget inn som offeret.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <defs>
+          <marker id="sfarr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#b04428"/>
+          </marker>
+          <marker id="sfgreen" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#3d6b3a"/>
+          </marker>
+        </defs>
+        <!-- Lifelines -->
+        <text x="80" y="20" font-weight="600" fill="#3d6b3a" text-anchor="middle">Offer</text>
+        <text x="360" y="20" font-weight="600" fill="#2d4a7a" text-anchor="middle">Server</text>
+        <text x="640" y="20" font-weight="600" fill="#b04428" text-anchor="middle">Angriper</text>
+        <line x1="80" y1="30" x2="80" y2="285" stroke="#c9c0ae" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="360" y1="30" x2="360" y2="285" stroke="#c9c0ae" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="640" y1="30" x2="640" y2="285" stroke="#c9c0ae" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Step 1: attacker gets anon token -->
+        <line x1="640" y1="50" x2="362" y2="50" stroke="#b04428" stroke-width="1.5" marker-end="url(#sfarr)"/>
+        <text x="500" y="45" text-anchor="middle" font-size="10" fill="#6b6257">1. GET / (henter anonym token=1234)</text>
+
+        <!-- Step 2: attacker plants token in victim -->
+        <line x1="638" y1="80" x2="82" y2="80" stroke="#b04428" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#sfarr)"/>
+        <text x="360" y="75" text-anchor="middle" font-size="10" fill="#b04428" font-style="italic">2. XSS / phishing-link planter token=1234 i offerets nettleser</text>
+
+        <!-- Step 3: victim logs in -->
+        <line x1="82" y1="120" x2="358" y2="120" stroke="#3d6b3a" stroke-width="1.5" marker-end="url(#sfgreen)"/>
+        <text x="220" y="115" text-anchor="middle" font-size="10" fill="#6b6257">3. POST /login (token=1234, brukernavn+passord)</text>
+
+        <!-- Step 4: server elevates SAME token -->
+        <rect x="200" y="135" width="320" height="40" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1"/>
+        <text x="360" y="151" text-anchor="middle" font-size="10" fill="#b04428" font-weight="600">SÅRBARHET</text>
+        <text x="360" y="167" text-anchor="middle" font-size="10" fill="#6b6257">server eleverer token=1234 fra anonym → logged-in</text>
+
+        <!-- Step 5: server confirms login -->
+        <line x1="358" y1="195" x2="82" y2="195" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#sfarr)"/>
+        <text x="220" y="190" text-anchor="middle" font-size="10" fill="#6b6257">4. 200 OK (samme token=1234)</text>
+
+        <!-- Step 6: attacker uses same token -->
+        <line x1="640" y1="230" x2="362" y2="230" stroke="#b04428" stroke-width="2" marker-end="url(#sfarr)"/>
+        <text x="500" y="225" text-anchor="middle" font-size="10" fill="#b04428" font-weight="600">5. GET /konto (token=1234) — angriper er nå logget inn som offer</text>
+        <line x1="358" y1="260" x2="638" y2="260" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#sfarr)"/>
+        <text x="500" y="255" text-anchor="middle" font-size="10" fill="#6b6257">6. 200 OK (offerets data)</text>
+      </svg>
+      <figcaption>Session fixation: angriper planter et eget anonymt token i offerets nettleser. Server eleverer samme token ved innlogging, og angriperens token blir logget-inn-token.</figcaption>
+    </figure>
+
+    <p>De to vanligste måtene å plante tokenet på:</p>
+    <ul>
+      <li><strong>Tampering over nettverk:</strong> hvis offeret bruker HTTP, kan en aktiv MITM-angriper injisere en <code>Set-Cookie</code> i en respons.</li>
+      <li><strong>Cross-Site Scripting (XSS):</strong> en XSS-sårbarhet på samme domene tillater <code>document.cookie = 'SESSID=1234'</code> fra en lenke angriperen sender.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Fix</h4>
+      <p>Generer alltid en <em>ny</em> session-ID etter vellykket autentisering — invalider den anonyme tokenen. Rammeverk som Django, Rails og Express har dette innebygd, men funksjonen må være aktivert. Kombiner med <code>HttpOnly</code> og <code>Secure</code> cookie-attributter.</p>
+    </div>
+  </div>
+</section>
+
 <section id="insecure-design">
   <div class="container">
-    <div class="section-badge">04 · A04</div>
+    <div class="section-badge">05 · A06</div>
     <h2>Insecure <em>design</em></h2>
     <p class="section-intro">En implementasjonsfeil kan patches. En designfeil krever arkitektur ombygget — og det er det som gjør A04 til en kategori for seg.</p>
     <p class="lead">Tenk deg en nettbank uten noen form for transaksjonsbegrensning — det er aldri designet inn. Man kan legge til rate-limiting på ett endepunkt etterpå, men hvis pengeflyten kan initieres fra ti forskjellige steder i systemet er det ikke en patch, det er en ombygging. A04 handler om sikkerhetsfeil som måtte vært løst på tegnebordet.</p>
@@ -161,7 +230,7 @@ invoice = Invoice.query.filter_by(id=invoice_id,
 
 <section id="logging-failures">
   <div class="container">
-    <div class="section-badge">05 · A09</div>
+    <div class="section-badge">06 · A09</div>
     <h2>Security logging <em>failures</em></h2>
     <p class="section-intro">Det du ikke logger, kan du ikke oppdage — og det du logger feil, kan bli en sårbarhet i seg selv.</p>
     <p class="lead">En angriper tar seg tid. De logger inn og ut hundrevis av ganger med forskjellige kontoer over to uker. Ingen alarm går. Ingen rapport genereres. Angrepet oppdages først når kunden ringer og spør hvorfor pengene er borte. Mangelfull logging betyr at kompromittering ikke oppdages — og at etterforskning etterpå er nesten umulig.</p>
@@ -185,7 +254,7 @@ invoice = Invoice.query.filter_by(id=invoice_id,
 
 <section id="forsvar-access">
   <div class="container">
-    <div class="section-badge">06 · Forsvar</div>
+    <div class="section-badge">07 · Forsvar</div>
     <h2>Forsvar mot tilgangs- og <em>autentiseringsfeil</em></h2>
     <p class="section-intro">Serversidekontroller er ikke valgfrie tillegg — de er den eneste tilgangssikringen som teller.</p>
     <p class="lead">Det ene enkeltprinsippet som eliminerer de fleste broken access control-feil: verifiser tilgang på serversiden for hvert eneste kall, uavhengig av hva klienten sier. Ingen unntak for «intern» trafikk, ingen unntak for «betrodd» klient, ingen unntak for «det er bare et GET».</p>

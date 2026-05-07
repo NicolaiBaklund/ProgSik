@@ -30,7 +30,8 @@
       <a href="#mfa"><span class="toc-num">02</span>MFA</a>
       <a href="#oauth"><span class="toc-num">03</span>OAuth 2.0</a>
       <a href="#oidc"><span class="toc-num">04</span>OIDC</a>
-      <a href="#authn-feil"><span class="toc-num">05</span>Vanlige feil</a>
+      <a href="#saml-feide"><span class="toc-num">05</span>SAML og Feide</a>
+      <a href="#authn-feil"><span class="toc-num">06</span>Vanlige feil</a>
     </nav>
   </div>
 </header>
@@ -129,9 +130,93 @@
   </div>
 </section>
 
+<section id="saml-feide">
+  <div class="container">
+    <div class="section-badge">05 · SAML og Feide</div>
+    <h2>SAML og <em>Feide</em></h2>
+    <p class="section-intro">Før OIDC kom, var SAML 2.0 standardprotokollen for SSO i enterprise og utdanning. Feide er fortsatt SAML-basert.</p>
+    <p class="lead">Single Sign-On (SSO) løser problemet med at hver brukerinnlogging mot en ny tjeneste tvinger brukeren til å logge på på nytt — same-origin policy hindrer at en cookie fra <code>blackboard.no</code> brukes mot <code>intranett.ntnu.no</code>. Løsningen: en sentral <em>identity provider</em> (IdP) håndterer all autentisering, mens hver tjeneste («service provider», SP) stoler på IdP-ens utsagn om hvem brukeren er.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <defs>
+          <marker id="sa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2d4a7a"/></marker>
+          <marker id="sb" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#3d6b3a"/></marker>
+        </defs>
+
+        <rect x="40" y="100" width="140" height="50" rx="3" fill="rgba(45,74,122,0.10)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="110" y="120" text-anchor="middle" font-weight="600" fill="#2d4a7a">Blackboard</text>
+        <text x="110" y="138" text-anchor="middle" font-size="10" fill="#6b6257">Service Provider</text>
+
+        <rect x="290" y="100" width="140" height="50" rx="3" fill="rgba(61,107,58,0.10)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="360" y="120" text-anchor="middle" font-weight="600" fill="#3d6b3a">Feide</text>
+        <text x="360" y="138" text-anchor="middle" font-size="10" fill="#6b6257">Identity Provider</text>
+
+        <rect x="540" y="40" width="80" height="36" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="580" y="62" text-anchor="middle" font-size="10" font-weight="600" fill="#b04428">NTNU LDAP</text>
+
+        <rect x="540" y="86" width="80" height="36" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="580" y="108" text-anchor="middle" font-size="10" font-weight="600" fill="#b04428">UiO LDAP</text>
+
+        <rect x="540" y="132" width="80" height="36" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="580" y="154" text-anchor="middle" font-size="10" font-weight="600" fill="#b04428">OsloMet LDAP</text>
+
+        <line x1="432" y1="115" x2="538" y2="80" stroke="#3d6b3a" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="432" y1="125" x2="538" y2="105" stroke="#3d6b3a" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="432" y1="135" x2="538" y2="148" stroke="#3d6b3a" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <rect x="160" y="220" width="80" height="36" rx="18" fill="rgba(163,152,134,0.20)" stroke="#a39886" stroke-width="1.5"/>
+        <text x="200" y="242" text-anchor="middle" font-size="11" font-weight="600" fill="#6b6257">Bruker</text>
+
+        <line x1="200" y1="218" x2="120" y2="152" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#sa)"/>
+        <text x="80" y="200" font-size="10" fill="#2d4a7a">1. besøker SP</text>
+
+        <line x1="180" y1="120" x2="220" y2="218" stroke="#3d6b3a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#sb)"/>
+        <text x="60" y="170" font-size="10" fill="#3d6b3a">2. SAML req</text>
+        <text x="60" y="184" font-size="10" fill="#3d6b3a">redirect</text>
+
+        <line x1="220" y1="220" x2="295" y2="135" stroke="#3d6b3a" stroke-width="1.5" marker-end="url(#sb)"/>
+        <text x="240" y="200" font-size="10" fill="#3d6b3a">3. login</text>
+
+        <line x1="350" y1="152" x2="225" y2="220" stroke="#3d6b3a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#sb)"/>
+        <text x="270" y="218" font-size="10" fill="#3d6b3a">4. SAML resp</text>
+
+        <line x1="180" y1="222" x2="115" y2="152" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#sa)"/>
+        <text x="70" y="225" font-size="10" fill="#2d4a7a">5. session</text>
+      </svg>
+      <figcaption>Feide som SAML 2.0 IdP for norsk utdanningssektor. SP (Blackboard) redirecter til Feide, Feide autentiserer mot riktig institusjons-LDAP, returnerer signert SAML-respons.</figcaption>
+    </figure>
+
+    <p><strong>SAML</strong> (Security Assertion Markup Language) er XML-basert. En SAML-respons er et signert XML-dokument med <code>&lt;saml:Subject&gt;</code> (hvem brukeren er), <code>&lt;saml:Conditions&gt;</code> (gyldig fra/til), <code>&lt;saml:AudienceRestriction&gt;</code> (hvilken SP responsen er ment for), og <code>&lt;saml:AttributeStatement&gt;</code> med brukerattributter (uid, e-post, tilhørighet).</p>
+
+    <pre><code>&lt;saml:Response&gt;
+  &lt;saml:Issuer&gt;https://idp.feide.no&lt;/saml:Issuer&gt;
+  &lt;ds:Signature&gt;...&lt;/ds:Signature&gt;
+  &lt;saml:Assertion&gt;
+    &lt;saml:Subject&gt;
+      &lt;saml:NameID&gt;ola.nordmann@ntnu.no&lt;/saml:NameID&gt;
+    &lt;/saml:Subject&gt;
+    &lt;saml:Conditions NotBefore="..." NotOnOrAfter="..."&gt;
+      &lt;saml:AudienceRestriction&gt;
+        &lt;saml:Audience&gt;https://blackboard.ntnu.no&lt;/saml:Audience&gt;
+      &lt;/saml:AudienceRestriction&gt;
+    &lt;/saml:Conditions&gt;
+    &lt;saml:AttributeStatement&gt;...&lt;/saml:AttributeStatement&gt;
+  &lt;/saml:Assertion&gt;
+&lt;/saml:Response&gt;</code></pre>
+
+    <p><strong>SAML vs. OIDC:</strong> SAML er XML/SOAP-tungt og passer enterprise. OIDC bruker JSON over HTTP og passer mobil og SPA bedre. Begge løser samme problem — SSO med en sentral IdP — men trender beveger seg fra SAML til OIDC for nye systemer. Feide tilbyr nå begge.</p>
+
+    <div class="callout callout-blue">
+      <h4>Hvorfor signaturen er kritisk</h4>
+      <p>SAML-responsen er bare en XML-tekst. Hvis SP ikke verifiserer signaturen mot IdP-ens sertifikat, kan en angriper konstruere falske assertions og late som hvem som helst. Klassiske SAML-angrep utnytter XML signature wrapping — angriper legger til en uautorisert assertion ved siden av den signerte. Bibliotek som ikke validerer at signaturen dekker riktig element er sårbare.</p>
+    </div>
+  </div>
+</section>
+
 <section id="authn-feil">
   <div class="container">
-    <div class="section-badge">05 · Fallgruver</div>
+    <div class="section-badge">06 · Fallgruver</div>
     <h2>Vanlige autentiserings<em>feil</em></h2>
     <p class="section-intro">De fleste autentiseringsfeil er prosess- og implementeringsfeil, ikke kryptografiske feil.</p>
     <p class="lead">Credential stuffing er den vanligste årsaken til kontokompromittering i 2026. En angriper bruker millioner av brukernavn/passord-par fra tidligere databrudd og prøver dem systematisk mot din tjeneste. Forsvar: rate-limiting, MFA, og integrasjon mot lekkede passord-databaser ved innlogging.</p>

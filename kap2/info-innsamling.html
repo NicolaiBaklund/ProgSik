@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informasjonsinnsamling — Kapittel 2</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 2</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 2: OWASP Top 10">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 2 · WSTG-INFO</div>
+    <h1>Informasjons<em>innsamling</em></h1>
+    <p class="lede">Før du kan teste eller angripe en applikasjon trenger du et kart. Hvilke sider finnes? Hvilke parametere tar de? Hva ligger bak innloggingen?</p>
+    <nav class="toc">
+      <a href="#hvorfor"><span class="toc-num">01</span>Hvorfor kartlegge</a>
+      <a href="#app-struktur"><span class="toc-num">02</span>Applikasjonsstruktur</a>
+      <a href="#trust-zones"><span class="toc-num">03</span>Trust zones</a>
+      <a href="#proxy"><span class="toc-num">04</span>Debug-proxy</a>
+      <a href="#dorking"><span class="toc-num">05</span>Google dorking</a>
+      <a href="#verktoy"><span class="toc-num">06</span>Verktøy</a>
+    </nav>
+  </div>
+</header>
+
+<section id="hvorfor">
+  <div class="container">
+    <div class="section-badge">01 · Motivasjon</div>
+    <h2>Hvorfor <em>kartlegge</em></h2>
+    <p class="section-intro">«The more you know about the application's structure, the better you can plan your tests.»</p>
+    <p class="lead">Både angripere og forsvarere starter samme sted: med å forstå hva som er der. En angriper leter etter <em>low-hanging fruit</em> — glemte testsider, eksponerte admin-paneler, parametere som lukter brukerinput. En intern tester / utvikler trenger samme bilde for å bestemme hva som skal testes, hvordan, og i hvilken rekkefølge.</p>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>Informasjonsinnsamling er fase 1 i OWASP Web Security Testing Guide (WSTG) — alle senere faser (input-validation, autentisering, autorisasjon, sesjonshåndtering) bygger på denne kartleggingen.</p>
+    </div>
+  </div>
+</section>
+
+<section id="app-struktur">
+  <div class="container">
+    <div class="section-badge">02 · WSTG-INFO-06</div>
+    <h2>Applikasjons<em>struktur</em></h2>
+    <p class="section-intro">Et page map er en rettet graf over alle sidene, hvilke metoder de aksepterer og hvilke parametere de tar.</p>
+    <p class="lead">Tegn det opp. Boks for hver side. Pil for hver lenke / redirect. Annoter med HTTP-metode (GET/POST), parameternavn og typer. Marker hvor autentiseringsgrensa går — hva som er åpent og hva som krever cookie. Når kartet er ferdig har du både angrepsflaten <em>og</em> testskopet.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <defs>
+          <marker id="ipgray" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#6b6257"/>
+          </marker>
+          <marker id="ipblue" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#2d4a7a"/>
+          </marker>
+          <marker id="iporange" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#c68a1f"/>
+          </marker>
+        </defs>
+
+        <!-- Auth boundary -->
+        <line x1="380" y1="20" x2="380" y2="340" stroke="#b04428" stroke-width="2.5"/>
+        <text x="385" y="30" font-size="10" fill="#b04428" font-style="italic">krever logged-in cookie →</text>
+
+        <!-- Public side -->
+        <text x="180" y="40" text-anchor="middle" font-weight="600" fill="#3d6b3a" font-size="12">Åpen sone</text>
+
+        <ellipse cx="100" cy="80" rx="60" ry="22" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a"/>
+        <text x="100" y="84" text-anchor="middle" font-size="11" fill="#3d6b3a">mainMenu</text>
+
+        <rect x="180" y="60" width="120" height="40" rx="3" fill="#fff" stroke="#3d6b3a"/>
+        <text x="240" y="78" text-anchor="middle" font-size="11" fill="#3d6b3a">browseBooks</text>
+        <text x="240" y="92" text-anchor="middle" font-size="9" fill="#6b6257" font-style="italic">id=[int]</text>
+
+        <rect x="180" y="120" width="120" height="40" rx="3" fill="#fff" stroke="#3d6b3a"/>
+        <text x="240" y="138" text-anchor="middle" font-size="11" fill="#3d6b3a">searchBooks</text>
+        <text x="240" y="152" text-anchor="middle" font-size="9" fill="#6b6257" font-style="italic">q=[string]</text>
+
+        <rect x="180" y="180" width="120" height="40" rx="3" fill="#fff" stroke="#3d6b3a"/>
+        <text x="240" y="198" text-anchor="middle" font-size="11" fill="#3d6b3a">signup</text>
+        <text x="240" y="212" text-anchor="middle" font-size="9" fill="#c68a1f" font-style="italic">POST username, pwd</text>
+
+        <rect x="180" y="240" width="120" height="40" rx="3" fill="#fff" stroke="#3d6b3a"/>
+        <text x="240" y="258" text-anchor="middle" font-size="11" fill="#3d6b3a">login</text>
+        <text x="240" y="272" text-anchor="middle" font-size="9" fill="#c68a1f" font-style="italic">POST creds</text>
+
+        <!-- Arrows from menu -->
+        <line x1="160" y1="80" x2="178" y2="80" stroke="#6b6257" stroke-width="1" marker-end="url(#ipgray)"/>
+        <line x1="155" y1="90" x2="178" y2="135" stroke="#6b6257" stroke-width="1" marker-end="url(#ipgray)"/>
+        <line x1="155" y1="95" x2="178" y2="195" stroke="#6b6257" stroke-width="1" marker-end="url(#ipgray)"/>
+        <line x1="155" y1="100" x2="178" y2="255" stroke="#6b6257" stroke-width="1" marker-end="url(#ipgray)"/>
+
+        <!-- Authed side -->
+        <text x="540" y="40" text-anchor="middle" font-weight="600" fill="#2d4a7a" font-size="12">Logged-in sone</text>
+
+        <rect x="420" y="60" width="120" height="40" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a"/>
+        <text x="480" y="78" text-anchor="middle" font-size="11" fill="#2d4a7a">addToCart</text>
+        <text x="480" y="92" text-anchor="middle" font-size="9" fill="#6b6257" font-style="italic">productId</text>
+
+        <rect x="420" y="120" width="120" height="40" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a"/>
+        <text x="480" y="138" text-anchor="middle" font-size="11" fill="#2d4a7a">viewCart</text>
+
+        <rect x="420" y="180" width="120" height="40" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a"/>
+        <text x="480" y="198" text-anchor="middle" font-size="11" fill="#2d4a7a">checkout</text>
+        <text x="480" y="212" text-anchor="middle" font-size="9" fill="#c68a1f" font-style="italic">POST card, expiry</text>
+
+        <rect x="580" y="60" width="120" height="40" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428"/>
+        <text x="640" y="78" text-anchor="middle" font-size="11" fill="#b04428">admin/users</text>
+        <text x="640" y="92" text-anchor="middle" font-size="9" fill="#b04428" font-style="italic">SENSITIV</text>
+
+        <rect x="580" y="180" width="120" height="40" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428"/>
+        <text x="640" y="198" text-anchor="middle" font-size="11" fill="#b04428">delete?id=</text>
+
+        <!-- Inter-page arrows -->
+        <line x1="300" y1="80" x2="418" y2="80" stroke="#2d4a7a" stroke-width="1" stroke-dasharray="2,2" marker-end="url(#ipblue)"/>
+        <text x="345" y="74" text-anchor="middle" font-size="9" fill="#a39886" font-style="italic">redirect</text>
+
+        <line x1="540" y1="135" x2="578" y2="195" stroke="#2d4a7a" stroke-width="1" marker-end="url(#ipblue)"/>
+
+        <!-- Legend -->
+        <rect x="40" y="305" width="640" height="40" rx="3" fill="rgba(255,255,255,0.6)" stroke="#c9c0ae"/>
+        <line x1="60" y1="320" x2="90" y2="320" stroke="#6b6257" stroke-width="1" marker-end="url(#ipgray)"/>
+        <text x="98" y="324" font-size="10" fill="#6b6257">redirect</text>
+        <line x1="170" y1="320" x2="200" y2="320" stroke="#2d4a7a" stroke-width="1" marker-end="url(#ipblue)"/>
+        <text x="208" y="324" font-size="10" fill="#6b6257">GET</text>
+        <text x="260" y="324" font-size="10" fill="#c68a1f" font-style="italic">POST-parametere annotert</text>
+        <text x="450" y="324" font-size="10" fill="#b04428">rød boks = sensitiv / admin-only</text>
+      </svg>
+      <figcaption>Page map (forenklet eksempel basert på Hacme Books). Vertikal rød linje markerer autentiseringsgrensa. Pilretningen viser navigasjon, parametere er annotert under hver boks.</figcaption>
+    </figure>
+
+    <p>Hva annoteringen bør inneholde:</p>
+    <ul>
+      <li><strong>HTTP-metode</strong> per kall (GET, POST, PUT, DELETE).</li>
+      <li><strong>Parametere</strong> med navn og type (<code>id=[int]</code>, <code>email=[string]</code>).</li>
+      <li><strong>Eksterne lenker</strong> (tredjeparter, oauth-providere, CDN-er — alle er angrepsflate via redirect / SSRF).</li>
+      <li><strong>Subdomener</strong> — <code>admin.example.com</code>, <code>api.example.com</code>, <code>staging.example.com</code> har ofte svakere herding.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="trust-zones">
+  <div class="container">
+    <div class="section-badge">03 · Trust zones</div>
+    <h2>Trust <em>zones</em></h2>
+    <p class="section-intro">Hvor går grensa mellom åpent og lukket — og hvilke ressurser sitter på innsiden?</p>
+    <p class="lead">En trust zone er et område der koden antar at den som spør er autorisert. Hver overgang mellom soner er et tilgangskontrollpunkt som <em>må</em> sjekke noe — cookie, JWT, mTLS-sertifikat, IP-allowlist. Glemmer du sjekken, har du en broken access control-feil (A01).</p>
+
+    <p>Typiske soner i en webapplikasjon:</p>
+    <ul>
+      <li><strong>Public:</strong> alt en uautentisert besøkende kan se.</li>
+      <li><strong>Authenticated user:</strong> krever gyldig sesjon.</li>
+      <li><strong>Admin / privileged:</strong> krever rolle utover vanlig bruker.</li>
+      <li><strong>Internal services:</strong> ikke eksponert mot internett — DB, cache, intern API-er. Forutsetter ofte (feilaktig) at all trafikk innenfor er pålitelig.</li>
+      <li><strong>Cloud metadata:</strong> <code>169.254.169.254</code> hos AWS / GCP — enhver prosess på instansen kan lese IAM-credentials med mindre IMDSv2 er aktivert.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="proxy">
+  <div class="container">
+    <div class="section-badge">04 · Web debug proxy</div>
+    <h2>Web debug-<em>proxy</em></h2>
+    <p class="section-intro">Sett en mann i midten mellom din nettleser og serveren — alt blir synlig, og alt kan endres.</p>
+    <p class="lead">En debug-proxy (Burp Suite, OWASP ZAP, Fiddler) sitter mellom nettleseren og applikasjonen. Hver request og respons logges. Du kan inspisere headere, parametere og bodies, modifisere dem før de når serveren, og spille av igjen tidligere requests med endrede verdier. Det er det grunnleggende verktøyet i alle penetrasjonstester av webapplikasjoner.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs>
+          <marker id="prxarr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#2d4a7a"/>
+          </marker>
+        </defs>
+        <!-- Browser -->
+        <rect x="40" y="70" width="120" height="60" rx="4" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="100" y="95" text-anchor="middle" font-weight="600" fill="#3d6b3a">Nettleser</text>
+        <text x="100" y="113" text-anchor="middle" font-size="10" fill="#6b6257" font-style="italic">proxy: localhost:8080</text>
+
+        <!-- Proxy -->
+        <rect x="280" y="55" width="160" height="90" rx="4" fill="rgba(198,138,31,0.12)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="360" y="80" text-anchor="middle" font-weight="600" fill="#c68a1f">Burp / ZAP</text>
+        <text x="360" y="100" text-anchor="middle" font-size="10" fill="#6b6257">• logger requests</text>
+        <text x="360" y="115" text-anchor="middle" font-size="10" fill="#6b6257">• modifiserer payloads</text>
+        <text x="360" y="130" text-anchor="middle" font-size="10" fill="#6b6257">• replay / fuzz</text>
+
+        <!-- Server -->
+        <rect x="560" y="70" width="120" height="60" rx="4" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="620" y="95" text-anchor="middle" font-weight="600" fill="#2d4a7a">Webserver</text>
+        <text x="620" y="113" text-anchor="middle" font-size="10" fill="#6b6257" font-style="italic">app.example.com</text>
+
+        <!-- Arrows -->
+        <line x1="162" y1="92" x2="278" y2="92" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#prxarr)"/>
+        <text x="220" y="86" text-anchor="middle" font-size="10" fill="#6b6257">request</text>
+        <line x1="442" y1="92" x2="558" y2="92" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#prxarr)"/>
+        <text x="500" y="86" text-anchor="middle" font-size="10" fill="#6b6257">request'</text>
+
+        <line x1="558" y1="115" x2="442" y2="115" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#prxarr)"/>
+        <text x="500" y="135" text-anchor="middle" font-size="10" fill="#6b6257">response</text>
+        <line x1="278" y1="115" x2="162" y2="115" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#prxarr)"/>
+        <text x="220" y="135" text-anchor="middle" font-size="10" fill="#6b6257">response'</text>
+      </svg>
+      <figcaption>Web debug-proxy: nettleseren konfigureres til å sende all trafikk gjennom proxy-en på localhost. Apostrof markerer at proxy-en kan modifisere innholdet før videresending.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="dorking">
+  <div class="container">
+    <div class="section-badge">05 · Google dorking</div>
+    <h2>Google <em>dorking</em></h2>
+    <p class="section-intro">Bruk søkemotorens egne operatorer til å finne det noen glemte å skjule.</p>
+    <p class="lead">Google har indeksert hele internett. Hvis en utvikler glemte å sette <code>robots.txt</code>, eller la en testfil ligge på en offentlig sti, finner du den med riktig søk. Eksisterer det allerede en <em>Google Hacking Database</em> (GHDB) på <code>exploit-db.com</code> med ferdige søkestrenger for vanlige feil — index-of-lister med <code>.sql</code>-dumper, eksponerte admin-paneler, kjente CMS-installasjoner.</p>
+
+    <pre><code><span class="comment"># Eksponerte SQL-dumper</span>
+intext:"index of" "*.sql"
+
+<span class="comment"># Admin-paneler</span>
+intitle:"index of" inurl:superadmin
+
+<span class="comment"># Begrens til ett domene</span>
+site:example.com filetype:pdf
+
+<span class="comment"># Innloggingssider</span>
+inurl:admin/default.aspx</code></pre>
+
+    <div class="callout callout-yellow">
+      <h4>Lovlighet</h4>
+      <p>Selve søket er lovlig — du leser indeksert data. Å bruke informasjonen til å bryte seg inn er det ikke. Ved penetrasjonstesting trenger du skriftlig autorisasjon før du går videre fra rekognosering til aktiv testing.</p>
+    </div>
+  </div>
+</section>
+
+<section id="verktoy">
+  <div class="container">
+    <div class="section-badge">06 · Verktøy</div>
+    <h2>Verk<em>tøy</em></h2>
+    <p class="section-intro">Standardarsenalet for både angripere og forsvarere.</p>
+
+    <ul>
+      <li><strong>Burp Suite</strong> (Community / Pro) — debug-proxy, repeater, intruder, scanner. De facto standard for webapp-pentest.</li>
+      <li><strong>OWASP ZAP</strong> — open source-alternativ til Burp, automatisert scanning, fuzzing.</li>
+      <li><strong>Fiddler</strong> — Windows-orientert proxy, særlig god på .NET og HTTPS-inspeksjon.</li>
+      <li><strong>Firefox DevTools / Chrome DevTools</strong> — innebygd nettverksfane, Edit and Resend, lokalstorage / cookie-inspeksjon.</li>
+      <li><strong>HTTrack / wget --mirror</strong> — laster ned hele nettstedet lokalt for offline analyse av kildekode og struktur.</li>
+      <li><strong>Kali Linux</strong> — distribusjon med ferdig installerte verktøy (Burp, ZAP, nmap, sqlmap, Metasploit).</li>
+      <li><strong>nmap</strong> — port- og service-skanning. Kartlegg hva som lytter før du undersøker hvordan.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Automatiske scannere er begrenset</h4>
+      <p>Sårbarheter som krever forretningslogikk-forståelse (IDOR, broken access control, race conditions, designfeil) kan ikke oppdages av automatiserte scannere. Manuell testing er alltid nødvendig.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+</body>
+</html>

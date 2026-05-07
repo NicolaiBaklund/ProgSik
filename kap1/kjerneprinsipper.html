@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kjerneprinsipper — Kapittel 1</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 1</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+
+<main data-chapter="Kapittel 1: Introduksjon og sikkerhetsprinsipper">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 1 · Designprinsipper</div>
+    <h1>Kjerne<em>prinsipper</em></h1>
+    <p class="lede">Seks designprinsipper som angir hvordan systemer skal bygges — fra svakeste ledd til fellesskapets hukommelse.</p>
+    <nav class="toc">
+      <a href="#svakeste-ledd"><span class="toc-num">01</span>Sikre svakeste ledd</a>
+      <a href="#kompartmentalisering"><span class="toc-num">02</span>Kompartmentalisering</a>
+      <a href="#skepsis"><span class="toc-num">03</span>Skepsis til tillit</a>
+      <a href="#enkelhet"><span class="toc-num">04</span>Hold det enkelt</a>
+      <a href="#hemmeligheter"><span class="toc-num">05</span>Hemmeligheter er vanskelig å skjule</a>
+      <a href="#fellesressurser"><span class="toc-num">06</span>Bruk fellesressurser</a>
+    </nav>
+  </div>
+</header>
+
+<section id="svakeste-ledd">
+  <div class="container">
+    <div class="section-badge">01 · Cannikin Law</div>
+    <h2>Sikre svakeste <em>ledd</em></h2>
+    <p class="section-intro">Et system er aldri sterkere enn sin svakeste komponent — angriperen trenger bare å finne én feil.</p>
+    <p class="lead">Cannikin-loven (eller «Liebigs minimumslov» i økologi) sier at en bøtte holder bare så mye vann som den korteste staven tillater. Den samme regelen gjelder sikkerhet: dyre brannmurer hjelper lite hvis et passord er <code>sommer2025</code>, og MFA på alle innlogginger redder ingenting hvis admin-kontoen står på en bortglemt jumphost uten patcher.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <!-- Bøtte med kort stav -->
+        <defs>
+          <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#7ba9c4" stop-opacity="0.6"/>
+            <stop offset="1" stop-color="#3d6a8a" stop-opacity="0.7"/>
+          </linearGradient>
+        </defs>
+        <!-- Vannlinje -->
+        <rect x="220" y="150" width="280" height="80" fill="url(#water)"/>
+        <line x1="220" y1="150" x2="500" y2="150" stroke="#3d6a8a" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <text x="510" y="155" font-size="12" fill="#3d6a8a" font-style="italic">vannivå = sikkerhet</text>
+        <!-- Staver: én er kort -->
+        <rect x="215" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <rect x="240" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <rect x="265" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <rect x="290" y="150" width="14" height="90" fill="#b04428" stroke="#6b2a18" stroke-width="1.5"/>
+        <rect x="315" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <rect x="340" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <rect x="365" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <rect x="390" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <rect x="415" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <rect x="440" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <rect x="465" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <rect x="490" y="80" width="14" height="160" fill="#a87a4a" stroke="#6b4a28" stroke-width="1"/>
+        <!-- Tekst peker -->
+        <line x1="297" y1="65" x2="297" y2="148" stroke="#b04428" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="297" y="55" font-size="13" font-weight="600" fill="#b04428" text-anchor="middle">svakt passord</text>
+      </svg>
+      <figcaption>Cannikin-loven: vannet renner ut i høyden av den korteste staven. Et velpatchet system med ett dårlig passord lekker like mye som et helt usikret system.</figcaption>
+    </figure>
+
+    <p>De vanligste svake leddene i moderne systemer:</p>
+    <ul>
+      <li><strong>Mennesker:</strong> phishing, social engineering, gjenbrukte passord — den dyreste teknologien stoppes av en ansatt som klikker.</li>
+      <li><strong>Glemte komponenter:</strong> en gammel admin-side, et utgått sertifikat, et dev-miljø som aldri ble fjernet.</li>
+      <li><strong>Tredjepartskode:</strong> sårbarheter i avhengigheter du ikke har lest, men som kjører i din prosess.</li>
+      <li><strong>Konfigurasjonsfeil:</strong> standardpassord, åpne S3-bøtter, eksponerte database-porter.</li>
+    </ul>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk forståelse</div>
+      <div class="q-text">Hvorfor er Cannikin-loven asymmetrisk i forsvarerens disfavør?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Forsvareren må sikre <em>alle</em> punkter — angriperen må bare finne <em>ett</em>. Forsvareren bærer kostnaden ved å løfte hele systemet til samme nivå; angriperen bærer kostnaden ved å lete til den korteste staven er funnet.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="kompartmentalisering">
+  <div class="container">
+    <div class="section-badge">02 · Skille mellom deler</div>
+    <h2>Kompart<em>mentalisering</em></h2>
+    <p class="section-intro">Del systemet inn i adskilte rom — slik at brann i ett rom ikke brer seg til alle.</p>
+    <p class="lead">En ubåt har vanntette skott. Et middelalderslott har en indre borg. Et fly har separate hydraulikksystemer. I programvare betyr kompartmentalisering at en kompromittert mikrotjeneste ikke skal kunne nå produksjonsdatabasen, og at en utvikler-laptop som blir infisert ikke skal kunne avinstallere alle servere.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <!-- Uten kompartmentalisering: ett stort rom -->
+        <text x="160" y="35" font-size="13" font-weight="600" fill="#b04428" text-anchor="middle">Uten kompartmentalisering</text>
+        <rect x="60" y="55" width="200" height="160" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <circle cx="100" cy="100" r="10" fill="#3d6b3a"/>
+        <circle cx="160" cy="120" r="10" fill="#3d6b3a"/>
+        <circle cx="220" cy="100" r="10" fill="#3d6b3a"/>
+        <circle cx="120" cy="170" r="10" fill="#3d6b3a"/>
+        <circle cx="200" cy="180" r="10" fill="#3d6b3a"/>
+        <!-- Brann sprer seg -->
+        <text x="160" y="245" font-size="11" fill="#b04428" text-anchor="middle" font-style="italic">én kompromittering = full tilgang</text>
+        <!-- Med kompartmentalisering: skott -->
+        <text x="540" y="35" font-size="13" font-weight="600" fill="#3d6b3a" text-anchor="middle">Med kompartmentalisering</text>
+        <rect x="440" y="55" width="200" height="160" fill="rgba(61,107,58,0.05)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <line x1="490" y1="55" x2="490" y2="215" stroke="#3d6b3a" stroke-width="1.5"/>
+        <line x1="540" y1="55" x2="540" y2="215" stroke="#3d6b3a" stroke-width="1.5"/>
+        <line x1="590" y1="55" x2="590" y2="215" stroke="#3d6b3a" stroke-width="1.5"/>
+        <line x1="440" y1="135" x2="640" y2="135" stroke="#3d6b3a" stroke-width="1.5"/>
+        <circle cx="465" cy="95" r="8" fill="#3d6b3a"/>
+        <circle cx="515" cy="95" r="8" fill="#3d6b3a"/>
+        <circle cx="565" cy="95" r="8" fill="#3d6b3a"/>
+        <circle cx="615" cy="95" r="8" fill="#3d6b3a"/>
+        <circle cx="465" cy="175" r="8" fill="#3d6b3a"/>
+        <circle cx="515" cy="175" r="8" fill="#3d6b3a"/>
+        <circle cx="565" cy="175" r="8" fill="#3d6b3a"/>
+        <circle cx="615" cy="175" r="8" fill="#3d6b3a"/>
+        <text x="540" y="245" font-size="11" fill="#3d6b3a" text-anchor="middle" font-style="italic">brudd begrenses til ett rom</text>
+      </svg>
+      <figcaption>Kompartmentalisering begrenser hvor langt en angriper kommer etter første brudd — det er forskjellen på en lekkasje og en oversvømmelse.</figcaption>
+    </figure>
+
+    <p>Praktiske mekanismer:</p>
+    <ul>
+      <li><strong>Nettverkssegmentering:</strong> separate VLAN, subnet eller VPC for ulike tillitsnivåer.</li>
+      <li><strong>Tjenestekontoer:</strong> hver tjeneste sin egen IAM-rolle; ingen delte legitimasjoner.</li>
+      <li><strong>Containere og sandboxing:</strong> prosessisolasjon, seccomp, AppArmor.</li>
+      <li><strong>Datasiloer:</strong> ikke samle alle persondata i én tabell — skill identitetsdata fra atferdsdata.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="skepsis">
+  <div class="container">
+    <div class="section-badge">03 · Vær skeptisk</div>
+    <h2>Skepsis til <em>tillit</em></h2>
+    <p class="section-intro">Stol verken på input, biblioteker eller egen kode. Tillit er en sårbarhet — eksplisiter den.</p>
+    <p class="lead">Programvarehistorien er en samling fortellinger om misforstått tillit. SQL injection skjer fordi koden trodde inputen var trygg. Log4Shell skjer fordi loggbiblioteket trodde alle strenger var tekst. SolarWinds skjedde fordi 18 000 kunder trodde signerte oppdateringer fra en kjent leverandør var ufarlige. «Trust no one» er ikke paranoia — det er designdisiplin.</p>
+
+    <div class="callout callout-blue">
+      <h4>Zero Trust som arkitekturideal</h4>
+      <p>Moderne sikkerhetsarkitektur (NIST 800-207) vender den tradisjonelle perimetermodellen på hodet: ingen tjeneste eller bruker er klarert kun fordi de er «innenfor». Hver forespørsel autentiseres og autoriseres på nytt, basert på identitet og kontekst — ikke nettverksposisjon.</p>
+    </div>
+
+    <p>Konkrete uttrykk for prinsippet:</p>
+    <ul>
+      <li><strong>Validering på serversiden:</strong> klientvalidering er for brukervennlighet, ikke sikkerhet — den kan alltid omgås.</li>
+      <li><strong>Parameteriserte spørringer:</strong> aldri konkateniere brukerinput inn i SQL.</li>
+      <li><strong>Avhengighetspinning og SBOM:</strong> vit hva du kjører; oppdag når noe endres.</li>
+      <li><strong>Signaturverifikasjon:</strong> sjekk artefakter før de kjøres — Sigstore, GPG, in-toto.</li>
+      <li><strong>Privilegieseparasjon:</strong> behandle hver tjenestegrense som mulig angrepspunkt.</li>
+    </ul>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk forståelse</div>
+      <div class="q-text">Hvorfor er klient-side validering utilstrekkelig som sikkerhetstiltak?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Klienten er under angriperens kontroll. JavaScript kan deaktiveres, HTTP-forespørsler kan konstrueres direkte med <code>curl</code> eller Burp, og en angriper sender det de vil. Klient-validering er en UX-funksjon (rask feedback til legitime brukere) — sikkerhet må håndheves der serveren har kontroll.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="enkelhet">
+  <div class="container">
+    <div class="section-badge">04 · KISS</div>
+    <h2>Hold det <em>enkelt</em></h2>
+    <p class="section-intro">Kompleksitet er sikkerhetens største fiende. Hver linje kode er en mulighet for sårbarhet — og hver funksjon er en angrepsflate.</p>
+    <p class="lead">Kompleksitet er der bugs lever. En enkel tilstandsmaskin med tre tilstander er enkel å verifisere. En tilstandsmaskin med tjueåtte tilstander, der noen ganger to kan være aktive samtidig, er der CVE-er kommer fra. Hver feature du legger til er en kanin du må fôre i ti år; hver port du åpner er en dør angriperen kan banke på.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <!-- Vekt: sikkerhet vs brukervennlighet -->
+        <line x1="360" y1="180" x2="360" y2="220" stroke="#6b6257" stroke-width="3"/>
+        <polygon points="340,220 380,220 360,180" fill="#6b6257"/>
+        <line x1="180" y1="120" x2="540" y2="120" stroke="#6b6257" stroke-width="3"/>
+        <!-- Venstre side: sikkerhet -->
+        <rect x="120" y="80" width="120" height="50" fill="rgba(176,68,40,0.15)" stroke="#b04428" stroke-width="2"/>
+        <text x="180" y="110" font-size="14" font-weight="600" fill="#b04428" text-anchor="middle">Sikkerhet</text>
+        <!-- Høyre side: brukervennlighet -->
+        <rect x="480" y="80" width="120" height="50" fill="rgba(45,74,122,0.15)" stroke="#2d4a7a" stroke-width="2"/>
+        <text x="540" y="110" font-size="14" font-weight="600" fill="#2d4a7a" text-anchor="middle">Brukervennlighet</text>
+        <!-- Kompleksitet pile -->
+        <text x="360" y="40" font-size="12" fill="#a39886" text-anchor="middle" font-style="italic">kompleksitet ↑ → begge taper</text>
+      </svg>
+      <figcaption>Sikkerhet og brukervennlighet er ikke nullsumspill — men kompleksitet underminerer begge. Enkle systemer er både sikrere og lettere å bruke.</figcaption>
+    </figure>
+
+    <p>Konkrete tiltak for å redusere angrepsoverflaten:</p>
+    <ul>
+      <li>Slå av ubrukte funksjoner og porter — det som ikke kjører kan ikke utnyttes.</li>
+      <li>Fjern avhengigheter som ikke er nødvendige — hver pakke er en ny tillitsrelasjon.</li>
+      <li>Foretrekk få, godt forståtte abstraksjoner over mange smarte.</li>
+      <li>Skru av debug-grensesnitt, stack traces og verbose feilmeldinger i produksjon.</li>
+      <li>Aksepter at sikkerhet noen ganger koster brukervennlighet — men ikke alltid mer enn nødvendig.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="hemmeligheter">
+  <div class="container">
+    <div class="section-badge">05 · Kerckhoffs' prinsipp</div>
+    <h2>Hemmeligheter er vanskelig å <em>skjule</em></h2>
+    <p class="section-intro">Et system skal være sikkert selv om alt unntatt nøkkelen er kjent. Sikkerhet ved obscurity er en ekstra hatt — aldri den eneste.</p>
+    <p class="lead">På 1800-tallet formulerte Auguste Kerckhoffs et prinsipp som har holdt: en kryptografisk algoritme skal være offentlig, og bare nøkkelen hemmelig. Hvorfor? Fordi hemmeligheter lekker — gjennom reverse engineering, gjennom sluttede ansatte, gjennom kildekode på avveie. Den eneste tingen du kan rotere er nøkkelen; det andre må antas å være kjent.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <!-- Algoritme: åpen boks -->
+        <rect x="80" y="60" width="220" height="140" fill="rgba(45,74,122,0.05)" stroke="#2d4a7a" stroke-width="2" stroke-dasharray="6,4"/>
+        <text x="190" y="50" font-size="13" font-weight="600" fill="#2d4a7a" text-anchor="middle">Algoritme: offentlig</text>
+        <text x="190" y="120" font-size="14" fill="#2d4a7a" text-anchor="middle" font-family="JetBrains Mono, monospace">AES-256-GCM</text>
+        <text x="190" y="145" font-size="14" fill="#2d4a7a" text-anchor="middle" font-family="JetBrains Mono, monospace">SHA-256</text>
+        <text x="190" y="170" font-size="14" fill="#2d4a7a" text-anchor="middle" font-family="JetBrains Mono, monospace">RSA-OAEP</text>
+        <!-- Pil -->
+        <line x1="320" y1="130" x2="400" y2="130" stroke="#a39886" stroke-width="2" marker-end="url(#kk-arr)"/>
+        <defs>
+          <marker id="kk-arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#a39886"/>
+          </marker>
+        </defs>
+        <!-- Nøkkel: hemmelig boks -->
+        <rect x="420" y="60" width="220" height="140" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="2"/>
+        <text x="530" y="50" font-size="13" font-weight="600" fill="#b04428" text-anchor="middle">Nøkkel: hemmelig</text>
+        <text x="530" y="120" font-size="13" fill="#b04428" text-anchor="middle" font-family="JetBrains Mono, monospace">k = 7a3f...</text>
+        <text x="530" y="145" font-size="11" fill="#6b6257" text-anchor="middle" font-style="italic">kort, roterbar,</text>
+        <text x="530" y="160" font-size="11" fill="#6b6257" text-anchor="middle" font-style="italic">kan byttes ved lekkasje</text>
+      </svg>
+      <figcaption>Kerckhoffs' prinsipp: algoritmen kan analyseres av hele verden uten at sikkerheten brytes — så lenge nøkkelen forblir hemmelig.</figcaption>
+    </figure>
+
+    <div class="callout callout-green">
+      <h4>Open vs. closed source</h4>
+      <p>Valget mellom åpen og lukket kildekode er en forretningsbeslutning, ikke en sikkerhetsbeslutning. Linux-kjernen er åpen og brukes i kritisk infrastruktur. Windows er lukket og brukes likevel i milliarder av kontorer. Hva som teller er om du har <em>prosesser</em> for sårbarhetshåndtering — ikke om koden er synlig.</p>
+    </div>
+
+    <p>Når kan obscurity faktisk hjelpe?</p>
+    <ul>
+      <li>Som <em>tilleggslag</em>: å skjule versjonsinformasjon gjør automatiske angrep mindre effektive.</li>
+      <li>Mot opportunistiske skanninger: ikke-standard porter unngår en del bot-trafikk.</li>
+      <li>Aldri som <em>eneste</em> forsvar — anta at angriperen vet hvor du er.</li>
+    </ul>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk forståelse</div>
+      <div class="q-text">Et selskap nekter å publisere algoritmen sin og hevder dette gir dem sikkerhetsfordel. Hva er problemet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Hemmeligholdet er sannsynligvis allerede brutt — gjennom reverse engineering, sluttede ansatte eller dekompilering — uten at selskapet vet det. Når feilen er funnet, kan den ikke fikses ved å bytte algoritme; hele systemet må bygges om. Et åpent design med offentlig granskning og roterbar nøkkel er både mer robust og mer reparerbart.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="fellesressurser">
+  <div class="container">
+    <div class="section-badge">06 · Fellesskap</div>
+    <h2>Bruk felles<em>ressurser</em></h2>
+    <p class="section-intro">Sikkerhet er en lagsport. Andre har funnet sårbarhetene før deg — bruk deres kataloger, ikke gjenoppfinn forsvaret.</p>
+    <p class="lead">Hver dag publiseres titusenvis av sikkerhetsoppdagelser. Du kan ikke følge alle, men du kan abonnere på de som rammer din stack. CVE-databasen, OWASP-prosjektene, NIST NVD og leverandørenes egne sikkerhetsrådgivninger er ikke valgfri lesning — de er forutsetningen for å vite om noe er kjent og fikset.</p>
+
+    <table>
+      <thead>
+        <tr><th>Ressurs</th><th>Hva den dekker</th><th>URL</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>CVE</td><td>Felles katalog over kjente sårbarheter med unike ID-er</td><td><code>cve.mitre.org</code></td></tr>
+        <tr><td>NVD</td><td>NIST-utvidelse av CVE med CVSS-scoring og analyser</td><td><code>nvd.nist.gov</code></td></tr>
+        <tr><td>OWASP Top 10</td><td>De ti mest kritiske risikoene for webapplikasjoner</td><td><code>owasp.org/Top10</code></td></tr>
+        <tr><td>OWASP WSTG</td><td>Web Security Testing Guide — konkrete testprosedyrer</td><td><code>owasp.org/wstg</code></td></tr>
+        <tr><td>CWE</td><td>Kategorisering av svakhetstyper (klasser, ikke instanser)</td><td><code>cwe.mitre.org</code></td></tr>
+        <tr><td>EPSS</td><td>Prediksjonsscore for hvor sannsynlig en CVE blir utnyttet</td><td><code>first.org/epss</code></td></tr>
+        <tr><td>NSM/NCSC</td><td>Nasjonale råd om aktive trusler og forsvarsmønstre</td><td><code>nsm.no</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="margin-note">
+      <strong>Praktisk verktøykjede:</strong> <code>Dependabot</code> eller <code>Renovate</code> overvåker avhengigheter og åpner PR-er ved nye CVE-er. <code>Trivy</code>, <code>Grype</code> og <code>OWASP Dependency-Check</code> skanner i CI. <code>Snyk</code> og <code>Socket</code> tilbyr betalt overvåking med kontekst. Velg minst én — og gjør resultatene en del av kodegjennomgangen.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

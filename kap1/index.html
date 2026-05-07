@@ -47,32 +47,49 @@
     <p class="lead">Tenk deg et hus. Du kan sette inn tyverisikrede låser, sette opp alarm, installere overvåkingskamera og gi naboen en reservenøkkel. Hver enkelt tiltak hjelper. Men hvis vinduskarmen i kjelleren er råtten, eller hvis alarmen varsler et selskap som ikke sender noen, hjelper det lite. Sikkerhet er ikke summen av enkeltkomponentene — det er styrken i den svakeste lenken, og spørsmålet om hvem som leter etter den.</p>
 
     <figure class="fig-frame">
-      <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
-        <!-- CIA-triaden -->
-        <circle cx="240" cy="130" r="90" fill="none" stroke="#b04428" stroke-width="2"/>
-        <circle cx="360" cy="130" r="90" fill="none" stroke="#2d4a7a" stroke-width="2"/>
-        <circle cx="300" cy="220" r="90" fill="none" stroke="#3d6b3a" stroke-width="2"/>
-        <!-- Labels -->
-        <text x="195" y="100" font-size="15" font-weight="600" fill="#b04428" text-anchor="middle">Konfidensialitet</text>
-        <text x="415" y="100" font-size="15" font-weight="600" fill="#2d4a7a" text-anchor="middle">Integritet</text>
-        <text x="300" y="268" font-size="15" font-weight="600" fill="#3d6b3a" text-anchor="middle">Tilgjengelighet</text>
-        <!-- Tension arrows -->
-        <line x1="285" y1="135" x2="315" y2="135" stroke="#a39886" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
-        <defs>
-          <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-            <path d="M0,0 L6,3 L0,6 Z" fill="#a39886"/>
-          </marker>
-        </defs>
-        <text x="300" y="128" font-size="12" font-style="italic" fill="#6b6257" text-anchor="middle">spenning</text>
+      <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+        <!-- Seks sikkerhetsmål: kjerne (CIA) + ytre ring (Privacy, Accountability, Non-Repudiation) -->
+        <!-- Kjerne CIA -->
+        <circle cx="290" cy="160" r="70" fill="rgba(176,68,40,0.07)" stroke="#b04428" stroke-width="2"/>
+        <circle cx="430" cy="160" r="70" fill="rgba(45,74,122,0.07)" stroke="#2d4a7a" stroke-width="2"/>
+        <circle cx="360" cy="240" r="70" fill="rgba(61,107,58,0.07)" stroke="#3d6b3a" stroke-width="2"/>
+        <text x="252" y="135" font-size="13" font-weight="600" fill="#b04428" text-anchor="middle">Konfidensialitet</text>
+        <text x="468" y="135" font-size="13" font-weight="600" fill="#2d4a7a" text-anchor="middle">Integritet</text>
+        <text x="360" y="285" font-size="13" font-weight="600" fill="#3d6b3a" text-anchor="middle">Tilgjengelighet</text>
+        <!-- Ytre ring -->
+        <text x="120" y="60" font-size="13" font-weight="600" fill="#c68a1f">Personvern</text>
+        <line x1="155" y1="68" x2="240" y2="120" stroke="#c68a1f" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="600" y="60" font-size="13" font-weight="600" fill="#c68a1f" text-anchor="end">Sporbarhet</text>
+        <line x1="565" y1="68" x2="480" y2="120" stroke="#c68a1f" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="360" y="335" font-size="13" font-weight="600" fill="#c68a1f" text-anchor="middle">Ikke-benektelse</text>
+        <line x1="360" y1="320" x2="360" y2="305" stroke="#c68a1f" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="360" y="30" font-size="11" font-style="italic" fill="#6b6257" text-anchor="middle">CIA er kjernen — men ikke det hele</text>
       </svg>
-      <figcaption>CIA-triaden: tre egenskaper som alle systemer balanserer — og som sjelden lar seg maksimere simultant.</figcaption>
+      <figcaption>Seks sikkerhetsmål: CIA-triaden er fundamentet, mens personvern, sporbarhet og ikke-benektelse dekker hva CIA alene ikke fanger.</figcaption>
     </figure>
 
     <p>Ross Anderson åpner <em>Security Engineering</em> med en observasjon som er vanskelig å bestride: de fleste sikkerhetssvikt skyldes ikke at angriperen var genial, men at forsvareren var uoppmerksom. Defense in depth, least privilege og fail-safe defaults er ikke fancy begreper — de er den intellektuelle disiplinen som gjør det mulig å bygge systemer der enkeltfeil ikke fører til katastrofe.</p>
 
+    <div class="callout callout-blue">
+      <h4>McGraws definisjon av programvaresikkerhet</h4>
+      <p><em>«Software security is the practice of building software to be secure and to continue to function properly under malicious attack.»</em> — Gary McGraw. Merk to ord: <strong>building</strong> (designtid, ikke etterpå) og <strong>continue to function</strong> (resiliens, ikke bare avvergning).</p>
+    </div>
+
     <div class="callout callout-green">
       <h4>Kapittelets kjerneidé</h4>
       <p>Sikkerhetsprinsipper er ikke regler du følger etter at systemet er bygget — de er designbeslutninger du tar mens du bygger det. Retroaktiv sikkerhet er alltid dyrere og alltid mer ufullstendig.</p>
+    </div>
+
+    <h3 style="font-family: var(--serif); font-size: 22px; margin-top: 36px;">Konteksten i 2026</h3>
+    <p>Ifølge <em>2025 Cyberthreat Defense Report</em> ble <strong>81,6 % av organisasjoner</strong> rammet av minst ett vellykket cyberangrep det siste året; 28,7 % opplevde seks eller flere. World Economic Forums Global Risks Report 2025 plasserer cyberspionasje og krigføring som femte største globale risiko over en toårshorisont. Bakteppet:</p>
+    <ul>
+      <li><strong>EU Cyber Resilience Act (CRA), januar 2025</strong> — pålegger leverandører av produkter med digitale elementer risikovurdering, dokumentasjon (SBOM, SDLC), samsvarsmerking og sårbarhetsrapportering.</li>
+      <li><strong>54 % av organisasjoner</strong> publiserer sårbar kode for å rekke en frist (ESG 2020) — penetrate &amp; patch som forretningsmodell.</li>
+      <li><strong>29 % av utviklere</strong> oppgir at de mangler kompetanse til å fikse sårbarhetene de finner.</li>
+    </ul>
+
+    <div class="margin-note">
+      <strong>Data&shy;privacy ≠ Data security.</strong> Data security er tiltak mot uautorisert tilgang. Data privacy er etterlevelse av regler for hvordan persondata samles inn, behandles, deles og slettes. Du kan ha streng datasikkerhet og likevel grovt brudd på personvernet — og motsatt.
     </div>
   </div>
 </section>
@@ -83,18 +100,26 @@
     <h2>Utforsk <em>kapittelet</em></h2>
     <div class="subpage-list">
       <a href="cia-triaden.html" class="subpage-card">
-        <div class="sp-icon">01–05</div>
+        <div class="sp-icon">01–08</div>
         <div class="sp-info">
-          <div class="sp-title">CIA-triaden og kjerneprinsipper</div>
-          <div class="sp-desc">Konfidensialitet, integritet og tilgjengelighet som trio — pluss defense in depth, least privilege og fail-safe defaults.</div>
+          <div class="sp-title">Sikkerhetsmål og kjerneprinsipper</div>
+          <div class="sp-desc">CIA-triaden, personvern, sporbarhet, ikke-benektelse — pluss defense in depth, least privilege og fail-safe defaults.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="kjerneprinsipper.html" class="subpage-card">
+        <div class="sp-icon">09–14</div>
+        <div class="sp-info">
+          <div class="sp-title">Kjerneprinsipper II</div>
+          <div class="sp-desc">Sikre svakeste ledd, kompartmentalisering, skepsis til tillit, KISS, Kerckhoffs' prinsipp og bruk av fellesressurser.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
       <a href="trusselbilde.html" class="subpage-card">
-        <div class="sp-icon">06–09</div>
+        <div class="sp-icon">15–20</div>
         <div class="sp-info">
           <div class="sp-title">Trusselbildet</div>
-          <div class="sp-desc">Trusselaktører, angrepsvektorer, angrepsoverflate — og hva som faktisk driver sikkerhetshendelser i praksis.</div>
+          <div class="sp-desc">Trusselaktører, angrepsvektorer, angrepsoverflate, reelle hendelser, risikolandskapet i 2026 og penetrate &amp; patch-antimønsteret.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
@@ -105,7 +130,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">15 spørsmål — fra definisjon til dilemma.</p>
+    <p class="section-intro">23 spørsmål — fra definisjon til dilemma.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -210,6 +235,62 @@
       <div class="q-text">Forklar hvordan «fail-open» vs. «fail-closed» påvirker safety og security ulikt.</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer"><strong>Fail-closed</strong> (nekter tilgang ved feil): maksimerer security, men kan true safety hvis kritiske systemer blokkeres. Eksempel: en brannmur som blokkerer all trafikk ved konfigurasjonsfeil hindrer et angrep, men stopper også en nødmelding. <strong>Fail-open</strong> (tillater tilgang ved feil): ivaretar tilgjengelighet og safety (nødutstyr fungerer), men åpner for uautorisert tilgang. Riktig valg avhenger av kontekst: et atomkraftverk og et blogg-CMS har motsatte krav.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 16 · Lett</div>
+      <div class="q-text">Hva er forskjellen på personvern og konfidensialitet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Konfidensialitet</strong> handler om hvem som får lese data — typisk forretningssensitiv informasjon. <strong>Personvern</strong> handler om <em>hvilke persondata</em> som overhodet samles inn, hvorfor, hvordan de behandles, og hva som skjer med dem. Et system kan være perfekt konfidensielt og likevel grovt brudd på personvernet hvis det samler inn data det ikke trenger. GDPR regulerer personvern; tilgangskontroll regulerer konfidensialitet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 17 · Middels</div>
+      <div class="q-text">Hva er forskjellen på integritet og ikke-benektelse?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Integritet</strong> beviser at meldingen ikke er endret (en hash er nok). <strong>Ikke-benektelse</strong> beviser i tillegg <em>hvem</em> som sendte den — og at vedkommende ikke kan nekte for det. Det krever asymmetrisk kryptografi: avsenderens private nøkkel signerer, alle med offentlig nøkkel kan verifisere. En MAC gir integritet og autentisitet for begge parter, men ingen ikke-benektelse — fordi begge har samme nøkkel.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 18 · Middels</div>
+      <div class="q-text">Hva er Cannikin-loven, og hvordan gjelder den i sikkerhet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Cannikin-loven sier at en bøtte holder bare så mye vann som den korteste staven tillater. I sikkerhet: et system er aldri sterkere enn det svakeste leddet. Forsvareren må sikre alle punkter; angriperen trenger bare å finne ett. Det forklarer hvorfor MFA på 99 % av kontoer ikke beskytter — admin-kontoen som mangler MFA er der angrepet kommer fra.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 19 · Middels</div>
+      <div class="q-text">Hvorfor er Kerckhoffs' prinsipp («algoritmen kan være offentlig, kun nøkkelen må være hemmelig») fortsatt relevant?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Hemmeligheter lekker — gjennom reverse engineering, sluttede ansatte, dekompilering eller kildekode på avveie. Det eneste du kan rotere når en hemmelighet kompromitteres, er nøkkelen. Hvis sikkerheten avhenger av at algoritmen forblir hemmelig, må hele systemet bygges om når den lekker. Åpne, granskede algoritmer (AES, SHA-256, RSA) er derfor mer robuste enn proprietære «hemmelige» varianter.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 20 · Middels</div>
+      <div class="q-text">Et team står overfor et valg mellom to arkitekturer: én med få komponenter og lite funksjonalitet, én med mange smarte abstraksjoner. Hvilken er sikrere — og hvorfor?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Den enkle. Hver komponent er angrepsoverflate; hver abstraksjon er en mulig misforståelse. KISS-prinsippet («Keep It Simple») gjelder fordi kompleksitet er der bugs lever, og bugs er der angrepene begynner. Smarte abstraksjoner gir også flere overraskelser — utviklere som arver koden bruker dem feil. En enkel arkitektur er både lettere å verifisere, lettere å revidere, og mindre sannsynlig å gjemme sårbarheter.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 21 · Middels</div>
+      <div class="q-text">Du oppdager en CVE i en avhengighet du bruker. Hvilke fellesressurser bør du sjekke før du planlegger fiks?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">(1) <strong>NVD</strong> for full beskrivelse og CVSS-score. (2) <strong>EPSS</strong> for sannsynlighet for utnyttelse — en høy CVSS men lav EPSS er sjelden hastesak. (3) <strong>Leverandørens sikkerhetsadvarsel</strong> for fix-versjon og workaround. (4) <strong>OWASP / CWE</strong> for å forstå svakhetstypen og lignende mønstre i egen kodebase. (5) <strong>NSM/NCSC</strong> hvis sårbarheten er aktivt utnyttet i Norge eller mot din sektor. Sjelden gir én kilde nok kontekst alene.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 22 · Vanskelig</div>
+      <div class="q-text">Hvorfor mener Gary McGraw at «penetrate &amp; patch» er et antimønster, ikke en strategi?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Penetrate &amp; patch lar angripere sette agendaen: man venter til noen finner sårbarheter, så lapper man. Problemene: (1) sårbarheten er typisk utnyttet før patch finnes, (2) patcher krever redeploy med kostnad og risiko, (3) mange brukere installerer aldri patchen, (4) underliggende designfeil består. McGraws alternativ — software security som byggepraksis — flytter arbeidet til design og implementasjon, der det er billigere og mer fullstendig. Ross Anderson: forsvareren er sjelden i undertall mot et sofistikert angrep, men ofte i undertall mot egen uoppmerksomhet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 23 · Vanskelig</div>
+      <div class="q-text">EUs Cyber Resilience Act (CRA) trådte i kraft i januar 2025. Hva betyr den i praksis for et lite norsk selskap som selger en SaaS-tjeneste til EU-kunder?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">CRA krever (1) <strong>risikovurdering</strong> dokumentert for hver versjon, (2) <strong>Software Bill of Materials (SBOM)</strong> som lister alle avhengigheter, (3) <strong>samsvarserklæring (CE)</strong> for at produktet oppfyller cybersikkerhetskravene, (4) <strong>sårbarhetsrapportering</strong> til ENISA innen 24 timer ved aktiv utnyttelse. Web-sider og open source under visse vilkår er unntatt, men kommersielle SaaS-tjenester er omfattet. Praktisk: penetrate &amp; patch er ikke lenger lovlig forretningspraksis i EU-markedet.</div></div>
     </div>
 
   </div>

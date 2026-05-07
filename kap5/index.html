@@ -46,6 +46,25 @@
     <p class="section-intro">Threat modeling er ikke en pentest-rapport. Det er en designaktivitet som gjøres mens det er billig å endre noe.</p>
     <p class="lead">Tenk deg at du er huseier og du vandrer rundt i huset ditt med en innbruddstyvs øyne. Du ser at kjellervinduer kan åpnes utenfra. Du ser at garasjeporten er synlig fra gaten og har en standard kode. Du ser at nøkkelen under dørmatta er der. Ingen av disse oppdagelsene er kompliserte. Men de krever at du bevisst tar på deg angriperens perspektiv — og det er det threat modeling er.</p>
 
+    <div class="callout callout-blue">
+      <h4>«If we had our hands tied behind our backs…»</h4>
+      <p>«…and could do only one thing to improve software security, we would do threat modeling.» — <em>Michael Howard og Steve Lipner, The Security Development Lifecycle (Microsoft Press, 2006).</em> Sitatet rammer hvorfor: av alle aktiviteter du kan velge — pentest, code review, fuzzing, opplæring — gir threat modeling mest verdi per krone fordi det fanger problemer på designnivå, der endring fortsatt er billig.</p>
+    </div>
+
+    <h3>Threat Modeling Manifesto — fire essensielle spørsmål</h3>
+    <p>Threat Modeling Manifesto (2020), forfattet av blant andre Adam Shostack og Izar Tarandach, koker prosessen ned til fire spørsmål som enhver økt bør svare på:</p>
+    <ol>
+      <li><strong>Hva bygger vi?</strong> — modeller systemet (DFD, arkitekturdiagram, use cases).</li>
+      <li><strong>Hva kan gå galt?</strong> — identifiser trusler (STRIDE, attack trees, misuse cases).</li>
+      <li><strong>Hva gjør vi med det?</strong> — definer mitigasjoner (kontroller, krav, designvalg).</li>
+      <li><strong>Har vi gjort en god jobb?</strong> — valider analysen (review, test mot mitigasjonene).</li>
+    </ol>
+
+    <div class="callout">
+      <h4>Mønstre og antimønstre</h4>
+      <p><strong>Pattern — Varied Viewpoints:</strong> sett sammen et team med ulik kompetanse (utvikler, arkitekt, sikkerhet, produkt). <strong>Pattern — Systematic Approach:</strong> bruk strukturerte rammeverk (STRIDE, OWASP-listen) framfor magefølelse. <strong>Antipattern — Hero Threat Modeller:</strong> én «sikkerhetsguru» som gjør alt selv — flaskehals og lav læringseffekt. <strong>Antipattern — Perfect Representation:</strong> vente på det perfekte diagrammet før man går videre — flere upresise representasjoner illuminerer mer enn én perfekt.</p>
+    </div>
+
     <figure class="fig-frame">
       <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
         <defs><marker id="tma" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
@@ -91,18 +110,26 @@
     <h2>Utforsk <em>kapittelet</em></h2>
     <div class="subpage-list">
       <a href="metodikk.html" class="subpage-card">
-        <div class="sp-icon">01–05</div>
+        <div class="sp-icon">01–06</div>
         <div class="sp-info">
-          <div class="sp-title">Metodikk og DFD</div>
-          <div class="sp-desc">Hva threat modeling er, Data Flow Diagrams, trust boundaries og PASTA-rammeverket.</div>
+          <div class="sp-title">Metodikk, DFD og trusselaktører</div>
+          <div class="sp-desc">Hva threat modeling er, Data Flow Diagrams, trust boundaries, PASTA og hvem du faktisk forsvarer deg mot.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="notasjoner.html" class="subpage-card">
+        <div class="sp-icon">07–10</div>
+        <div class="sp-info">
+          <div class="sp-title">Notasjoner — utover DFD</div>
+          <div class="sp-desc">Misuse cases, attack trees, attack-defense trees og bow-tie-diagrammer. Flere representasjoner avdekker ulike problemer.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
       <a href="stride.html" class="subpage-card">
-        <div class="sp-icon">06–10</div>
+        <div class="sp-icon">11–15</div>
         <div class="sp-info">
           <div class="sp-title">STRIDE og mitigasjoner</div>
-          <div class="sp-desc">De seks STRIDE-kategoriene, DREAD-scoring og mitigasjonsmatrise med konkrete kontroller.</div>
+          <div class="sp-desc">De seks STRIDE-kategoriene med ekte hendelser, abstraksjonshierarkiet STRIDE→OWASP→CAPEC, og mitigasjonsmatrise.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
@@ -113,7 +140,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">15 spørsmål om threat modeling, DFD og STRIDE.</p>
+    <p class="section-intro">20 spørsmål om threat modeling, notasjoner, trusselaktører og STRIDE.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -218,6 +245,41 @@
       <div class="q-text">Hva er «abuse cases» og hvorfor er de nyttige i threat modeling?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer">Abuse cases (eller misuse cases) er use cases skrevet fra angriperens perspektiv: «som en angriper ønsker jeg å omgå autentisering for å få tilgang til andres data». De komplementerer threat modeling ved å knytte trusler til konkrete brukerscenarier og gjøre dem lettere å kommunisere til utviklere og produkteiere. De hjelper også med å prioritere: en abuse case som rammer mange brukere er høyere prioritet enn en som rammer svært få.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 16 · Lett</div>
+      <div class="q-text">Hva er de fire essensielle spørsmålene i Threat Modeling Manifesto (2020)?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">(1) Hva bygger vi? (2) Hva kan gå galt? (3) Hva gjør vi med det? (4) Har vi gjort en god jobb? Disse fire spørsmålene oppsummerer hele prosessen fra modellering, via identifisering og mitigasjon, til validering.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 17 · Middels</div>
+      <div class="q-text">Hva er forskjellen mellom en attack tree og et misuse case-diagram?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Et <strong>misuse case</strong> utvider UML use cases med ondsinnede aktører og «threaten/mitigate»-relasjoner — det er et kommunikasjonsverktøy på krav-nivå, lett å forstå for produkteiere. En <strong>attack tree</strong> (Schneier 1999) bryter ned ett konkret angrepsmål i del-mål via AND/OR-noder — det er teknisk, og noder kan dekoreres med kost, sannsynlighet, ferdighetsnivå, oppdagelsesgrad. Misuse cases gir bredde og forretningskontekst; attack trees gir dybde og kvantifisering.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 18 · Middels</div>
+      <div class="q-text">Hva er forskjellen mellom en attacker-centric og en software-centric trusselmodell?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Attacker-centric</strong> starter med trusselaktørene: hvem er motstanderen, hva er kapabiliteter, motivasjon, ressurser? (Anderson, Security Engineering). <strong>Software-centric</strong> starter med systemet: hvilke komponenter, dataflyter, trust boundaries finnes, og hvilke trusler treffer dem? (Shostack, STRIDE-tradisjonen). I praksis kombinerer man dem — men startpunktet former hvilke trusler man finner.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 19 · Middels</div>
+      <div class="q-text">Hva er antimønsteret «Hero Threat Modeller», og hvorfor er det skadelig?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">«Hero Threat Modeller» er at én sikkerhetsguru gjør all threat modeling alene. Skadelig fordi: (1) flaskehals — én person rekker ikke å dekke alle features; (2) lav læringseffekt — utviklerne lærer ikke å tenke som angripere selv; (3) sårbar mot at personen slutter. Manifesto-mønsteret «Varied Viewpoints» motvirker dette: tverrfaglig team med ulike perspektiver finner flere og bedre trusler.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 20 · Vanskelig</div>
+      <div class="q-text">Sett trusselaktørene «statlige cyberkrigere» (f.eks. Volt Typhoon) og «script kiddies» opp mot hverandre på dimensjonene Skills, Motivation og Resources. Hvordan påvirker forskjellene din mitigasjonsstrategi?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Statlige aktører: høy Skills (zero-days, custom malware), høy Motivation (geopolitisk, langvarig kampanje), nær ubegrenset Resources. Script kiddies: lav Skills (ferdige verktøy), lav Motivation (status, kjedsomhet), minimale Resources. <strong>Konsekvens:</strong> mot script kiddies holder standard hygiene (patch, MFA, WAF). Mot statlige aktører må du anta brudd, segmentere nettet, signere konfigurasjon, ha aktiv overvåkning av lateral movement, og akseptere at kostnadsbalansen aldri går i din favør — målet blir å heve angripers kost og forsinke kampanjen, ikke å gjøre den umulig.</div></div>
     </div>
   </div>
 </section>
