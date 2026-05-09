@@ -33,7 +33,8 @@
       <a href="#session-fixation"><span class="toc-num">04</span>Session fixation</a>
       <a href="#insecure-design"><span class="toc-num">05</span>Insecure design</a>
       <a href="#logging-failures"><span class="toc-num">06</span>Logging failures</a>
-      <a href="#forsvar-access"><span class="toc-num">07</span>Forsvar</a>
+      <a href="#exceptional-conditions"><span class="toc-num">07</span>Mishandling exceptions</a>
+      <a href="#forsvar-access"><span class="toc-num">08</span>Forsvar</a>
     </nav>
   </div>
 </header>
@@ -60,8 +61,19 @@
   <div class="container">
     <div class="section-badge">02 · IDOR</div>
     <h2>Insecure Direct Object <em>Reference</em></h2>
-    <p class="section-intro">IDOR er broken access control i sin enkleste form — og den er i praksis lett å utnytte, men like lett å fikse.</p>
+    <p class="section-intro">Server tar imot en ressurs-ID fra klienten og leverer ressursen uten å sjekke at den innloggede brukeren faktisk eier den. Autentisering er gjort, autorisering er glemt.</p>
     <p class="lead">Du er innlogget og ser fakturaene dine på <code>/api/invoices/1042</code>. Du endrer <code>1042</code> til <code>1043</code>. Apper uten serversidesjekk returnerer fakturaen til en annen bruker — navn, adresse, beløp, alt. Med systematisk enumerering kan en angriper laste ned hele kunderegisteret.</p>
+
+    <h3>Hva er den faktiske feilen?</h3>
+    <p>Det er lett å blande sammen to forskjellige sikkerhetsmekanismer:</p>
+    <ul>
+      <li><strong>Autentisering (authentication):</strong> «Hvem er du?» — løses av login + session-cookie. Server vet at <code>current_user.id == 42</code>.</li>
+      <li><strong>Autorisering (authorization):</strong> «Har du lov til å gjøre <em>dette</em> mot <em>denne</em> ressursen?» — må sjekkes <em>per request, per ressurs</em>.</li>
+    </ul>
+
+    <p>IDOR oppstår når kode hopper rett fra «brukeren er innlogget» til «hent ressursen med ID-en de spør om» — uten det mellomliggende steget «sjekk at brukeren har lov til å se denne spesifikke ressursen». ID-en kommer fra URL-en (<code>/api/invoices/1043</code>), forespørselsbody, query-parameter eller skjult skjemafelt — alle er <em>klientkontrollerte</em>. Server stoler på at klienten kun spør om sine egne ID-er. Det er den feilantakelsen som er hele sårbarheten.</p>
+
+    <p>Hvorfor så vanlig? REST-API-er bruker URL-stier som <code>/resource/{id}</code> som primær identifikator. ORM-er gjør hentingen til én linje (<code>Invoice.query.get(id)</code>). Eierskaps-sjekken må legges til <em>aktivt</em> — den skjer ikke automatisk. Glem den én gang per endepunkt, og du har en sårbarhet.</p>
 
     <figure class="fig-frame">
       <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
@@ -97,14 +109,28 @@
       <figcaption>IDOR: angriperen bytter ID i URL-en. Uten serversidesjekk returneres andres data.</figcaption>
     </figure>
 
-    <pre><code><span class="comment"># Sårbar</span>
+    <pre><code><span class="comment"># Sårbar — henter via klient-kontrollert ID, ingen eiersjekk</span>
 invoice = Invoice.query.get(invoice_id)
 <span class="keyword">return</span> invoice.to_dict()
 
-<span class="comment"># Sikker</span>
+<span class="comment"># Sikker — eierskap er en del av WHERE-klausulen</span>
 invoice = Invoice.query.filter_by(id=invoice_id,
                                   owner_id=current_user.id).first_or_404()
 <span class="keyword">return</span> invoice.to_dict()</code></pre>
+
+    <p>Den sikre varianten flytter eiersjekken ned i selve databasespørringen — finnes ikke en faktura med dette ID-et <em>og</em> denne eieren, returneres 404. Angriperen får samme svar enten ressursen ikke eksisterer eller tilhører en annen — ingen informasjonslekkasje om hva som finnes.</p>
+
+    <div class="callout callout-blue">
+      <h4>Sjekkliste for kodegjennomgang</h4>
+      <p>Hver gang en endepunkthandler tar imot en ID fra klienten — URL-path, query-parameter, skjult formfelt, JSON-body — still tre spørsmål: <strong>(1)</strong> Er brukeren innlogget? <strong>(2)</strong> Har brukerens rolle generelt lov til denne handlingen? <strong>(3)</strong> Eier denne spesifikke brukeren <em>denne spesifikke ressursen</em>? Mangler ett av de tre, har du en IDOR.</p>
+    </div>
+
+    <p>Andre varianter av samme grunnfeil:</p>
+    <ul>
+      <li><strong>Mass assignment:</strong> klient sender <code>{"name": "Ola", "is_admin": true}</code>, server lar JSON deserialiseres rett inn i ORM-objektet og oppgraderer brukeren til admin.</li>
+      <li><strong>Forced browsing:</strong> <code>/admin/users</code> har ingen lenke i UI-et for vanlige brukere, men endepunktet sjekker ikke rolle på serversiden — vanlig bruker som vet URL-en kommer rett inn.</li>
+      <li><strong>Path traversal:</strong> en filnedlasting tar <code>?file=invoice.pdf</code> uten validering. Angriper sender <code>?file=../../../../etc/passwd</code>.</li>
+    </ul>
   </div>
 </section>
 
@@ -203,27 +229,33 @@ invoice = Invoice.query.filter_by(id=invoice_id,
   <div class="container">
     <div class="section-badge">05 · A06</div>
     <h2>Insecure <em>design</em></h2>
-    <p class="section-intro">En implementasjonsfeil kan patches. En designfeil krever arkitektur ombygget — og det er det som gjør A04 til en kategori for seg.</p>
-    <p class="lead">Tenk deg en nettbank uten noen form for transaksjonsbegrensning — det er aldri designet inn. Man kan legge til rate-limiting på ett endepunkt etterpå, men hvis pengeflyten kan initieres fra ti forskjellige steder i systemet er det ikke en patch, det er en ombygging. A04 handler om sikkerhetsfeil som måtte vært løst på tegnebordet.</p>
+    <p class="section-intro">Sikkerhetshull som ikke kommer fra en kodefeil, men fra at en kontroll <em>aldri ble tegnet inn</em> i arkitekturen. Du kan ikke patche deg ut av en designfeil.</p>
+    <p class="lead">Forskjellen er presis. En implementasjonsfeil betyr at noen skrev koden feil — riktig idé, dårlig utførelse. SQL injection er typisk: utvikleren visste at input skal saneres, men brukte string-konkatenering i stedet for prepared statement. Du fikser én linje. En designfeil betyr derimot at <em>kontrollen ikke finnes i systemets struktur</em> — ingen har bestemt at den skulle finnes. Det er forskjellen på «glemt å låse døra» og «huset har ingen dør».</p>
+
+    <h3>Hva er den faktiske feilen?</h3>
+    <p>Tenk deg en nettbank uten noen form for transaksjonsbegrensning. Ikke fordi noen glemte å implementere det — fordi <em>kravet ikke fantes</em>. Pengeflyten initieres fra ti forskjellige endepunkter (web, mobil-app, partnerintegrasjon, batch-jobb, intern admin), og ingen av dem har et felles policypunkt. Du kan legge på rate-limiting på ett endepunkt etterpå — men angriperen finner bare en av de andre ni. Fixen er ikke en patch, fixen er sentralisering av forretningslogikken og eksplisitte abuse case-krav.</p>
 
     <p>Klassiske insecure design-mønstre:</p>
     <ul>
-      <li><strong>Manglende forretningslogikk-begrensninger:</strong> ingen øvre grense på forsøk, beløp, transaksjoner eller ressurser — by design, ikke ved en implementasjonsfeil.</li>
-      <li><strong>For brede trust zones:</strong> alle interne tjenester stoler blindt på hverandre. Én kompromittert intern komponent gir full tilgang til resten.</li>
-      <li><strong>Manglende abuse cases:</strong> systemet er designet for legitim bruk uten å ha tenkt på hva som skjer hvis en bruker gjør det motsatte av det tiltenkte.</li>
-      <li><strong>Sensitiv data i URL-er:</strong> <code>/reset?token=abc123</code> — token havner i server-logger, browser-historikk og Referer-header.</li>
+      <li><strong>Manglende forretningslogikk-begrensninger:</strong> ingen øvre grense på forsøk, beløp, transaksjoner eller ressurser — fordi grensen aldri ble spesifisert, ikke fordi koden glemte å sjekke. Eksempel: kupongkoder uten max-bruk per konto, og angriperen bruker samme kode 10 000 ganger.</li>
+      <li><strong>For brede trust zones:</strong> alle interne tjenester stoler blindt på hverandre. Én kompromittert intern komponent gir full tilgang til resten. Designet sa «alt innenfor brannmuren er trygt» — som er feil i 2026.</li>
+      <li><strong>Manglende abuse cases:</strong> systemet er designet for legitim bruk uten å ha tenkt på hva som skjer hvis brukeren gjør det motsatte av det tiltenkte. Eksempel: «glemt passord»-flyt sender e-post til en adresse <em>klienten</em> oppgir, ikke en lagret — kontoovertakelse i ett steg.</li>
+      <li><strong>Sensitiv data i URL-er:</strong> <code>/reset?token=abc123</code> — token havner i server-logger, browser-historikk og Referer-header som lekker til tredjepart. Designvalg, ikke en bug i én funksjon.</li>
+      <li><strong>Konfidensialitet uten integritet:</strong> data krypteres men signeres ikke. Mottaker kan ikke skille gyldig melding fra tampert. Klassisk tegnebordsfeil.</li>
     </ul>
 
     <div class="callout callout-blue">
-      <h4>Design vs. implementasjon</h4>
-      <p>SQL injection er en implementasjonsfeil — du fikser den ved å bytte til parameteriserte spørringer. Et system uten rate-limiting er en designfeil — du kan ikke fikse det uten å endre arkitekturen. A04 minner oss om at sikkerhet ikke er noe du legger på etterpå.</p>
+      <h4>Design vs. implementasjon — testen</h4>
+      <p>Spør: «Kan jeg fikse dette ved å endre én funksjon eller én klasse?» Hvis ja → implementasjonsfeil. Hvis fixen krever ny kontroll, ny komponent, ny dataflyt eller endring i hvordan moduler snakker sammen → designfeil. SQL injection er én linje. Manglende rate-limiting er en arkitekturkomponent. A06 minner oss om at sikkerhet ikke er noe du legger på etterpå.</p>
     </div>
 
     <p>Hva som hjelper i designfasen:</p>
     <ul>
-      <li><strong>Threat modeling tidlig:</strong> kjør STRIDE på systemet mens det fortsatt er piler og bokser på et whiteboard, ikke kode i produksjon.</li>
-      <li><strong>Security requirements:</strong> definer hva systemet <em>ikke</em> skal tillate — ikke bare hva det skal gjøre.</li>
+      <li><strong>Threat modeling tidlig:</strong> kjør STRIDE eller LINDDUN på systemet mens det fortsatt er piler og bokser på et whiteboard, ikke kode i produksjon.</li>
+      <li><strong>Security requirements:</strong> definer hva systemet <em>ikke</em> skal tillate — ikke bare hva det skal gjøre. «Brukeren kan ikke utføre mer enn N transaksjoner per døgn» er et krav, ikke en implementasjonsdetalj.</li>
+      <li><strong>Abuse case-modellering:</strong> for hver use case, skriv også «evil user story»-en. Hva gjør en angriper med samme funksjon?</li>
       <li><strong>Referansearkitekturer:</strong> bruk OWASP ASVS eller etablerte mønstre for autentisering og sesjonshåndtering i stedet for å finne opp hjulet.</li>
+      <li><strong>Defense in depth som designprinsipp:</strong> aldri stol på én kontroll. Brannmur + autentisering + autorisering + rate-limit + logging — alle aktive samtidig.</li>
     </ul>
   </div>
 </section>
@@ -231,30 +263,106 @@ invoice = Invoice.query.filter_by(id=invoice_id,
 <section id="logging-failures">
   <div class="container">
     <div class="section-badge">06 · A09</div>
-    <h2>Security logging <em>failures</em></h2>
-    <p class="section-intro">Det du ikke logger, kan du ikke oppdage — og det du logger feil, kan bli en sårbarhet i seg selv.</p>
-    <p class="lead">En angriper tar seg tid. De logger inn og ut hundrevis av ganger med forskjellige kontoer over to uker. Ingen alarm går. Ingen rapport genereres. Angrepet oppdages først når kunden ringer og spør hvorfor pengene er borte. Mangelfull logging betyr at kompromittering ikke oppdages — og at etterforskning etterpå er nesten umulig.</p>
+    <h2>Security logging og <em>alerting failures</em></h2>
+    <p class="section-intro">Loggingsvikt er ikke at noe galt skjer — det er at <em>du ikke vet det</em>. A09:2025 dekker både manglende logger og manglende reaksjon på dem.</p>
+    <p class="lead">En angriper tar seg tid. De logger inn og ut hundrevis av ganger med forskjellige kontoer over to uker — credential stuffing mot lekkede passordlister. Ingen alarm går. Ingen rapport genereres. Til slutt treffer de en konto med gjenbrukt passord, tømmer den, og angrepet oppdages først når kunden ringer og spør hvorfor pengene er borte. To-ukers vindu hvor noe synlig kunne vært stoppet — men det fantes ingen øyne.</p>
 
-    <p>Hva som alltid skal logges:</p>
+    <h3>Hva er den faktiske feilen?</h3>
+    <p>Loggingsvikt er sjelden at logger ikke <em>finnes</em>. Det er at de:</p>
     <ul>
-      <li>Innloggingsforsøk — vellykkede og mislykkede, med tidsstempel og IP.</li>
-      <li>Tilgangsforsøk til sensitive ressurser, inkludert avviste.</li>
-      <li>Endringer i tilgangskontroll og brukerrettigheter.</li>
-      <li>Alle handlinger utført av privilegerte kontoer.</li>
+      <li>Inneholder feil informasjon (eller for mye / for lite).</li>
+      <li>Ikke aggregeres sentralt — hver server har sin egen log fil ingen ser på.</li>
+      <li>Har ingen alerting koblet på — selv kritiske mønstre genererer ingen e-post / Slack-melding / pager.</li>
+      <li>Er kun tilgjengelige <em>etter</em> hendelsen, fra read-only-tilstanden, lenge etter angriperen har kommet og gått.</li>
+      <li>Er manipulerbare av angriperen — same servera/databasen som ble kompromittert lagrer logger.</li>
+    </ul>
+
+    <p>OWASP 2025 endret navnet fra «Security Logging Failures» til «Security Logging <strong>and Alerting</strong> Failures» av en grunn: en logg uten en alarm er en arkivkopi, ikke et forsvar. Real-time deteksjon krever at noen — eller noe — leser loggen mens angrepet pågår.</p>
+
+    <p>Hva som <em>alltid</em> skal logges:</p>
+    <ul>
+      <li><strong>Innloggingsforsøk</strong> — vellykkede og mislykkede, med tidsstempel, IP og brukerkonto. Mønstre som «100 mislykkede mot 100 forskjellige kontoer fra én IP» = credential stuffing.</li>
+      <li><strong>Tilgangsforsøk til sensitive ressurser</strong>, inkludert avviste (403). En 403 fra en gyldig sesjon er signal om enten en bug eller et IDOR-forsøk.</li>
+      <li><strong>Endringer i tilgangskontroll og brukerrettigheter</strong> — privilege escalation må aldri skje stille.</li>
+      <li><strong>Alle handlinger utført av privilegerte kontoer</strong> — admin-handlinger har lavere baseline-volum, hver enkelt fortjener oppmerksomhet.</li>
+      <li><strong>Inputvalideringsfeil og parserfeil</strong> — gjentatte 400 / 500-feil mot ett endepunkt fra én klient indikerer aktiv probing.</li>
     </ul>
 
     <p>Hva som <em>ikke</em> skal logges:</p>
     <ul>
-      <li>Passord — heller ikke feilskrevne forsøk.</li>
-      <li>Session-tokens og API-nøkler.</li>
-      <li>Sensitiv personlig informasjon uten lovlig grunnlag (GDPR).</li>
+      <li><strong>Passord</strong> — heller ikke feilskrevne forsøk. Brukere bommer ofte med en variant av passordet sitt; en passordlogg blir til en passorddump.</li>
+      <li><strong>Session-tokens og API-nøkler</strong> — den som leser loggen får da rett til å imitere brukeren.</li>
+      <li><strong>Sensitiv personlig informasjon</strong> uten lovlig grunnlag (GDPR-eksponering).</li>
+      <li><strong>Innholdet i kryptert trafikk</strong> i klartekst etter dekryptering — du gjør krypteringen meningsløs.</li>
     </ul>
+
+    <p>Alerting og monitoring — det A09 i 2025 legger særlig vekt på:</p>
+    <ul>
+      <li><strong>Sentral aggregering:</strong> SIEM (Splunk, Elastic, Datadog) som samler logger fra alle tjenester. Logger på én server ingen ser på er verdiløse.</li>
+      <li><strong>Detection rules:</strong> definerte mønstre som utløser alarm — N mislykkede login per minutt, ny IP for admin-konto, 5xx-spike, uventet utgående trafikk.</li>
+      <li><strong>Tamper-resistent lagring:</strong> append-only, separat sikkerhetsdomene fra applikasjonen. Angriper som tar over app-serveren skal ikke kunne slette spor.</li>
+      <li><strong>Eskaleringsprosess:</strong> alarm må gå til <em>noen</em> som er forventet å reagere — ellers er den ikke en alarm.</li>
+    </ul>
+
+    <div class="callout callout-yellow">
+      <h4>Median time-to-detect</h4>
+      <p>IBM Cost of a Data Breach 2024-rapporten: gjennomsnittlig oppdagelsestid for et databrudd er 194 dager. 200 dager mellom brudd og deteksjon er normaltilstanden, ikke unntaket. A09 er kategorien som lukker det vinduet.</p>
+    </div>
+  </div>
+</section>
+
+<section id="exceptional-conditions">
+  <div class="container">
+    <div class="section-badge">07 · A10 (NY 2025)</div>
+    <h2>Mishandling of Exceptional <em>Conditions</em></h2>
+    <p class="section-intro">Sårbarheter som dukker opp når kode møter en tilstand utvikleren ikke planla for — feil, race conditions, network glitches, full disk. Ny kategori i OWASP Top 10 2025.</p>
+    <p class="lead">Mesteparten av sikkerhetsteorien handler om hva som skjer når alt går som det skal — bruker logger inn, request kommer fram, DB-spørringen returnerer. A10:2025 er kategorien for det motsatte: <em>hva skjer når noe brekker?</em> Default-svaret skal være «fail closed» — nekt operasjonen, logg, returner trygg respons. Default-svaret er altfor ofte «fail open» — slipp gjennom, fortsett, krasj med stack trace til brukeren.</p>
+
+    <h3>Hva er den faktiske feilen?</h3>
+    <p>Tre typiske mønstre:</p>
+    <ul>
+      <li><strong>Fail open:</strong> autorisasjonssjekken kaster en exception (DB nede, eksternt API timeout). Catch-blokken returnerer <code>true</code> for å «ikke blokkere brukeren». Resultat: alle får admin-tilgang når DB-en hikker.</li>
+      <li><strong>Race conditions:</strong> to forespørsler ankommer samtidig. Begge sjekker «har brukeren penger?» (ja). Begge trekker beløpet. Brukeren brukte saldoen sin to ganger. Klassisk eksempel: dobbeltinnløsning av rabattkoder.</li>
+      <li><strong>Verbose feilmeldinger:</strong> applikasjonen krasjer og returnerer hele stack tracen til brukeren — med filstier, biblioteksversjoner, SQL-spørringen som feilet. Angriperen kartlegger systemet via planlagte feil.</li>
+      <li><strong>Resource exhaustion:</strong> ingen øvre grense på opplastingsstørrelse, antall samtidige connections, mengde minne én forespørsel kan allokere. Én angriper tar ned hele tjenesten med en stor request.</li>
+      <li><strong>Time-of-check-to-time-of-use (TOCTOU):</strong> sjekk og bruk er ikke atomiske. Mellom <code>if (file_exists)</code> og <code>open(file)</code> bytter angriperen filen til en symlenke.</li>
+    </ul>
+
+    <pre><code><span class="comment"># Fail open — KATASTROFE</span>
+<span class="keyword">def</span> is_admin(user_id):
+    <span class="keyword">try</span>:
+        <span class="keyword">return</span> db.query(<span class="value">"SELECT is_admin FROM users WHERE id=?"</span>, user_id)[<span class="value">0</span>]
+    <span class="keyword">except</span> Exception:
+        <span class="keyword">return</span> <span class="value">True</span>  <span class="comment"># «for ikke å blokkere brukeren» — hver feil = admin</span>
+
+<span class="comment"># Fail closed — riktig</span>
+<span class="keyword">def</span> is_admin(user_id):
+    <span class="keyword">try</span>:
+        <span class="keyword">return</span> db.query(<span class="value">"SELECT is_admin FROM users WHERE id=?"</span>, user_id)[<span class="value">0</span>]
+    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:
+        log.error(<span class="value">"is_admin check failed"</span>, exc_info=e)
+        <span class="keyword">return</span> <span class="value">False</span>  <span class="comment"># default deny ved tvil</span></code></pre>
+
+    <p>Mottiltak:</p>
+    <ul>
+      <li><strong>Fail-closed by default:</strong> sikkerhetskritiske funksjoner skal alltid nekte ved tvil. Skriv testen som tvinger exception og verifiser at default er deny.</li>
+      <li><strong>Spesifikke catch-blokker:</strong> ikke <code>catch Exception</code> — fang den spesifikke feilen du faktisk håndterer. Resten propagerer til en sentral handler som logger og returnerer generisk 500.</li>
+      <li><strong>Atomiske operasjoner:</strong> bruk DB-transaksjoner med <code>SELECT ... FOR UPDATE</code>, optimistisk låsing eller idempotency keys for å unngå race conditions på state-endringer.</li>
+      <li><strong>Generiske feilmeldinger til klient, detaljer i log:</strong> brukeren får «En feil oppstod, referanse-ID 7af3», stacktracen går til SIEM.</li>
+      <li><strong>Eksplisitte ressursgrenser:</strong> max request size, connection pool limits, timeout på alle eksterne kall, max payload depth for JSON/XML.</li>
+      <li><strong>Chaos engineering:</strong> test bevisst at systemet feiler trygt — drep DB-tilkoblinger, tregg ned eksterne API-er, fyll opp disken.</li>
+    </ul>
+
+    <div class="callout callout-blue">
+      <h4>Hvorfor egen kategori i 2025?</h4>
+      <p>Sikkerhetsfeil i unntakstilstand er notorisk vanskelige å oppdage med statisk analyse, scannere eller vanlig pen-test — fordi den vanlige utførelsesveien fungerer. Kategorien tvinger eksplisitt vurdering: hva skjer når API-et ditt møter feil det aldri ble testet for?</p>
+    </div>
   </div>
 </section>
 
 <section id="forsvar-access">
   <div class="container">
-    <div class="section-badge">07 · Forsvar</div>
+    <div class="section-badge">08 · Forsvar</div>
     <h2>Forsvar mot tilgangs- og <em>autentiseringsfeil</em></h2>
     <p class="section-intro">Serversidekontroller er ikke valgfrie tillegg — de er den eneste tilgangssikringen som teller.</p>
     <p class="lead">Det ene enkeltprinsippet som eliminerer de fleste broken access control-feil: verifiser tilgang på serversiden for hvert eneste kall, uavhengig av hva klienten sier. Ingen unntak for «intern» trafikk, ingen unntak for «betrodd» klient, ingen unntak for «det er bare et GET».</p>

@@ -147,20 +147,59 @@ result = subprocess.run(["ping", "-c", "4", ip],
   <div class="container">
     <div class="section-badge">04 · NoSQL og LDAP</div>
     <h2>NoSQL og LDAP <em>injection</em></h2>
-    <p class="section-intro">Injection er ikke SQL-spesifikt — enhver tolkbar spørring bygget fra brukerkontrollert inndata er sårbar.</p>
-    <p class="lead">MongoDB-applikasjoner som direkte deserialiserer JSON fra brukere er sårbare for operator-injection. En innloggingsforespørsel der body er <code>{"username": "admin", "password": {"$gt": ""}}</code> kan omgå passordsjekken fordi <code>$gt: ""</code> betyr «større enn tom streng» — en betingelse som alltid er sann for et ikke-tomt passord.</p>
+    <p class="section-intro">Injection er ikke SQL-spesifikt. Enhver spørrespråk som tolker strukturen i input — MongoDB query operators, LDAP filter syntax, XPath, GraphQL — kan angripes når kode antar at input er strenger og det egentlig er objekter.</p>
+    <p class="lead">MongoDB-drivere tar imot query-objekter direkte som JavaScript-objekter. Hvis innloggingskoden gjør <code>db.users.findOne({ username: req.body.username, password: req.body.password })</code> og en angriper sender body som <code>{"username": "admin", "password": {"$gt": ""}}</code> — så blir spørringen til Mongo: «finn admin der passord er større enn tom streng». Det er sant for ethvert ikke-tomt lagret passord. Logger inn som admin uten å vite passordet.</p>
 
-    <pre><code><span class="comment"># Sårbar MongoDB-innlogging (Express/Node)</span>
+    <h3>Hva er den faktiske feilen?</h3>
+    <p>SQL injection brukte at strenger og kode bor i samme syntaks. NoSQL injection bruker noe litt annet: at <em>data og operatorer</em> bor i samme JSON-objekt. Når Express deserialiserer requestbody til et JS-objekt og koden gir det rett til Mongo-driveren, mister applikasjonen kontrollen over hvilke felter som er bruker-input og hvilke som er query-operatorer. <code>{"$gt": ""}</code> ser ut som en uskyldig verdi i JSON, men Mongo tolker det som «greater than».</p>
+
+    <p>Roten av feilen er <em>typeantakelse</em>: koden antar at <code>req.body.password</code> er en <code>string</code>. JSON tillater også objekter, arrays, tall, null. Uten typevalidering på server kan klienten sende hva som helst.</p>
+
+    <p>NoSQL-spesifikke operatorer angripere utnytter:</p>
+    <ul>
+      <li><code>$gt</code>, <code>$lt</code>, <code>$ne</code> — sammenlikninger som blir alltid-sanne / alltid-usanne.</li>
+      <li><code>$regex</code> — regex som matcher alt (<code>{"$regex": ".*"}</code>).</li>
+      <li><code>$where</code> — server-side JavaScript-evaluering. Direkte RCE-vektor i eldre Mongo-versjoner.</li>
+      <li><code>$exists</code> — finn alle dokumenter som har et bestemt felt.</li>
+    </ul>
+
+    <pre><code><span class="comment">// Sårbar MongoDB-innlogging (Express/Node)</span>
 db.users.findOne({ username: req.body.username,
                    password: req.body.password })
-<span class="comment">// Angriper sender: { "password": { "$gt": "" } }</span>
+<span class="comment">// Angriper sender: { "username": "admin", "password": { "$gt": "" } }</span>
+<span class="comment">// → finner admin uten å kunne passordet</span>
 
-<span class="comment"># Sikker — valider typer eksplisitt</span>
-<span class="keyword">if</span> (typeof req.body.password !== <span class="value">'string'</span>) return res.status(400).end();
-db.users.findOne({ username: String(req.body.username),
-                   password: String(req.body.password) })</code></pre>
+<span class="comment">// Sikker — valider typer eksplisitt</span>
+<span class="keyword">if</span> (typeof req.body.username !== <span class="value">'string'</span>) <span class="keyword">return</span> res.status(<span class="value">400</span>).end();
+<span class="keyword">if</span> (typeof req.body.password !== <span class="value">'string'</span>) <span class="keyword">return</span> res.status(<span class="value">400</span>).end();
+db.users.findOne({ username: req.body.username,
+                   password: req.body.password })
 
-    <p>LDAP injection følger samme mønster: spørringer som <code>(uid=admin)(&(password=*)</code> kan manipuleres via uescapede tegn som <code>*</code>, <code>(</code>, <code>)</code>, <code>\</code>. Biblioteker som <code>ldap3</code> tilbyr escaping-funksjoner (<code>escape_filter_chars</code>) som bør brukes konsekvent.</p>
+<span class="comment">// Bedre — bruk schema-validering (Joi, Zod, Mongoose-schema)</span>
+<span class="keyword">const</span> schema = z.object({ username: z.string(), password: z.string() });
+<span class="keyword">const</span> body = schema.parse(req.body);  <span class="comment">// kaster ved typefeil</span>
+db.users.findOne(body)</code></pre>
+
+    <h3>LDAP injection</h3>
+    <p>LDAP filter har egne metategn som styrer logikken: <code>*</code>, <code>(</code>, <code>)</code>, <code>\</code>, <code>NUL</code>. En innloggingssjekk bygd som streng:</p>
+
+    <pre><code><span class="comment"># Sårbar — string-konkatenering i LDAP-filter</span>
+filter = f<span class="value">"(&amp;(uid={username})(password={password}))"</span>
+
+<span class="comment"># Angriper: username = admin, password = *)(uid=*</span>
+<span class="comment"># Filter blir:  (&amp;(uid=admin)(password=*)(uid=*))</span>
+<span class="comment"># → matcher alle, returnerer admin-bruker</span>
+
+<span class="comment"># Sikker — bruk biblioteketsescaping</span>
+<span class="keyword">from</span> ldap3.utils.conv <span class="keyword">import</span> escape_filter_chars
+filter = f<span class="value">"(&amp;(uid={escape_filter_chars(username)})(password={escape_filter_chars(password)}))"</span></code></pre>
+
+    <p>Biblioteker som <code>ldap3</code> tilbyr <code>escape_filter_chars()</code> som konverterer farlige tegn til <code>\xx</code>-sekvenser. Bruk det konsekvent — eller enda bedre, bruk parameterized search-API-er der serveren skiller filter-template fra bruker-input.</p>
+
+    <div class="callout callout-blue">
+      <h4>Mønsteret bak alle injection-varianter</h4>
+      <p>Uansett om det er SQL, NoSQL, LDAP, XPath, OS shell eller LaTeX-renderer: feilen er at <em>data og kode flettes sammen i samme streng eller struktur</em>, og parseren på den andre siden kan ikke skille dem. Fixen er alltid den samme abstraksjonen — hold dem separate fra start til slutt.</p>
+    </div>
   </div>
 </section>
 

