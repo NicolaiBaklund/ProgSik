@@ -26,56 +26,180 @@
     <h1>Secure Development <em>Lifecycle</em></h1>
     <p class="lede">Sikkerhet er ikke en funksjon du skrur på etter at applikasjonen er bygget — det er en ingeniørdisiplin integrert fra dag én.</p>
     <nav class="toc">
-      <a href="#microsoft-sdl"><span class="toc-num">01</span>Microsoft SDL</a>
-      <a href="#owasp-samm"><span class="toc-num">02</span>OWASP SAMM</a>
-      <a href="#devsecops"><span class="toc-num">03</span>DevSecOps</a>
-      <a href="#sikkerhetskrav"><span class="toc-num">04</span>Sikkerhetskrav</a>
-      <a href="#sca-sbom"><span class="toc-num">05</span>SCA og SBOM</a>
+      <a href="#touchpoints"><span class="toc-num">01</span>Touchpoints</a>
+      <a href="#microsoft-sdl"><span class="toc-num">02</span>Microsoft SDL</a>
+      <a href="#owasp-samm"><span class="toc-num">03</span>OpenSAMM</a>
+      <a href="#bsimm"><span class="toc-num">04</span>BSIMM</a>
+      <a href="#devsecops"><span class="toc-num">05</span>DevSecOps</a>
+      <a href="#roller"><span class="toc-num">06</span>Roller</a>
+      <a href="#sikkerhetskrav"><span class="toc-num">07</span>Sikkerhetskrav</a>
+      <a href="#standard-vs-sdlc"><span class="toc-num">08</span>SDLC vs standard</a>
+      <a href="#sca-sbom"><span class="toc-num">09</span>SCA og SBOM</a>
+      <a href="#disclosure"><span class="toc-num">10</span>Disclosure + bug bounty</a>
     </nav>
   </div>
 </header>
 
+<section id="touchpoints">
+  <div class="container">
+    <div class="section-badge">01 · Touchpoints</div>
+    <h2>McGraws <em>Touchpoints</em></h2>
+    <p class="section-intro">Gary McGraws «Seven Touchpoints for Software Security» (2006) var et tidlig forsøk på å gjøre sikkerhet konkret — knytte aktiviteter til artefakter du allerede produserer.</p>
+    <p class="lead">I stedet for å designe en ny prosess, hekter touchpoints sikkerhetsaktiviteter på fasene du allerede har: krav, arkitektur, testplaner, kode, testresultater, og feedback fra produksjon. Tanken er at sikkerhet ikke er et separat spor, men berøringspunkter («touchpoints») som integreres i utviklingsflyten.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="10">
+        <!-- Faser nederst -->
+        <g font-size="9">
+          <rect x="20" y="140" width="100" height="44" rx="2" fill="rgba(45,74,122,0.05)" stroke="#2d4a7a" stroke-width="1"/>
+          <text x="70" y="160" text-anchor="middle" fill="#2d4a7a">Krav og</text>
+          <text x="70" y="172" text-anchor="middle" fill="#2d4a7a">use cases</text>
+          <rect x="125" y="140" width="100" height="44" rx="2" fill="rgba(45,74,122,0.05)" stroke="#2d4a7a" stroke-width="1"/>
+          <text x="175" y="160" text-anchor="middle" fill="#2d4a7a">Arkitektur</text>
+          <text x="175" y="172" text-anchor="middle" fill="#2d4a7a">og design</text>
+          <rect x="230" y="140" width="80" height="44" rx="2" fill="rgba(45,74,122,0.05)" stroke="#2d4a7a" stroke-width="1"/>
+          <text x="270" y="166" text-anchor="middle" fill="#2d4a7a">Testplan</text>
+          <rect x="315" y="140" width="80" height="44" rx="2" fill="rgba(45,74,122,0.05)" stroke="#2d4a7a" stroke-width="1"/>
+          <text x="355" y="166" text-anchor="middle" fill="#2d4a7a">Kode</text>
+          <rect x="400" y="140" width="100" height="44" rx="2" fill="rgba(45,74,122,0.05)" stroke="#2d4a7a" stroke-width="1"/>
+          <text x="450" y="160" text-anchor="middle" fill="#2d4a7a">Tester og</text>
+          <text x="450" y="172" text-anchor="middle" fill="#2d4a7a">resultater</text>
+          <rect x="505" y="140" width="100" height="44" rx="2" fill="rgba(45,74,122,0.05)" stroke="#2d4a7a" stroke-width="1"/>
+          <text x="555" y="160" text-anchor="middle" fill="#2d4a7a">Feedback</text>
+          <text x="555" y="172" text-anchor="middle" fill="#2d4a7a">fra prod.</text>
+        </g>
+        <!-- Touchpoints på toppen -->
+        <g font-size="9" fill="#b04428">
+          <text x="40" y="40" text-anchor="middle" font-weight="600">Abuse</text>
+          <text x="40" y="52" text-anchor="middle" font-weight="600">cases</text>
+          <line x1="50" y1="60" x2="60" y2="138" stroke="#b04428" stroke-width="1"/>
+          <text x="100" y="40" text-anchor="middle" font-weight="600">Sikkerhets-</text>
+          <text x="100" y="52" text-anchor="middle" font-weight="600">krav</text>
+          <line x1="100" y1="60" x2="80" y2="138" stroke="#b04428" stroke-width="1"/>
+          <text x="160" y="40" text-anchor="middle" font-weight="600">Risiko-</text>
+          <text x="160" y="52" text-anchor="middle" font-weight="600">analyse</text>
+          <line x1="160" y1="60" x2="160" y2="138" stroke="#b04428" stroke-width="1"/>
+          <text x="220" y="40" text-anchor="middle" font-weight="600">Ekstern</text>
+          <text x="220" y="52" text-anchor="middle" font-weight="600">review</text>
+          <line x1="215" y1="60" x2="195" y2="138" stroke="#b04428" stroke-width="1"/>
+          <text x="280" y="46" text-anchor="middle" font-weight="600">Risikobasert test</text>
+          <line x1="270" y1="60" x2="270" y2="138" stroke="#b04428" stroke-width="1"/>
+          <text x="350" y="46" text-anchor="middle" font-weight="600">Code review (SAST)</text>
+          <line x1="355" y1="60" x2="355" y2="138" stroke="#b04428" stroke-width="1"/>
+          <text x="445" y="46" text-anchor="middle" font-weight="600">Risiko-analyse 2</text>
+          <line x1="445" y1="60" x2="445" y2="138" stroke="#b04428" stroke-width="1"/>
+          <text x="510" y="46" text-anchor="middle" font-weight="600">Pen.test</text>
+          <line x1="510" y1="60" x2="500" y2="138" stroke="#b04428" stroke-width="1"/>
+          <text x="585" y="46" text-anchor="middle" font-weight="600">Sec.</text>
+          <text x="585" y="58" text-anchor="middle" font-weight="600">Operations</text>
+          <line x1="580" y1="68" x2="555" y2="138" stroke="#b04428" stroke-width="1"/>
+        </g>
+        <text x="360" y="208" text-anchor="middle" font-style="italic" fill="#a39886">Samme livssyklus, sikkerhetsaktiviteter hektet på</text>
+      </svg>
+      <figcaption>McGraws Touchpoints — sikkerhetsaktiviteter knyttet til artefakter i en eksisterende SDLC.</figcaption>
+    </figure>
+
+    <p>Touchpoints er fortsatt ett av de mest brukte mentale rammeverkene fordi det ikke krever at organisasjonen skifter prosess. Det er også sterkt knyttet til BSIMM, som måler i hvilken grad firmaer faktisk gjennomfører disse aktivitetene.</p>
+  </div>
+</section>
+
 <section id="microsoft-sdl">
   <div class="container">
-    <div class="section-badge">01 · Microsoft SDL</div>
+    <div class="section-badge">02 · Microsoft SDL</div>
     <h2>Microsoft <em>SDL</em></h2>
     <p class="section-intro">Microsoft SDL ble utviklet etter Trustworthy Computing-initiativet i 2002 — og er blitt industristandarden for strukturert sikker utvikling.</p>
     <p class="lead">I 2002 stoppet Microsoft all Windows-utvikling for å drive obligatorisk sikkerhetsopplæring og gjennomgå eksisterende kode. Det resulterte i det som ble kjent som Trustworthy Computing og la grunnlaget for Security Development Lifecycle. SDL er ikke et statisk dokument — det har blitt oppdatert og tilpasset til agile og DevOps-arbeidsflyt.</p>
     <p>De syv fasene med tilhørende aktiviteter:</p>
     <ol>
       <li><strong>Opplæring:</strong> alle utviklere gjennomfører sikkerhetskurs relevant for sin rolle og teknologistakk.</li>
-      <li><strong>Krav:</strong> definer sikkerhetskrav og personvernkrav; identifiser misuse cases; sett minimumssikkerhetsstandarder.</li>
+      <li><strong>Krav:</strong> definer sikkerhetskrav og personvernkrav; identifiser misuse cases; sett minimumssikkerhetsstandarder («bug bars»).</li>
       <li><strong>Design:</strong> threat modeling per nytt designvalg; reduser angrepsoverflaten; bruk sikre designprinsipper.</li>
-      <li><strong>Implementering:</strong> bruk godkjente kryptobiblioteker og sikre kodestandard; kjør SAST.</li>
-      <li><strong>Verifisering:</strong> DAST, fuzz testing, penetrasjonstest av høyrisikokomponenter.</li>
-      <li><strong>Frigivelse:</strong> gjennomfør en endelig sikkerhetsgjennomgang; definere en incident response-plan; lag en patch-prosess.</li>
-      <li><strong>Respons:</strong> motta og behandle sikkerhetsrapporter (responsible disclosure); patch og releas hurtig.</li>
+      <li><strong>Implementering:</strong> bruk godkjente kryptobiblioteker og sikre kodestandard; deprecater usikre funksjoner; kjør SAST.</li>
+      <li><strong>Verifisering:</strong> DAST, fuzz testing, attack surface review, penetrasjonstest av høyrisikokomponenter.</li>
+      <li><strong>Frigivelse:</strong> Final Security Review; definer incident response-plan; arkiver release-artefakter for senere etterforskning.</li>
+      <li><strong>Respons:</strong> motta og behandle sikkerhetsrapporter (responsible disclosure); patch og release hurtig; kjør incident response-planen.</li>
     </ol>
   </div>
 </section>
 
 <section id="owasp-samm">
   <div class="container">
-    <div class="section-badge">02 · OWASP SAMM</div>
+    <div class="section-badge">03 · OpenSAMM</div>
     <h2>OWASP <em>SAMM</em></h2>
     <p class="section-intro">SAMM gir en modenhetsskala fremfor en sjekkliste — det er mer ærlig om virkeligheten.</p>
-    <p class="lead">OWASP Software Assurance Maturity Model definerer fem forretningsfunksjoner, hver med tre praksiser og tre modningsnivåer. En organisasjon på nivå 1 gjør grunnleggende aktiviteter. Nivå 3 er state-of-the-art. SAMM er designet for realistisk vurdering: de fleste organisasjoner er på nivå 1–2 for de fleste praksiser — og det er et godt utgangspunkt for en forbedringsplan.</p>
+    <p class="lead">OWASP Software Assurance Maturity Model er en preskriptiv modell som lar organisasjoner vurdere sitt eget modenhetsnivå og lage en konkret forbedringsplan. SAMM er designet for realistisk selvvurdering: de fleste organisasjoner er på nivå 1–2 for de fleste praksiser — og det er et godt utgangspunkt, ikke en fiasko.</p>
+
+    <p>OpenSAMM v1 (som var grunnlaget) deler arbeidet i <strong>fire forretningsfunksjoner</strong>, hver med tre praksiser:</p>
     <table>
       <thead><tr><th>Forretningsfunksjon</th><th>Praksiser</th></tr></thead>
       <tbody>
-        <tr><td>Governance</td><td>Strategi og metrikker, policyer og compliance, opplæring og veiledning</td></tr>
-        <tr><td>Design</td><td>Trusselmodellering, sikkerhetskrav, sikker arkitektur</td></tr>
-        <tr><td>Implementation</td><td>Sikker koding, kodegjennomgang, dependency management</td></tr>
-        <tr><td>Verification</td><td>Arkitekturvurdering, requirements testing, sikkerhetstesting</td></tr>
-        <tr><td>Operations</td><td>Hendelseshåndtering, miljøhåndtering, operasjonell administrasjon</td></tr>
+        <tr><td>Governance</td><td>Strategi og metrikker · Policy og compliance · Opplæring og veiledning</td></tr>
+        <tr><td>Construction</td><td>Trusselvurdering · Sikkerhetskrav · Sikker arkitektur</td></tr>
+        <tr><td>Verification</td><td>Designreview · Code review · Sikkerhetstesting</td></tr>
+        <tr><td>Deployment</td><td>Sårbarhetshåndtering · Miljøherding · Operasjonell aktivering</td></tr>
       </tbody>
     </table>
+    <p class="lead">SAMM v2 (nyere versjon) deler i fem funksjoner og bytter ut «Construction» med «Design» og «Implementation». Konsept og bruk er den samme — modenhet vurderes per praksis.</p>
+
+    <h3>Modningsnivåer</h3>
+    <table>
+      <thead><tr><th>Nivå</th><th>Beskrivelse</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>Implisitt utgangspunkt — praksisen er ikke utført</td></tr>
+        <tr><td>1</td><td>Innledende forståelse og ad hoc gjennomføring</td></tr>
+        <tr><td>2</td><td>Økt effektivitet/effektkraft i praksisen</td></tr>
+        <tr><td>3</td><td>Komplett mestring av praksisen i skala</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>SAMM-vurdering</h4>
+      <p>OWASP tilbyr SAMM Assessment som regneark/verktøy. Du svarer ja/nei på et sett intervjuspørsmål per praksis, får en score per praksis, og kan tegne en radarprofil. Resultatet brukes til å lage en konkret roadmap — gå fra nivå 1 til 2 i de praksisene som er kritiske for din risikoprofil.</p>
+    </div>
+  </div>
+</section>
+
+<section id="bsimm">
+  <div class="container">
+    <div class="section-badge">04 · BSIMM</div>
+    <h2>BSIMM — <em>deskriptiv</em> målestokk</h2>
+    <p class="section-intro">BSIMM beskriver hva firmaer faktisk gjør, ikke hva de bør gjøre. Det er forskjellen mellom å lese en kokebok og å observere hvordan kjøkken faktisk lager mat.</p>
+    <p class="lead">Building Security In Maturity Model er bygget på data fra over 120 firmaer — inkludert Adobe, Cisco, Microsoft, NVIDIA, PayPal, Verizon og banker som JPMorgan og Citi. BSIMM-fasilitatoren observerer aktiviteter, koder dem mot et felles taksonomi (12 praksiser), og publiserer aggregerte tall. Resultatet er en målestokk: «Earth»-profilen viser bransjegjennomsnittet, og din egen profil kan tegnes opp mot den.</p>
+
+    <h3>Preskriptiv vs. deskriptiv</h3>
+    <table>
+      <thead><tr><th>Preskriptiv</th><th>Deskriptiv</th></tr></thead>
+      <tbody>
+        <tr><td>Beskriver hva du <em>bør</em> gjøre</td><td>Beskriver hva firmaer <em>faktisk</em> gjør</td></tr>
+        <tr><td>Touchpoints, MS SDL, OWASP CLASP, OpenSAMM</td><td>BSIMM</td></tr>
+        <tr><td>Brukes som oppskrift</td><td>Brukes som målestokk og benchmarking</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Eksempelaktivitet (BSIMM)</h3>
+    <p>Hver BSIMM-aktivitet har en kode (domene + nivå) og en presis beskrivelse. To eksempler:</p>
+    <pre><code><span class="comment"># Architectural Analysis, nivå 1, aktivitet 2</span>
+[AA1.2] Perform design review for high-risk applications.
+        Organisasjonen lærer fordelene med arkitekturanalyse ved
+        å se reelle resultater for noen få høyrisiko-applikasjoner.
+
+<span class="comment"># Configuration Mgmt &amp; Vulnerability Mgmt, nivå 3, aktivitet 4</span>
+[CMVM3.4] Operate a bug bounty program.
+        Organisasjonen tar imot sårbarhetsrapporter fra eksterne
+        forskere og betaler bounty per verifisert funn.</code></pre>
+
+    <p>BSIMM-V observasjonene viste 16 % aktivitetsøkning over 24 måneder for firmaer som ble målt to ganger — modellen demonstrerer at strukturerte initiativer faktisk forbedrer praksis over tid.</p>
+
+    <div class="callout callout-green">
+      <h4>Når BSIMM er nyttig</h4>
+      <p>Bruk BSIMM når du må forklare ledelsen «vi ligger på snittet for finansbransjen», når du må prioritere mellom investeringer («pen-testing er allerede over snittet, men architecture analysis er under»), og når du sammenligner forretningsenheter internt. Bruk SAMM når du trenger en oppskrift for hvordan du skal forbedre deg.</p>
+    </div>
   </div>
 </section>
 
 <section id="devsecops">
   <div class="container">
-    <div class="section-badge">03 · DevSecOps</div>
+    <div class="section-badge">05 · DevSecOps</div>
     <h2>Dev<em>SecOps</em></h2>
     <p class="section-intro">DevSecOps er ikke en ny metodologi — det er DevOps der sikkerhet er en del av pipelines, ikke en separat gate.</p>
     <p class="lead">Tradisjonelt var sikkerhet en avsluttende sjekk: bygg applikasjonen, send til sikkerhetsteam for gjennomgang, vent på godkjenning, deploy. I et DevOps-miljø der deploys skjer mange ganger per dag, er denne modellen umulig å skalere. DevSecOps integrerer sikkerhetstesting i CI/CD-pipelinen — automatisert, rask og blokkerende.</p>
@@ -125,25 +249,125 @@
   </div>
 </section>
 
+<section id="roller">
+  <div class="container">
+    <div class="section-badge">06 · Roller</div>
+    <h2>Roller og <em>ansvar</em></h2>
+    <p class="section-intro">SDL fungerer ikke uten klart eierskap. OWASP CLASP (selv om prosessen er utdatert) ga oss det rolledelte rammeverket: hver rolle har eksplisitt sikkerhetsansvar.</p>
+    <p class="lead">Sikkerhet er <em>ikke</em> én persons ansvar — verken sikkerhetsavdelingens eller en enkelt sikkerhets-champions. Den emergerer fra alle rollenes praksis. Tre kjerneroller, fra ledelse til kode:</p>
+
+    <h3>Manager / produkteier</h3>
+    <ul>
+      <li>Har nok sikkerhetskunnskap til å ta riktige beslutninger og prioriteringer.</li>
+      <li>Sørger for at nye funksjoner ikke utvider angrepsoverflaten unødvendig.</li>
+      <li>Følger opp sikkerhetsfremdrift med samme alvor som funksjonell fremdrift.</li>
+    </ul>
+
+    <h3>Security engineer / champion</h3>
+    <ul>
+      <li>Søker kunnskap både teknisk og prosessmessig.</li>
+      <li>Bistår tekniske aktiviteter — threat modeling, sårbarhetstriaging, security review.</li>
+      <li>Fremmer adopsjon av sikkerhetsstrategi i produktet.</li>
+      <li>Bygger team-kultur for selvforvaltning av sikkerhet — er <em>ikke</em> den eneste ansvarlige.</li>
+    </ul>
+
+    <h3>Utvikler</h3>
+    <ul>
+      <li>Har kunnskap til å skrive sikker kode korrekt.</li>
+      <li>Støtter ledelsen med kunnskap som hjelper riktige prioriteringer.</li>
+      <li>Identifiserer og varsler når sikkerhetstrusler dukker opp i daglig arbeid.</li>
+      <li>Bruker sikkerhetsverktøy aktivt — ikke som et kontrollpunkt, men som et arbeidsredskap.</li>
+      <li>Praktiserer ansvarlig sikkerhet hver dag.</li>
+    </ul>
+
+    <div class="callout callout-yellow">
+      <h4>Antimønster: «Det er sikkerhetsteamets ansvar»</h4>
+      <p>Når sikkerhet sentraliseres til ett team uten ansvar i utviklingsteamene, blir sikkerhet en blokkering på slutten av løpet — ikke en kontinuerlig praksis. Champion-modellen (én sikkerhetsbevisst utvikler per team) er BSIMM-anbefalt for å skalere sikkerhetskompetanse uten å sentralisere alt arbeid.</p>
+    </div>
+
+    <h3>Opplæring som motor</h3>
+    <p>Alle rollene trenger opplæring tilpasset rollen. Effektive treningsformater inkluderer instruktørledet undervisning, e-læring, simuleringsøvelser, hands-on hacking-labber, mentoring, gruppediskusjoner og rollespill (CTF, red/blue exercises). Engangskurs har lav effekt — gjenta jevnlig.</p>
+  </div>
+</section>
+
 <section id="sikkerhetskrav">
   <div class="container">
-    <div class="section-badge">04 · Sikkerhetskrav</div>
+    <div class="section-badge">07 · Sikkerhetskrav</div>
     <h2>Sikkerhets<em>krav</em></h2>
     <p class="section-intro">Sikkerhetskrav er funksjonelle krav for hva systemet ikke skal tillate — og de er like gyldige som krav om hva det skal tillate.</p>
     <p class="lead">«Systemet skal ha innlogging» er et funksjonelt krav. «Systemet skal begrense innloggingsforsøk til 5 per minutt per konto og 20 per minutt per IP-adresse» er et sikkerhetskrav. Begge er legitime brukerkrav. Misuse cases er et verktøy for å systematisk identifisere sikkerhetskrav fra angriperperspektivet.</p>
 
-    <p>Formater for sikkerhetskrav i agile prosesser:</p>
+    <h3>Firesmiths kriterier for et godt sikkerhetskrav</h3>
+    <p>Donald Firesmith (2003) formulerte kriteriene som fortsatt brukes i industrien:</p>
+    <ul>
+      <li><strong>Beskriv hva, ikke hvordan</strong> — la designere velge løsning.</li>
+      <li><strong>Vær åpen for ulike løsninger</strong> — unngå prematur designfastlåsning.</li>
+      <li><strong>Forståelig og entydig</strong> — én tolkning, ikke flere.</li>
+      <li><strong>Kohesjon</strong> — én ting per krav.</li>
+      <li><strong>Testbar</strong> — klare aksepteringskriterier, ofte kvantifisert.</li>
+    </ul>
+
+    <table>
+      <thead><tr><th>Dårlig krav</th><th>Hvorfor det er dårlig</th></tr></thead>
+      <tbody>
+        <tr><td>«Systemet skal være sikkert»</td><td>Ikke testbart, ikke målbart</td></tr>
+        <tr><td>«Det skal ikke være sårbarheter i koden»</td><td>Umulig å verifisere absolutt</td></tr>
+        <tr><td>«Systemet skal kryptere konfidensielle data med RSA»</td><td>Designvalg lukket inn (RSA er feil verktøy for store datamengder)</td></tr>
+        <tr><td>«Webserveren skal logge tilganger og brukere skal ha unike ID-er»</td><td>To ting i ett krav (kohesjonsbrudd)</td></tr>
+      </tbody>
+    </table>
+
+    <table>
+      <thead><tr><th>Bedre krav</th><th>Hvorfor det er bedre</th></tr></thead>
+      <tbody>
+        <tr><td>«Opplasting og nedlasting av kundedata skal være kryptert med autentisert kryptering»</td><td>Beskriver hva, åpen for løsning</td></tr>
+        <tr><td>«Krypteringsnøkler skal genereres av en spesifisert part (leverandør, kunde eller tredjepart)»</td><td>Spesifikt og testbart</td></tr>
+        <tr><td>«Etter 5 mislykkede innloggingsforsøk skal kontoen returnere HTTP 429 og forsinke neste forsøk med minst 15 sekunder»</td><td>Kvantifisert og testbart</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Formater i agile prosesser</h3>
     <ul>
       <li><strong>Security user story:</strong> «Som sikkerhetsteam ønsker vi at alle passordforsøk rate-limites for å forhindre credential stuffing.»</li>
       <li><strong>Acceptance criterion:</strong> «Gitt at en bruker har forsøkt innlogging 5 ganger feil, skal neste forsøk gi 429 Too Many Requests og en forsinkelse på 15 sekunder.»</li>
       <li><strong>Definition of Done:</strong> «Alle nye API-endepunkter er dokumentert med autentiserings- og autorisasjonskrav, og OWASP Top 10 er vurdert.»</li>
     </ul>
+
+    <div class="callout callout-blue">
+      <h4>OWASP ASVS som krav-katalog</h4>
+      <p>OWASP Application Security Verification Standard (ASVS) er en ferdig katalog over sikkerhetskrav og verifikasjonskriterier — du trenger ikke skrive alt fra bunnen. ASVS er delt i tre nivåer: L1 for alle apper, L2 for de fleste, L3 for kritiske systemer. Hver kravlinje peker på relevante CWE og NIST-paragrafer. Bruk ASVS som basisline og legg til prosjekt-spesifikke krav på toppen.</p>
+    </div>
+  </div>
+</section>
+
+<section id="standard-vs-sdlc">
+  <div class="container">
+    <div class="section-badge">08 · Standarder</div>
+    <h2>SDLC vs. <em>sikkerhetsstandard</em></h2>
+    <p class="section-intro">SDL er <em>hvordan</em> du bygger. En sikkerhetsstandard er <em>hva</em> du bygger. De to forveksles ofte — men løser forskjellige problemer.</p>
+    <p class="lead">En SDL er en metodologi og prosess: aktiviteter, faser, gates, roller. En sikkerhetsstandard er et krav-rammeverk: en sjekkliste eller verifikasjonskatalog som definerer hva som må være på plass for compliance. SDL er handling. Standarden er målestokk.</p>
+
+    <table>
+      <thead><tr><th>Standard</th><th>Type</th><th>Når den brukes</th></tr></thead>
+      <tbody>
+        <tr><td>NIST SSDF (SP 800-218)</td><td>Beste praksis for sikker utvikling</td><td>Føderale leverandører i USA, men adoptert bredt</td></tr>
+        <tr><td>OWASP ASVS</td><td>Detaljerte sikkerhetskrav for webapplikasjoner</td><td>Spesifisere krav i kontrakt og test</td></tr>
+        <tr><td>ISO/IEC 27001</td><td>Informasjonssikkerhetsstyringssystem (ISMS)</td><td>Sertifisering av sikkerhetsstyring i organisasjon</td></tr>
+        <tr><td>ISO/IEC 27005:2022</td><td>Veiledning for risikohåndtering</td><td>Strukturere risikoprosessen i 27001-rammeverket</td></tr>
+        <tr><td>PCI DSS</td><td>Krav for håndtering av betalingskortdata</td><td>Påkrevd for alle som lagrer/prosesserer kortdata</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>Hvordan de virker sammen</h4>
+      <p>«Vi tester for sårbarheter ved hver build» — det er <strong>SDL i handling</strong>. «Vi tester for sårbarheter for å overholde ISO 27001-kontroll A.14.2» — det er <strong>standarden som målestokk</strong>. Du trenger begge: standarden gir deg revisjon og kontraktbase, SDL gir deg praktiske rutiner.</p>
+    </div>
   </div>
 </section>
 
 <section id="sca-sbom">
   <div class="container">
-    <div class="section-badge">05 · SCA og SBOM</div>
+    <div class="section-badge">09 · SCA og SBOM</div>
     <h2>SCA og <em>SBOM</em></h2>
     <p class="section-intro">Du skriver kanskje 5 % av koden i applikasjonen din — de resterende 95 % er avhengigheter, og de er ditt ansvar.</p>
     <p class="lead">SCA (Software Composition Analysis) analyserer direkte og transitive avhengigheter mot kjente sårbarhetsdatabaser (NVD, OSV, GitHub Advisory). En moderne webapplikasjon kan ha tusenvis av transitive avhengigheter. SCA identifiserer hvilke av dem som har kjente CVEer og hvilken versjon som fikser dem.</p>
@@ -162,6 +386,50 @@ grype sbom:sbom.json --fail-on high</code></pre>
     <div class="callout callout-green">
       <h4>Pinning vs. auto-update</h4>
       <p>Pinning til eksakte versjoner gir reproduserbare builds, men betyr manuell oppdatering for sikkerhetspatches. Dependabot løser dette: den lager automatisk PR-er for sikkerhetsoppdateringer, lar CI kjøre og viser om det er trygt å merge.</p>
+    </div>
+  </div>
+</section>
+
+<section id="disclosure">
+  <div class="container">
+    <div class="section-badge">10 · Disclosure</div>
+    <h2>Disclosure og <em>bug bounty</em></h2>
+    <p class="section-intro">Eksterne forskere finner ofte sårbarheter du ikke fant. Spørsmålet er ikke om — men hvordan du tar imot meldingen.</p>
+    <p class="lead">Når en sikkerhetsforsker oppdager en sårbarhet i ditt system, har de fire valg. Hvilket de tar er delvis bestemt av hva du gjør for dem.</p>
+
+    <table>
+      <thead><tr><th>Praksis</th><th>Hvem får vite</th><th>Konsekvens</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Full disclosure</strong></td><td>Verden — før leverandøren patcher</td><td>Maksimalt press på leverandør, men brukere er sårbare under vinduet</td></tr>
+        <tr><td><strong>Responsible disclosure</strong></td><td>Leverandøren først, så verden etter patch (typisk 90 dager)</td><td>Bransjestandard — balansert mellom press og brukervern</td></tr>
+        <tr><td><strong>Profit-driven</strong></td><td>Tredjeparts megler (forsker selger sårbarheten)</td><td>Kjøperen kan være offensiv aktør — sårbarhet utnyttes mot brukere</td></tr>
+        <tr><td><strong>Non-disclosure</strong></td><td>Ingen</td><td>Sårbarheten består — kan oppdages av angriper senere</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Responsible disclosure i praksis</h3>
+    <p>Som leverandør gjør du det enklere ved å ha et klart varslingsspor. Standard er en <code>security.txt</code> i web-roten med kontaktinfo, en publisert disclosure-policy som lover at god-tro-forskere ikke saksøkes, og en SLA for respons (24–72 timer for kritiske). Project Zero (Google) bruker 90 dager som default — etter det publiseres detaljene uansett om patch er ute.</p>
+
+    <pre><code><span class="comment"># /.well-known/security.txt</span>
+Contact: mailto:security@example.com
+Expires: 2026-12-31T23:59:00.000Z
+Encryption: https://example.com/pgp-key.txt
+Policy: https://example.com/disclosure-policy
+Hiring: https://example.com/jobs</code></pre>
+
+    <div class="callout callout-yellow">
+      <h4>Mindre enn perfekt verden</h4>
+      <p>Forskere som rapporterer ansvarlig møter ofte: leverandører som ikke setter pris på arbeidet, leverandører som blir tause, leverandører som mangler erfaring med sårbarhetsprosess, leverandører som vil kommunisere på usikre kanaler — og i verste fall søksmål. Norske selskaper har vært involvert i slike saker. En klar policy fjerner usikkerheten for forskeren.</p>
+    </div>
+
+    <h3>Bug bounty</h3>
+    <p>Bug bounty er en formalisert variant av responsible disclosure: organisasjonen betaler en bonus per verifisert sårbarhet, gjerne på en glidende skala etter type og alvorlighet. Typiske skalaer: $10 000 for remote code execution, $750 for CSRF, høyere for kritiske tjenester. Programmer kjøres ofte gjennom HackerOne eller Bugcrowd, som håndterer triagering og betaling.</p>
+
+    <p>BSIMM klassifiserer bug bounty på det høyeste modenhetsnivået ([CMVM3.4]) — ikke fordi det er enkelt, men fordi det krever modne prosesser: triage-team, beslutningsmyndighet, juridisk ramme, betalingsmekanikk og hurtig patch-pipeline.</p>
+
+    <div class="callout callout-green">
+      <h4>Red team / blue team som kontinuerlig praksis</h4>
+      <p>Internt: red team (offensive) prøver å bryte systemet, blue team (defensive) prøver å oppdage og stoppe. Eksternt: bug bounty utvider red team til hele forskerverdenen mot betaling. Begge praksiser er kontinuerlige, ikke engangsøvelser — angrepslandskapet endrer seg, og det skal forsvaret ditt også.</p>
     </div>
   </div>
 </section>

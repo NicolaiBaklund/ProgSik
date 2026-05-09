@@ -27,10 +27,12 @@
     <p class="lede">Risiko kan ikke elimineres — men den kan forstås, kvantifiseres og behandles med åpne øyne og en eksplisitt plan.</p>
     <nav class="toc">
       <a href="#risikobegrep"><span class="toc-num">01</span>Risikobegrepet</a>
-      <a href="#cvss"><span class="toc-num">02</span>CVSS-scoring</a>
-      <a href="#risikobehandling"><span class="toc-num">03</span>Risikobehandling</a>
-      <a href="#tredjepart"><span class="toc-num">04</span>Tredjepartsrisiko</a>
-      <a href="#risikoregister"><span class="toc-num">05</span>Risikoregisteret</a>
+      <a href="#rmf"><span class="toc-num">02</span>McGraws RMF</a>
+      <a href="#cvss"><span class="toc-num">03</span>CVSS-scoring</a>
+      <a href="#risikobehandling"><span class="toc-num">04</span>Risikobehandling</a>
+      <a href="#tredjepart"><span class="toc-num">05</span>Tredjepartsrisiko</a>
+      <a href="#risikoregister"><span class="toc-num">06</span>Risikoregisteret</a>
+      <a href="#okonomi"><span class="toc-num">07</span>Sikkerhetsøkonomi</a>
     </nav>
   </div>
 </header>
@@ -96,15 +98,166 @@
       </svg>
       <figcaption>En enkel risikomatrise — risikoen er produktet av sannsynlighet og konsekvens.</figcaption>
     </figure>
+
+    <p>Skalaene må defineres eksplisitt — ellers blir vurderingen privat synsing. Et brukbart utgangspunkt:</p>
+
+    <table>
+      <thead><tr><th>Dimensjon</th><th>Lav</th><th>Middels</th><th>Høy</th><th>Ekstrem</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Sannsynlighet</strong></td><td>Hvert 10. år eller sjeldnere</td><td>Hvert år eller sjeldnere</td><td>Hver måned eller sjeldnere</td><td>Ukentlig</td></tr>
+        <tr><td><strong>Konfidensialitet</strong></td><td>Ingen/minimal eksponering</td><td>Intern info eller individuelle persondata</td><td>Konfidensiell info eller persondata for mange</td><td>Hemmelig info eller alle persondata</td></tr>
+        <tr><td><strong>Tilgjengelighet</strong></td><td>Forsinket utførelse</td><td>Utilfredsstillende kvalitet eller alvorlige forsinkelser</td><td>Begrenset evne til oppgaver</td><td>Kritiske oppgaver umulige</td></tr>
+        <tr><td><strong>Økonomi</strong></td><td>Mindre tap, kan repareres</td><td>Betydelig tap, kan repareres</td><td>Irreparabelt økonomisk tap</td><td>Vesentlig irreparabelt tap</td></tr>
+        <tr><td><strong>Omdømme</strong></td><td>Ingen tap, lite påvirkning på tillit</td><td>Omdømme og tillit kan svekkes</td><td>Skade på omdømme, alvorlig tillitstap</td><td>Alvorlig skade på omdømme og tillit</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>Sikkerhet ≠ safety</h4>
+      <p>Safety håndterer effekten av tilfeldige feil. I sikkerhet antar vi en <em>fiendtlig motstander</em> som kan få komponenter til å feile på det mest beleilige tidspunkt og på den mest skadelige måten. Tilfeldighet er optimisme — gjenværende risiko skal ikke beregnes som om angriperen er en terning.</p>
+    </div>
+  </div>
+</section>
+
+<section id="rmf">
+  <div class="container">
+    <div class="section-badge">02 · McGraws RMF</div>
+    <h2>Risk Management <em>Framework</em></h2>
+    <p class="section-intro">Gary McGraws RMF er den strukturerte oppskriften som binder forretningsmål til kodelinjer — og lar deg argumentere for sikkerhetsinvesteringer overfor ledelsen.</p>
+    <p class="lead">RMF er en kontinuerlig, iterativ prosess i fem steg. Kjernen er <em>traceability</em>: hver teknisk risiko må kunne spores tilbake til en forretningsrisiko som truer et forretningsmål. Hvis du ikke kan svare «hvilket forretningsmål truer denne sårbarheten», er prioriteringen din basert på magefølelse.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <defs><marker id="rmfa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
+        <rect x="20" y="80" width="110" height="50" rx="4" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="75" y="100" text-anchor="middle" font-weight="600" fill="#2d4a7a">1. Forretnings-</text>
+        <text x="75" y="115" text-anchor="middle" font-weight="600" fill="#2d4a7a">kontekst</text>
+        <line x1="132" y1="105" x2="156" y2="105" stroke="#b04428" stroke-width="1.5" marker-end="url(#rmfa)"/>
+        <rect x="158" y="80" width="110" height="50" rx="4" fill="rgba(176,68,40,0.1)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="213" y="100" text-anchor="middle" font-weight="600" fill="#b04428">2. Identifiser</text>
+        <text x="213" y="115" text-anchor="middle" font-weight="600" fill="#b04428">+ koble risikoer</text>
+        <line x1="270" y1="105" x2="294" y2="105" stroke="#b04428" stroke-width="1.5" marker-end="url(#rmfa)"/>
+        <rect x="296" y="80" width="110" height="50" rx="4" fill="rgba(198,138,31,0.1)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="351" y="100" text-anchor="middle" font-weight="600" fill="#c68a1f">3. Syntetiser</text>
+        <text x="351" y="115" text-anchor="middle" font-weight="600" fill="#c68a1f">+ ranger</text>
+        <line x1="408" y1="105" x2="432" y2="105" stroke="#b04428" stroke-width="1.5" marker-end="url(#rmfa)"/>
+        <rect x="434" y="80" width="110" height="50" rx="4" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="489" y="100" text-anchor="middle" font-weight="600" fill="#3d6b3a">4. Mitigasjons-</text>
+        <text x="489" y="115" text-anchor="middle" font-weight="600" fill="#3d6b3a">strategi</text>
+        <line x1="546" y1="105" x2="570" y2="105" stroke="#b04428" stroke-width="1.5" marker-end="url(#rmfa)"/>
+        <rect x="572" y="80" width="120" height="50" rx="4" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="632" y="100" text-anchor="middle" font-weight="600" fill="#2d4a7a">5. Fikser</text>
+        <text x="632" y="115" text-anchor="middle" font-weight="600" fill="#2d4a7a">+ valider</text>
+        <!-- Loop tilbake -->
+        <path d="M 632 130 L 632 170 L 75 170 L 75 130" fill="none" stroke="#a39886" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="354" y="184" text-anchor="middle" fill="#a39886" font-style="italic">kontinuerlig + iterativ — målinger og rapportering på tvers</text>
+      </svg>
+      <figcaption>McGraws Risk Management Framework — fem steg som gjentas så lenge systemet lever.</figcaption>
+    </figure>
+
+    <h3>Traceability i praksis</h3>
+    <p>Det viktigste outputtet fra RMF er ikke en risikoliste — det er sporbarheten mellom forretningsmål, risikoer, krav og tester. Kjeden har fire ledd:</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <!-- BG -->
+        <rect x="280" y="10" width="160" height="36" rx="4" fill="rgba(45,74,122,0.15)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="33" text-anchor="middle" font-weight="600" fill="#2d4a7a">BG: Pålitelige eksamener</text>
+        <!-- BR rad -->
+        <rect x="40" y="80" width="180" height="36" rx="4" fill="rgba(176,68,40,0.12)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="130" y="103" text-anchor="middle" font-weight="600" fill="#b04428">BR3: Brukeridentitet avsløres</text>
+        <rect x="270" y="80" width="180" height="36" rx="4" fill="rgba(176,68,40,0.12)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="360" y="103" text-anchor="middle" font-weight="600" fill="#b04428">BR5: Auto-retting feiler</text>
+        <rect x="500" y="80" width="180" height="36" rx="4" fill="rgba(176,68,40,0.12)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="590" y="103" text-anchor="middle" font-weight="600" fill="#b04428">BR7: Resultater ikke pålitelige</text>
+        <!-- TR rad -->
+        <rect x="20" y="160" width="170" height="36" rx="4" fill="rgba(61,107,58,0.12)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="105" y="183" text-anchor="middle" font-weight="600" fill="#3d6b3a">TR6: SQL injection mot DB</text>
+        <rect x="200" y="160" width="180" height="36" rx="4" fill="rgba(61,107,58,0.12)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="290" y="183" text-anchor="middle" font-weight="600" fill="#3d6b3a">TR4: Session hijacking</text>
+        <rect x="390" y="160" width="180" height="36" rx="4" fill="rgba(61,107,58,0.12)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="480" y="183" text-anchor="middle" font-weight="600" fill="#3d6b3a">TR8: Logg inn på flere kontoer</text>
+        <rect x="580" y="160" width="120" height="36" rx="4" fill="rgba(61,107,58,0.12)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="640" y="183" text-anchor="middle" font-weight="600" fill="#3d6b3a">TR7: VM-deteksjon</text>
+        <!-- SR/TC rad -->
+        <rect x="40" y="240" width="200" height="32" rx="4" fill="rgba(198,138,31,0.12)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="140" y="260" text-anchor="middle" font-weight="600" fill="#c68a1f">SR: Inputvalidering + parametrisering</text>
+        <rect x="260" y="240" width="180" height="32" rx="4" fill="rgba(198,138,31,0.12)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="350" y="260" text-anchor="middle" font-weight="600" fill="#c68a1f">SR: Sikker sesjonshåndtering</text>
+        <rect x="460" y="240" width="220" height="32" rx="4" fill="rgba(198,138,31,0.12)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="570" y="260" text-anchor="middle" font-weight="600" fill="#c68a1f">SR: Én aktiv sesjon per bruker</text>
+        <!-- piler -->
+        <line x1="130" y1="116" x2="130" y2="158" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="290" y1="116" x2="290" y2="158" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="480" y1="116" x2="480" y2="158" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="640" y1="116" x2="640" y2="158" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="360" y1="46" x2="130" y2="78" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="360" y1="46" x2="360" y2="78" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="360" y1="46" x2="590" y2="78" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="105" y1="196" x2="140" y2="238" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="290" y1="196" x2="350" y2="238" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="480" y1="196" x2="570" y2="238" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="640" y1="196" x2="640" y2="238" stroke="#a39886" stroke-width="1" stroke-dasharray="3,3"/>
+      </svg>
+      <figcaption>Eksempel fra digital eksamen (etter Meland 2026): forretningsmål → forretningsrisikoer → tekniske risikoer → sikkerhetskrav. Hver teknisk risiko skal kunne spores oppover til et forretningsmål.</figcaption>
+    </figure>
+
+    <h3>De fem stegene</h3>
+    <ol>
+      <li><strong>Forstå forretningskonteksten:</strong> hva er målene, hvilke eiendeler beskytter du, hvem er interessentene? Eksempel-mål for digital eksamen: «studenter kan gjennomføre eksamen med 99,9 % oppetid», «pålitelige eksamener».</li>
+      <li><strong>Identifiser og koble forretnings- og tekniske risikoer:</strong> forretningsrisikoer truer mål direkte (BR: «brukeridentitet avsløres → juridisk straff»). Tekniske risikoer er konkrete trusler mot systemet (TR: «SQL injection», «session hijacking»). Verktøy: misuse cases, attack trees, DFD-er.</li>
+      <li><strong>Syntetiser og ranger:</strong> hver risiko får sannsynlighet × konsekvens. Visualiser i risikomatrise. Resultatet er en prioritert kø av hva som skal håndteres først.</li>
+      <li><strong>Definer mitigasjonsstrategi:</strong> for hver høyrisiko utled sikkerhetskrav. Krav skal beskrive <em>hva</em> ikke <em>hvordan</em> (se Firesmith-kriteriene i SDL-kapittelet).</li>
+      <li><strong>Gjennomfør fikser og valider:</strong> implementer kontroller, og valider med risikobasert testing — testplaner kobles eksplisitt tilbake til tekniske risikoer og krav, slik at du kan dokumentere at risikoen faktisk ble redusert.</li>
+    </ol>
+
+    <div class="callout callout-green">
+      <h4>Hvorfor traceability betyr noe</h4>
+      <p>Når en kontroll må prioriteres bort på grunn av tid eller penger, gir traceability et ærlig svar: «vi velger ikke å mitigere TR8, som kobler til BR7, som truer forretningsmålet om pålitelige eksamener». Beslutningen blir eksplisitt — og kan eskaleres til riktig nivå.</p>
+    </div>
   </div>
 </section>
 
 <section id="cvss">
   <div class="container">
-    <div class="section-badge">02 · CVSS</div>
+    <div class="section-badge">03 · CVSS</div>
     <h2>CVSS-<em>scoring</em></h2>
-    <p class="section-intro">CVSS gir en standardisert score for kjente sårbarheter — men scoren forteller ikke hele historien.</p>
-    <p class="lead">CVSS Base Score beregnes fra seks faktorer: Attack Vector (AV), Attack Complexity (AC), Privileges Required (PR), User Interaction (UI), og konsekvensene for Confidentiality, Integrity og Availability (C/I/A). En sårbarhet med AV:Network, AC:Low, PR:None, UI:None og full C/I/A-konsekvens gir Base Score 10.0 — det høyeste.</p>
+    <p class="section-intro">CVSS gir en standardisert score for kjente sårbarheter — men scoren forteller ikke hele historien, og <code>CVSS != Risk</code>.</p>
+    <p class="lead">CVSS v4 (FIRST.org, 2023) deler scoren i fire metrikkgrupper. Bare Base og Threat påvirker den endelige scoren direkte — Environmental brukes til å justere for ditt miljø, og Supplemental gir tilleggsinnsikt uten å endre tallet.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <rect x="20" y="30" width="160" height="150" rx="4" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="100" y="50" text-anchor="middle" font-weight="600" fill="#b04428">Base</text>
+        <text x="100" y="70" text-anchor="middle" font-size="9" fill="#6b6257">Konstant over tid</text>
+        <text x="100" y="90" text-anchor="middle" font-size="9" fill="#1a1612">AV / AC / AT</text>
+        <text x="100" y="105" text-anchor="middle" font-size="9" fill="#1a1612">PR / UI</text>
+        <text x="100" y="125" text-anchor="middle" font-size="9" fill="#1a1612">VC / VI / VA</text>
+        <text x="100" y="140" text-anchor="middle" font-size="9" fill="#1a1612">SC / SI / SA</text>
+        <rect x="195" y="30" width="160" height="150" rx="4" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="275" y="50" text-anchor="middle" font-weight="600" fill="#c68a1f">Threat</text>
+        <text x="275" y="70" text-anchor="middle" font-size="9" fill="#6b6257">Endrer seg over tid</text>
+        <text x="275" y="100" text-anchor="middle" font-size="10" fill="#1a1612">Exploit Maturity</text>
+        <text x="275" y="115" text-anchor="middle" font-size="9" fill="#6b6257">(unreported / poc / attacked)</text>
+        <rect x="370" y="30" width="160" height="150" rx="4" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="450" y="50" text-anchor="middle" font-weight="600" fill="#2d4a7a">Environmental</text>
+        <text x="450" y="70" text-anchor="middle" font-size="9" fill="#6b6257">Unik for ditt miljø</text>
+        <text x="450" y="95" text-anchor="middle" font-size="9" fill="#1a1612">Modifisert Base</text>
+        <text x="450" y="110" text-anchor="middle" font-size="9" fill="#1a1612">CR / IR / AR</text>
+        <text x="450" y="125" text-anchor="middle" font-size="9" fill="#6b6257">(C/I/A-krav for asset)</text>
+        <rect x="545" y="30" width="160" height="150" rx="4" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="625" y="50" text-anchor="middle" font-weight="600" fill="#3d6b3a">Supplemental</text>
+        <text x="625" y="70" text-anchor="middle" font-size="9" fill="#6b6257">Endrer ikke score</text>
+        <text x="625" y="90" text-anchor="middle" font-size="9" fill="#1a1612">Automatable</text>
+        <text x="625" y="103" text-anchor="middle" font-size="9" fill="#1a1612">Recovery</text>
+        <text x="625" y="116" text-anchor="middle" font-size="9" fill="#1a1612">Safety</text>
+        <text x="625" y="129" text-anchor="middle" font-size="9" fill="#1a1612">Value Density</text>
+        <text x="625" y="142" text-anchor="middle" font-size="9" fill="#1a1612">Provider Urgency</text>
+      </svg>
+      <figcaption>CVSS v4 — fire metrikkgrupper. Base + Threat gir grunnscoren. Environmental tilpasser til ditt miljø. Supplemental er kontekst.</figcaption>
+    </figure>
+
+    <p>Base Score beregnes fra: Attack Vector (AV), Attack Complexity (AC), Attack Requirements (AT), Privileges Required (PR), User Interaction (UI), og C/I/A-konsekvens for både sårbart system (VC/VI/VA) og etterfølgende system (SC/SI/SA). En sårbarhet med AV:Network, AC:Low, PR:None, UI:None og full C/I/A-konsekvens gir Base 10.0.</p>
 
     <table>
       <thead><tr><th>Score</th><th>Alvorlighetsgrad</th><th>Typisk responstid</th></tr></thead>
@@ -116,16 +269,24 @@
       </tbody>
     </table>
 
+    <div class="callout callout-yellow">
+      <h4>Prøv selv — Inspera-scenario</h4>
+      <p>Scenario: «Etter innlogging i Inspera oppdager du at du kan manipulere URL-en for å endre user-ID og få lese-tilgang til andre studenters besvarelser.» Åpne <a href="https://www.first.org/cvss/calculator/4.0">first.org/cvss/calculator/4.0</a> og finn ut hvilken vector og score dette gir.</p>
+      <details><summary>Forventet vektor og score</summary>
+      <p><code>AV:N / AC:L / AT:N / PR:L / UI:N / VC:H / VI:N / VA:N / SC:N / SI:N / SA:N</code> → Base 7.1 (Høy). Etterfølgende-system-impact er None fordi sårbarheten ikke gir tilgang utenfor selve eksamenssystemet. Privilegier er Low fordi angriperen må være innlogget student. Hvis konfidensialiteten av eksamenssvar regnes som svært høy i ditt miljø, kan Environmental-justering (CR:H) løfte scoren ytterligere.</p>
+      </details>
+    </div>
+
     <div class="callout callout-blue">
-      <h4>Hva CVSS ikke sier</h4>
-      <p>CVSS Base Score reflekterer ikke om din spesifikke konfigurasjon er sårbar, om en exploit eksisterer i naturen, eller om den sårbare funksjonaliteten faktisk brukes. Temporal Score (patch tilgjengelighet, exploit modenhets) og Environmental Score (din konfigurasjon) justerer dette — men brukes sjelden. Behandle CVSS som et utgangspunkt for vurdering, ikke som en endelig dom.</p>
+      <h4>CVSS er ikke risiko</h4>
+      <p>Base Score reflekterer ikke om din konfigurasjon er sårbar, om en exploit eksisterer i naturen, eller om den sårbare funksjonaliteten faktisk brukes. Threat-metrikker (Exploit Maturity) og Environmental-metrikker (din konfigurasjon) justerer dette — men brukes sjelden i praksis. Behandle CVSS som utgangspunkt for vurdering, ikke endelig dom. Risiko = sannsynlighet × konsekvens i <em>din</em> kontekst.</p>
     </div>
   </div>
 </section>
 
 <section id="risikobehandling">
   <div class="container">
-    <div class="section-badge">03 · Behandling</div>
+    <div class="section-badge">04 · Behandling</div>
     <h2>Risiko<em>behandling</em></h2>
     <p class="section-intro">Fire strategier for å håndtere identifisert risiko — og en av dem er «gjøre ingenting», men da eksplisitt og dokumentert.</p>
     <p class="lead">Etter at en risiko er identifisert og scoret, må du ta en av fire beslutninger. Det eneste som ikke er akseptabelt, er å ignorere den — det er å ubevisst akseptere den uten å forstå konsekvensene.</p>
@@ -140,7 +301,7 @@
 
 <section id="tredjepart">
   <div class="container">
-    <div class="section-badge">04 · Tredjeparter</div>
+    <div class="section-badge">05 · Tredjeparter</div>
     <h2>Tredjeparts<em>risiko</em></h2>
     <p class="section-intro">Din sikkerhet er ikke sterkere enn den svakeste leverandøren som har tilgang til ditt system eller dine data.</p>
     <p class="lead">SolarWinds-angrepet i 2020 kompromitterte tusenvis av organisasjoner — ikke ved å angripe dem direkte, men ved å kompromittere en felles leverandør. Organisasjonene hadde god intern sikkerhet, men en tredjepart med privilegert tilgang var inngangsporten. Tredjepartsrisiko er reell, voksende og vanskelig å kontrollere.</p>
@@ -155,23 +316,88 @@
 
 <section id="risikoregister">
   <div class="container">
-    <div class="section-badge">05 · Register</div>
+    <div class="section-badge">06 · Register</div>
     <h2>Risiko<em>registeret</em></h2>
     <p class="section-intro">Et risikoregister er ikke et dokument du skriver én gang og legger i en skuff — det er et levende verktøy for styring.</p>
-    <p class="lead">Et godt risikoregister er enkelt nok til å oppdateres regelmessig, komplett nok til å gi oversikt, og strukturert nok til å kommunisere til ledelse. Det viktigste er at det faktisk brukes — et perfekt ubrukt risikoregister er verdiløst.</p>
+    <p class="lead">Et godt risikoregister er enkelt nok til å oppdateres regelmessig, komplett nok til å gi oversikt, og strukturert nok til å kommunisere til ledelse. Det viktigste er at det faktisk brukes — et perfekt ubrukt risikoregister er verdiløst. Skill mellom <strong>iboende risiko</strong> (uten kontroller) og <strong>gjenværende risiko</strong> (etter kontroller) i hver rad — ellers mister du kontrollens dokumenterte effekt.</p>
 
     <table>
-      <thead><tr><th>ID</th><th>Risiko</th><th>Sannsynlighet</th><th>Konsekvens</th><th>Score</th><th>Behandling</th><th>Eier</th><th>Status</th></tr></thead>
+      <thead><tr><th>ID</th><th>Risiko</th><th>Iboende</th><th>Kontroll</th><th>Gjenværende</th><th>Behandling</th><th>Eier</th><th>Status</th></tr></thead>
       <tbody>
-        <tr><td>R-01</td><td>Credential stuffing mot innlogging</td><td>Høy</td><td>Alvorlig</td><td>Høy</td><td>Redusere</td><td>Dev Lead</td><td>Pågår — MFA under implementering</td></tr>
-        <tr><td>R-02</td><td>Ukryptert backup i sky-storage</td><td>Middels</td><td>Kritisk</td><td>Høy</td><td>Redusere</td><td>Ops</td><td>Ferdig — AES-256 aktivert</td></tr>
-        <tr><td>R-03</td><td>Sårbar Node.js-avhengighet (CVSS 6.5)</td><td>Lav</td><td>Begrenset</td><td>Lav</td><td>Akseptere</td><td>Dev Lead</td><td>Ingen exploit i naturen — overvåkes</td></tr>
+        <tr><td>R-01</td><td>Credential stuffing mot innlogging</td><td>Høy</td><td>MFA + rate-limiting</td><td>Lav</td><td>Redusere</td><td>Dev Lead</td><td>Pågår — MFA under implementering</td></tr>
+        <tr><td>R-02</td><td>Ukryptert backup i sky-storage</td><td>Kritisk</td><td>AES-256 at-rest + KMS</td><td>Lav</td><td>Redusere</td><td>Ops</td><td>Ferdig</td></tr>
+        <tr><td>R-03</td><td>Sårbar Node.js-avhengighet (CVSS 6.5)</td><td>Middels</td><td>Ingen aktiv exploit + ikke kalt fra ekstern input</td><td>Lav</td><td>Akseptere</td><td>Dev Lead</td><td>Overvåkes — re-evalueres ved patch</td></tr>
+        <tr><td>R-04</td><td>Tap av kortdata ved breach</td><td>Kritisk</td><td>Outsource til PCI-DSS-tilbyder</td><td>Lav</td><td>Overføre</td><td>CTO</td><td>Stripe-integrasjon i produksjon</td></tr>
       </tbody>
     </table>
 
     <div class="callout callout-green">
       <h4>Oppdateringssyklus</h4>
       <p>Gjennomgå risikoregisteret kvartalsvis, ved større arkitekturendringer og etter sikkerhetshendelser. Akseptert risiko bør re-evalueres regelmessig — kontekst endrer seg.</p>
+    </div>
+  </div>
+</section>
+
+<section id="okonomi">
+  <div class="container">
+    <div class="section-badge">07 · Økonomi</div>
+    <h2>Sikkerhets<em>økonomi</em></h2>
+    <p class="section-intro">Ross Anderson sa det allerede i 2001: informasjonssikkerhet er like mye et økonomisk problem som et teknisk. Angriperen har et budsjett — og du kan påvirke det.</p>
+    <p class="lead">Sikkerhetsavgjørelser er økonomiske avgjørelser. Spørsmålet er ikke «kan vi være 100 % sikre» (svaret er nei), men «hva er optimal investering?». Hver krone brukt på sikkerhet er en krone som ikke brukes på funksjonalitet — og hver uforhindret hendelse er en krone spart i skadekostnad. Den ideelle investeringen er der marginal kost = marginal nytte.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+        <line x1="60" y1="40" x2="60" y2="220" stroke="#1a1612" stroke-width="1.5"/>
+        <text x="60" y="510" font-size="0">.</text>
+        <rect x="80" y="60" width="240" height="160" rx="2" fill="rgba(45,74,122,0.05)" stroke="#2d4a7a" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="200" y="80" text-anchor="middle" font-weight="600" fill="#2d4a7a">Forsvarer</text>
+        <text x="100" y="105" font-size="10" fill="#1a1612">• Investering (forhåndskontroller)</text>
+        <text x="100" y="125" font-size="10" fill="#1a1612">• Reaktiv kostnad (IR, forensics)</text>
+        <text x="100" y="145" font-size="10" fill="#1a1612">• Tap (data, omdømme, drift)</text>
+        <text x="100" y="165" font-size="10" fill="#1a1612">• Reimbursement (forsikring)</text>
+        <text x="100" y="195" font-style="italic" font-size="9" fill="#a39886">Mål: minimer total kostnad</text>
+        <rect x="400" y="60" width="280" height="160" rx="2" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="540" y="80" text-anchor="middle" font-weight="600" fill="#b04428">Angriper</text>
+        <text x="420" y="105" font-size="10" fill="#1a1612">• Investering (verktøy, tid, kunnskap)</text>
+        <text x="420" y="125" font-size="10" fill="#1a1612">• Profitt (fra vellykket angrep)</text>
+        <text x="420" y="145" font-size="10" fill="#1a1612">• Straff (juridisk risiko)</text>
+        <text x="420" y="165" font-size="10" fill="#1a1612">• Leverandør-profitt (RaaS, exploit-kit)</text>
+        <text x="420" y="180" font-size="10" fill="#1a1612">• Alternativkostnad (annet mål)</text>
+        <text x="420" y="208" font-style="italic" font-size="9" fill="#a39886">Mål: maksimer (profitt − kostnad)</text>
+        <text x="370" y="50" text-anchor="middle" fill="#a39886" font-style="italic">To budsjetter, ett spill</text>
+      </svg>
+      <figcaption>Etter Meland (2021) «Storyless cyber security» — sikkerhet som en konkurranse mellom to budsjetter. Angriperen flytter til neste mål når kostnad-nytte ikke holder.</figcaption>
+    </figure>
+
+    <h3>Forsvarets dilemma</h3>
+    <p>Forsvareren må ha rett 100 % av tiden. Angriperen trenger bare ett vellykket forsøk. Asymmetrien betyr at brudd er statistisk uunngåelige over tid — og mitigasjonsstrategien må erkjenne det. Lagdelt forsvar reduserer sannsynlighet, segmentering reduserer konsekvens, og incident response håndterer det som likevel skjer.</p>
+
+    <h3>Angripsøkonomi i praksis</h3>
+    <p>En av de viktigste innsiktene fra moderne sikkerhetsøkonomi er at angrep er industrialisert. Dark Web Price Index (2021) gir konkrete tall:</p>
+
+    <table>
+      <thead><tr><th>Tjeneste</th><th>Pris (USD)</th></tr></thead>
+      <tbody>
+        <tr><td>Kapret Facebook-konto</td><td>~65</td></tr>
+        <tr><td>1000 Instagram-følgere</td><td>~5</td></tr>
+        <tr><td>1 års Netflix 4K (kapret)</td><td>~4</td></tr>
+        <tr><td>USA-tannlege-database (122k oppføringer)</td><td>~50</td></tr>
+        <tr><td>DDoS mot ubeskyttet site (1 time, 10–50k req/s)</td><td>~15</td></tr>
+        <tr><td>DDoS mot ubeskyttet site (1 uke)</td><td>~500</td></tr>
+        <tr><td>DDoS mot beskyttet site (24 t, elite-proxy)</td><td>~200</td></tr>
+      </tbody>
+    </table>
+
+    <p>Konsekvensen for SDL: hvis du gjør et angrep dyrere enn forventet utbytte, flytter angriperen seg til neste mål. Det er nesten alltid billigere å være litt vanskeligere enn nabosystemet enn å være uangripbar.</p>
+
+    <div class="callout callout-yellow">
+      <h4>Advarsel: irrasjonelle angripere</h4>
+      <p>Økonomisk modellering antar rasjonalitet. Statlige aktører, hacktivister og ideologisk motiverte angripere bryter modellen — de bruker mer enn forventet utbytte tilsier. For kritisk infrastruktur, helse og forsvar må trusselmodellen inkludere irrasjonelle aktører eksplisitt.</p>
+    </div>
+
+    <div class="callout callout-blue">
+      <h4>Estimering når data mangler</h4>
+      <p>Angrepsfrekvens, vellykkede angrep og tap-per-angrep er sjelden tilgjengelig. Mulige kilder: ekspertvurderinger, cyberforsikrings-statistikk, tap-rapporter, prislister i undergrunnsmarkeder, profitsimuleringer. Studier viser at «90 % sikre» estimater fra eksperter tar feil 65 % av tiden (<em>Noise</em>, Kahneman 2021) — kalibrer estimatene mot faktiske utfall.</p>
     </div>
   </div>
 </section>

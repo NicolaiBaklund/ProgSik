@@ -37,26 +37,39 @@
 <section id="sast-detail">
   <div class="container">
     <div class="section-badge">01 · SAST</div>
-    <h2><em>SAST</em></h2>
-    <p class="section-intro">Static Application Security Testing analyserer kildekoden uten å kjøre applikasjonen — rask, integrert i IDE og CI.</p>
-    <p class="lead">SAST-verktøy bygger et Abstract Syntax Tree (AST) av koden og kjører analyser over det. Taint tracking følger data fra brukerinput (source) gjennom koden til potensielt farlige operasjoner (sink) — f.eks. fra <code>request.GET['q']</code> til en SQL-spørring uten parameterisering. Hvis det finnes en flyt fra source til sink uten sanitering, rapporteres det som en sårbarhet.</p>
+    <h2><em>SAST</em> i pipelinen</h2>
+    <p class="section-intro">Her ser vi på SAST som SDL-aktivitet — hvordan plassere det, gating-strategier og hva som faktisk må til for at funnene skal handles.</p>
+    <p class="lead">Static Application Security Testing analyserer kildekoden uten å kjøre applikasjonen. Selve analyseteknikken (AST, taint tracking, dataflyt) er detaljert i <a href="../kap10/sast.html">Kapittel 10 · Statisk analyse</a>. Det vi fokuserer på her er hvordan SAST integreres i utviklingsløpet — der gevinsten faktisk realiseres.</p>
 
     <table>
       <thead><tr><th>Verktøy</th><th>Styrke</th><th>Svakhet</th></tr></thead>
       <tbody>
-        <tr><td>SonarQube</td><td>Bredt språkstøtte, integrering i IDE og CI</td><td>Høy false positive rate uten kalibrering</td></tr>
-        <tr><td>CodeQL (GitHub)</td><td>Kraftig spørringsspråk, lav false positiv rate</td><td>Langsomt for store kodebaser</td></tr>
+        <tr><td>SonarQube</td><td>Bred språkstøtte, godt etablert IDE/CI-integrering</td><td>Høy false positive rate uten kalibrering</td></tr>
+        <tr><td>CodeQL (GitHub)</td><td>Kraftig spørringsspråk, lav false positive rate</td><td>Langsomt for store kodebaser</td></tr>
         <tr><td>Semgrep</td><td>Rask, egendefinerte regler, lav barriere</td><td>Enklere analysemodell (mønstermatch)</td></tr>
       </tbody>
     </table>
 
-    <p>Integrering i praksis:</p>
+    <h3>Plassering i pipelinen</h3>
     <ul>
-      <li>Kjør SAST på hvert commit og PR — gi resultater som PR-kommentarer.</li>
-      <li>Blokker merge på kritiske og høy-alvorlighets funn med lav false positive rate.</li>
-      <li>Supprimer kjente falske positiver med annotasjoner i koden (<code>// nosec</code>, <code>@SuppressWarnings</code>).</li>
-      <li>Mål og forbedre false positive rate over tid.</li>
+      <li><strong>IDE-plugin:</strong> raskeste feedback — utvikleren ser advarsel mens hun skriver.</li>
+      <li><strong>Pre-commit hook:</strong> rask scanning før commit (typisk Semgrep med utvalgte regler).</li>
+      <li><strong>PR-gate:</strong> full scan ved hver pull request, resultater som inline-kommentarer.</li>
+      <li><strong>Nightly full-scan:</strong> dypere analyser (CodeQL) som tar lengre tid kjøres asynkront.</li>
     </ul>
+
+    <h3>Gating som ikke ødelegger flyten</h3>
+    <ul>
+      <li><strong>Blokker</strong> kun på funn med høy konfidens og høy alvorlighet — det reduserer alarmtretthet.</li>
+      <li><strong>Adviser</strong> for lavere konfidens — informerer uten å stoppe merge.</li>
+      <li><strong>Suppress</strong> kjente falske positiver med kode-annotasjoner (<code>// nosec</code>, <code>@SuppressWarnings</code>) og kommentar som forklarer hvorfor.</li>
+      <li><strong>Mål false positive rate over tid</strong> — den er en ledende indikator for om systemet faktisk brukes.</li>
+    </ul>
+
+    <div class="callout callout-yellow">
+      <h4>Antimønster: 80 % FP og full blokkering</h4>
+      <p>Hvis 80 % av funn er falske positiver og du blokkerer på alt, lærer teamet å klikke «override». Da gir SAST null sikkerhetsverdi — bare prosess-friksjon. Investér i kalibrering før gating: én runde manuell triage av all backlog, deaktiver irrelevante regler for stacken, og introduser blokkering først når FP-rate er under 10–15 %.</p>
+    </div>
   </div>
 </section>
 

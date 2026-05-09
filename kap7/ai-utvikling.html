@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-assistert utvikling — Kapittel 7</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 7</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 7: LLM og programvaresikkerhet">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 7 · AI-assistert utvikling</div>
+    <h1>AI-assistert <em>utvikling</em></h1>
+    <p class="lede">Fra autocomplete til kollaborativ koding — og fra raskere levering til en ny klasse sikkerhetsfeil utvikleren ikke ser.</p>
+    <nav class="toc">
+      <a href="#landskapet"><span class="toc-num">01</span>Verktøylandskapet</a>
+      <a href="#verdi"><span class="toc-num">02</span>Verdien — synlig og skjult</a>
+      <a href="#risiko"><span class="toc-num">03</span>Risikokategorier</a>
+      <a href="#empiri"><span class="toc-num">04</span>Empirien: Stanford-studien</a>
+      <a href="#praksis"><span class="toc-num">05</span>Gode utviklerpraksiser</a>
+    </nav>
+  </div>
+</header>
+
+<section id="landskapet">
+  <div class="container">
+    <div class="section-badge">01 · Landskapet</div>
+    <h2>Verktøy<em>landskapet</em> i 2026</h2>
+    <p class="section-intro">Tekstredigerer → IDE → autocomplete → AI-assistanse. Skiftet er fra syntakshjelp til semantisk forståelse, og fra isolert redigering til kontinuerlig samarbeid.</p>
+    <p class="lead">AI-kodeassistenter har gått fra kuriositet til standardverktøy på under tre år. Gartner anslår at 75 % av enterprise-utviklere vil bruke AI-kodeassistenter innen 2028. Det betyr at sikkerhetsspørsmålet ikke lenger er <em>«bør vi bruke det?»</em>, men <em>«hvordan bruker vi det forsvarlig?»</em>.</p>
+
+    <table>
+      <thead><tr><th>Verktøy</th><th>Profil</th><th>Styrke</th></tr></thead>
+      <tbody>
+        <tr><td><strong>GitHub Copilot</strong></td><td>IDE-integrert autocomplete + chat</td><td>Bredt språkstøtte, modent økosystem</td></tr>
+        <tr><td><strong>Cursor</strong></td><td>AI-først IDE</td><td>Stor kontekst, sterke kodebase-spørringer</td></tr>
+        <tr><td><strong>Claude Code</strong></td><td>Terminal-/agent-basert</td><td>Sterk resonnement på kompleks logikk</td></tr>
+        <tr><td><strong>ChatGPT (GPT-4.1+)</strong></td><td>Chat-basert</td><td>Generell, fleksibel</td></tr>
+        <tr><td><strong>Amazon Q Developer</strong></td><td>Cloud-integrert</td><td>AWS-spesifikk kontekst</td></tr>
+        <tr><td><strong>Tabnine</strong></td><td>On-prem / privacy-fokusert</td><td>Bedrifter med datapolitikk</td></tr>
+        <tr><td><strong>Codeium / Continue.dev</strong></td><td>Gratis / open source</td><td>Lav inngangsbarriere</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>Hva assistenter <em>kan</em></h4>
+      <p>Automatisere repetitive oppgaver · redusere kognitiv belastning · akselerere navigering i ukjente språk og rammeverk · holde utvikleren i «flow state» · gjøre ekspertise mer tilgjengelig. Det er reelle gevinster — men de skygger ofte for risikobildet.</p>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk · 30 sek</div>
+      <div class="q-text">Hva er det største skiftet fra autocomplete til AI-assistanse?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Fra syntakshjelp til semantisk forståelse. Autocomplete fyller inn neste token basert på lokale mønstre. AI-assistanse forstår intensjonen i koden, kan generere hele funksjoner og diskutere designvalg. Det gir kraft — og åpner et nytt feilrom.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="verdi">
+  <div class="container">
+    <div class="section-badge">02 · Verdi</div>
+    <h2>Verdien — <em>synlig og skjult</em></h2>
+    <p class="section-intro">Tidsbesparelse er bare toppen av isfjellet. Den større effekten ligger under vannlinjen — og det er den ledelsen oftest betaler for, men sjelden måler godt.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Vannlinje -->
+        <line x1="20" y1="100" x2="700" y2="100" stroke="#2d4a7a" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="700" y="95" text-anchor="end" font-size="10" fill="#2d4a7a" font-style="italic">vannlinjen</text>
+
+        <!-- Topp av isfjell -->
+        <polygon points="220,100 360,40 500,100" fill="rgba(45,74,122,0.15)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="65" text-anchor="middle" font-weight="600" fill="#2d4a7a">Synlig verdi</text>
+        <text x="360" y="82" text-anchor="middle" font-size="11" fill="#6b6257">tidsbesparelse · raskere koding · kostnadskutt</text>
+
+        <!-- Under vann -->
+        <polygon points="160,100 360,300 560,100" fill="rgba(45,74,122,0.35)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="360" y="125" text-anchor="middle" font-weight="600" fill="#fff">Skjult verdi</text>
+        <text x="360" y="148" text-anchor="middle" font-size="11" fill="#fff">redusert kontekstskifte · flow state</text>
+        <text x="360" y="165" text-anchor="middle" font-size="11" fill="#fff">bedre utvikleropplevelse</text>
+        <text x="360" y="182" text-anchor="middle" font-size="11" fill="#fff">økt utviklerretensjon</text>
+        <text x="360" y="199" text-anchor="middle" font-size="11" fill="#fff">bedre kodekvalitet og vedlikeholdbarhet</text>
+        <text x="360" y="216" text-anchor="middle" font-size="11" fill="#fff">forbedret kundeopplevelse</text>
+        <text x="360" y="233" text-anchor="middle" font-size="11" fill="#fff">færre feil og mindre teknisk gjeld</text>
+        <text x="360" y="250" text-anchor="middle" font-size="11" fill="#fff">raskere time-to-market</text>
+      </svg>
+      <figcaption>«Isfjellet» av AI-kodeassistentverdi (Gartner, 2024). Tidsbesparelser er det målbare — men det meste av verdien sitter i utvikleropplevelse og kvalitetsforbedringer.</figcaption>
+    </figure>
+
+    <p>I praksis er det tre ting AI-assistanse fjerner mest tid fra: skriving av tester og boilerplate, søk i dokumentasjon, og dechiffrering av eksisterende kode. Det frigjør tid til design, brainstorming, samarbeid og iterasjon — det som faktisk avgjør om produktet blir bra.</p>
+
+    <div class="callout callout-orange-warning callout-blue">
+      <h4>Men: «manuell sårbarhetsjakt» har vist seg vanskelig å automatisere</h4>
+      <p>I forskningen fra Gartner og andre er <em>«manually finding vulnerabilities»</em> markert som en oppgave AI-assistenter <strong>ikke</strong> løser godt — selv om det er nettopp den oppgaven sikkerhetsteam håpet på. Hvorfor? Fordi sårbarheter ofte krever kontekst som modellen ikke har: trusselmodellen, miljøet, dataeierskapet, hvilke data som går hvor.</p>
+    </div>
+  </div>
+</section>
+
+<section id="risiko">
+  <div class="container">
+    <div class="section-badge">03 · Risiko</div>
+    <h2>Risiko<em>kategorier</em></h2>
+    <p class="section-intro">Tre brede kategorier av risiko: modellen lekker data, modellen genererer usikker kode, og modellen selv er angripbar.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Tre kategorier -->
+        <rect x="30" y="40" width="200" height="100" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="130" y="65" text-anchor="middle" font-weight="600" fill="#b04428">Sensitiv data lekker</text>
+        <text x="130" y="88" text-anchor="middle" font-size="11" fill="#6b6257">prompts inneholder</text>
+        <text x="130" y="103" text-anchor="middle" font-size="11" fill="#6b6257">hemmeligheter,</text>
+        <text x="130" y="118" text-anchor="middle" font-size="11" fill="#6b6257">kundekode, IP</text>
+
+        <rect x="260" y="40" width="200" height="100" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="360" y="65" text-anchor="middle" font-weight="600" fill="#3d6b3a">Sårbar kode foreslås</text>
+        <text x="360" y="88" text-anchor="middle" font-size="11" fill="#6b6257">utdaterte mønstre,</text>
+        <text x="360" y="103" text-anchor="middle" font-size="11" fill="#6b6257">manglende validering,</text>
+        <text x="360" y="118" text-anchor="middle" font-size="11" fill="#6b6257">feil kryptobruk</text>
+
+        <rect x="490" y="40" width="200" height="100" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="590" y="65" text-anchor="middle" font-weight="600" fill="#2d4a7a">Sikkerhet overses</text>
+        <text x="590" y="88" text-anchor="middle" font-size="11" fill="#6b6257">utvikler stoler blindt,</text>
+        <text x="590" y="103" text-anchor="middle" font-size="11" fill="#6b6257">reviewer mindre nøye,</text>
+        <text x="590" y="118" text-anchor="middle" font-size="11" fill="#6b6257">tester sjeldnere</text>
+      </svg>
+      <figcaption>De tre brede risikokategoriene. Den tredje — at sikkerhet rett og slett overses — er den minst tekniske og ofte den farligste.</figcaption>
+    </figure>
+
+    <h3>Garbage in, garbage out</h3>
+    <p>Treningsdataene til kode-LLM-er kommer fra <strong>offentlige kilder</strong> — GitHub, BitBucket, Stack Overflow, dokumentasjon, kodeeksempler. De inneholder reelt sårbare mønstre i stor skala: SQL-konkatenering, hardkodede credentials, utdaterte krypto-API-er, manglende inputvalidering. Modellen lærer disse mønstrene som «vanlige» — fordi de <em>er</em> vanlige.</p>
+
+    <div class="callout">
+      <span class="label">CSET, november 2024</span>
+      <h4>48 %</h4>
+      <p>av koden produsert av fem ulike LLM-er inneholdt minst én feil som kunne lede til ondsinnet utnyttelse. <em>Kilde: «Cybersecurity Risks of AI-Generated Code», Center for Security and Emerging Technology.</em></p>
+    </div>
+
+    <h3>Manglende sikkerhetskontekst</h3>
+    <p>Modellen vet ikke hvilket trusselbilde du opererer i, hvilke data som er sensitive, hvilke compliance-krav som gjelder, eller hva «sikker nok» betyr i din organisasjon. Den genererer plausibel kode som matcher treningsfordelingen — ikke kode som matcher dine spesifikke krav.</p>
+
+    <div class="callout callout-blue">
+      <h4>Sikkerhet eller en følelse av sikkerhet?</h4>
+      <p>Det er forskjell på <em>at koden er sikker</em> og <em>at utvikleren tror koden er sikker</em>. AI-assistenter er overraskende gode på å produsere det andre uten å produsere det første — og det er der den virkelige risikoen ligger.</p>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk · 1 min</div>
+      <div class="q-text">Hvorfor er «garbage in, garbage out» et særlig sikkerhetsproblem for kode-LLM-er?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Fordi treningskorpusene (GitHub, SO, OSS-dokumentasjon) inneholder reelt sårbare mønstre i stor skala — utdaterte krypto-API-er, SQL-konkatenering, manglende validering. Modellen lærer disse som «normale» fordi de statistisk sett er normale. Når modellen genererer kode, reproduserer den sårbare mønstre med samme selvtillit som sikre.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="empiri">
+  <div class="container">
+    <div class="section-badge">04 · Empiri</div>
+    <h2>Stanford-<em>studien</em></h2>
+    <p class="section-intro">Perry et al. (Stanford, arXiv:2211.03622) lot deltakere løse kodeoppgaver med og uten AI-assistanse. Resultatet er ubehagelig.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Akse -->
+        <line x1="80" y1="40" x2="80" y2="220" stroke="#6b6257" stroke-width="1"/>
+        <line x1="80" y1="220" x2="700" y2="220" stroke="#6b6257" stroke-width="1"/>
+        <!-- Y-grid og labels -->
+        <text x="70" y="225" text-anchor="end" font-size="10" fill="#6b6257">0%</text>
+        <line x1="78" y1="180" x2="700" y2="180" stroke="#e0d9cb" stroke-width="0.5"/>
+        <text x="70" y="184" text-anchor="end" font-size="10" fill="#6b6257">25%</text>
+        <line x1="78" y1="140" x2="700" y2="140" stroke="#e0d9cb" stroke-width="0.5"/>
+        <text x="70" y="144" text-anchor="end" font-size="10" fill="#6b6257">50%</text>
+        <line x1="78" y1="100" x2="700" y2="100" stroke="#e0d9cb" stroke-width="0.5"/>
+        <text x="70" y="104" text-anchor="end" font-size="10" fill="#6b6257">75%</text>
+        <line x1="78" y1="60" x2="700" y2="60" stroke="#e0d9cb" stroke-width="0.5"/>
+        <text x="70" y="64" text-anchor="end" font-size="10" fill="#6b6257">100%</text>
+        <text x="20" y="135" font-size="11" fill="#6b6257" transform="rotate(-90 20 135)">% sikre svar</text>
+
+        <!-- Kategori 1: Encryption -->
+        <rect x="100" y="115" width="40" height="105" fill="rgba(176,68,40,0.7)" stroke="#b04428"/>
+        <rect x="142" y="86" width="40" height="134" fill="rgba(61,107,58,0.7)" stroke="#3d6b3a"/>
+        <text x="141" y="240" text-anchor="middle" font-size="11" fill="#6b6257">Kryptering</text>
+        <text x="120" y="110" text-anchor="middle" font-size="10" fill="#b04428" font-weight="600">66%</text>
+        <text x="162" y="80" text-anchor="middle" font-size="10" fill="#3d6b3a" font-weight="600">79%</text>
+
+        <!-- Kategori 2: Signing -->
+        <rect x="240" y="215" width="40" height="5" fill="rgba(176,68,40,0.7)" stroke="#b04428"/>
+        <rect x="282" y="186" width="40" height="34" fill="rgba(61,107,58,0.7)" stroke="#3d6b3a"/>
+        <text x="281" y="240" text-anchor="middle" font-size="11" fill="#6b6257">Signering</text>
+        <text x="260" y="210" text-anchor="middle" font-size="10" fill="#b04428" font-weight="600">3%</text>
+        <text x="302" y="180" text-anchor="middle" font-size="10" fill="#3d6b3a" font-weight="600">21%</text>
+
+        <!-- Kategori 3: Sandbox -->
+        <rect x="380" y="206" width="40" height="14" fill="rgba(176,68,40,0.7)" stroke="#b04428"/>
+        <rect x="422" y="174" width="40" height="46" fill="rgba(61,107,58,0.7)" stroke="#3d6b3a"/>
+        <text x="421" y="240" text-anchor="middle" font-size="11" fill="#6b6257">Sandbox-katalog</text>
+        <text x="400" y="200" text-anchor="middle" font-size="10" fill="#b04428" font-weight="600">9%</text>
+        <text x="442" y="168" text-anchor="middle" font-size="10" fill="#3d6b3a" font-weight="600">29%</text>
+
+        <!-- Kategori 4: SQL -->
+        <rect x="520" y="208" width="40" height="12" fill="rgba(176,68,40,0.7)" stroke="#b04428"/>
+        <rect x="562" y="164" width="40" height="56" fill="rgba(61,107,58,0.7)" stroke="#3d6b3a"/>
+        <text x="561" y="240" text-anchor="middle" font-size="11" fill="#6b6257">SQL</text>
+        <text x="540" y="202" text-anchor="middle" font-size="10" fill="#b04428" font-weight="600">8%</text>
+        <text x="582" y="158" text-anchor="middle" font-size="10" fill="#3d6b3a" font-weight="600">35%</text>
+
+        <!-- Forklaring -->
+        <rect x="100" y="255" width="14" height="14" fill="rgba(176,68,40,0.7)" stroke="#b04428"/>
+        <text x="120" y="266" font-size="11" fill="#6b6257">Med AI</text>
+        <rect x="190" y="255" width="14" height="14" fill="rgba(61,107,58,0.7)" stroke="#3d6b3a"/>
+        <text x="210" y="266" font-size="11" fill="#6b6257">Uten AI</text>
+      </svg>
+      <figcaption>Andel deltakere som leverte sikre svar, med vs. uten AI-assistent (Perry et al., Stanford 2022). Tallene er omtrentlige fra studien — alle fire oppgaver: AI-gruppen leverte færre sikre løsninger.</figcaption>
+    </figure>
+
+    <div class="callout callout-blue">
+      <h4>Sitatet som setter rammen</h4>
+      <p><em>«Deltakere med tilgang til AI-assistenter introduserte sikkerhetssårbarheter oftere på flertallet av oppgavene, og <strong>vurderte samtidig sine usikre svar som sikre</strong> oftere enn kontrollgruppen.»</em> — Perry, Srivastava, Kumar, Boneh (2022).</p>
+    </div>
+
+    <p>Det doble effekten — mer usikker kode <em>og</em> høyere selvtillit i den koden — er det som gjør funnet alvorlig. Hadde AI-brukere vært mer skeptiske til egne svar, ville code review fanget mye. Men de var mindre skeptiske, ikke mer. Code review-praksisen må derfor justeres: AI-generert kode skal ikke få et «automatisk troskvarter» fordi den ser polert ut.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk · 1 min</div>
+      <div class="q-text">Hvorfor er Stanford-funnet om <em>selvvurdering</em> minst like viktig som funnet om mer sårbar kode?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Fordi review-prosesser bygger på utviklerens egen vurdering av risikoen i koden de leverer. Når AI-brukere vurderer sin usikre kode som sikker, signaliserer de feil til reviewer, til seg selv, og til testpipelinen. Resultatet: sårbarheter går gjennom flere kontroller fordi alle aktører er overoptimistiske. Den tekniske feilen forsterkes av et menneskelig tillitsproblem.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="praksis">
+  <div class="container">
+    <div class="section-badge">05 · Praksis</div>
+    <h2>Gode utvikler<em>praksiser</em></h2>
+    <p class="section-intro">Fem praksiser som hever sannsynligheten for at AI-assistert kode er reelt sikker — ikke bare opplevd sikker.</p>
+
+    <ol>
+      <li><strong>Velg AI-assistent bevisst.</strong> Privacy-modell (sender koden til skyen?), modellvalg, treningsdata-policy, on-prem-mulighet.</li>
+      <li><strong>Bruk sikker prompt-engineering.</strong> Be eksplisitt om sikre mønstre, navngitt rammeverk, kontekst om datafølsomhet.</li>
+      <li><strong>Legg på sanntids sårbarhetsdeteksjon.</strong> SAST-verktøy som kjører i IDE-en mens AI genererer kode.</li>
+      <li><strong>Bygg sikkerhet inn i utviklingsflyten.</strong> Pre-commit hooks, CI/CD-blokkering, secret scanning, dependency review.</li>
+      <li><strong>Human-in-the-loop på alvor.</strong> Behandle AI-output som forslag fra en juniorutvikler — gjennomles, valider, test.</li>
+    </ol>
+
+    <h3>Sikker prompt-engineering — et konkret eksempel</h3>
+    <pre><code><span class="comment"># Svak prompt</span>
+Lag en funksjon som autentiserer brukere mot databasen.
+
+<span class="comment"># Sterk prompt</span>
+Lag en funksjon som autentiserer brukere mot databasen og følger
+OWASP secure coding practices. Krav:
+  - bcrypt for passordhashing (min cost factor 12)
+  - parameteriserte spørringer (ingen string-konkatenering)
+  - feilmeldinger som ikke avslører om brukernavn finnes
+  - rate limiting på autentiseringsforsøk
+  - logging av mislykkede forsøk uten å logge passord</code></pre>
+
+    <p>Forskjellen er ikke kosmetisk. Den svake prompten gir modellen lov til å velge fra hele fordelingen av treningseksempler — inkludert sårbare. Den sterke prompten setter eksplisitte begrensninger som flytter sannsynlighetsmassen mot trygge mønstre.</p>
+
+    <h3>Sanntids sårbarhetsdeteksjon</h3>
+    <table>
+      <thead><tr><th>Verktøy</th><th>Tilnærming</th><th>Når det skinner</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Snyk Code</strong></td><td>SAST i IDE, ML-basert regelmotor</td><td>Rask feedback, godt språkstøtte, OSS-dependency-skanning</td></tr>
+        <tr><td><strong>SonarQube IDE</strong></td><td>Linting + sikkerhetsregler</td><td>Bredt språkstøtte, integreres med SonarCloud-pipeline</td></tr>
+        <tr><td><strong>Veracode Fix</strong></td><td>AI-drevet remediering</td><td>Foreslår konkrete patcher for funn — ikke bare flagg</td></tr>
+      </tbody>
+    </table>
+    <p>Poenget er ikke å velge ett verktøy, men å sørge for at AI-generert kode møter en automatisk sikkerhetskontroll <em>før</em> den treffer commit. Du vil ha SAST-feedbacken i samme tempo som AI-assistenten gir kodeforslag — ellers blir sikkerhetstilbakemeldingen «for sent» psykologisk.</p>
+
+    <div class="callout callout-green">
+      <h4>Hovedlærdommen</h4>
+      <p>AI-assistanse er ikke et sikkerhetsproblem i seg selv — det er en <em>endring i hvordan kode produseres</em>, og prosessene rundt må endres tilsvarende. Behold prompt-disiplin, automatiser deteksjon, og gjenoppretter en sunn skepsis i code review.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

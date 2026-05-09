@@ -47,44 +47,43 @@
     <p class="lead">Programvaresikkerhet er ikke et problem du løser én gang og er ferdig med. Det er en løpende prosess: ny kode introduserer nye sårbarheter, nye avhengigheter bringer med seg nye risikoer, og trusselbildet endrer seg. Secure Development Lifecycle (SDL) er rammeverket som gjør sikkerhet til en integrert del av programvareutviklingen — fra kravspesifikasjon til hendelsesrespons.</p>
 
     <figure class="fig-frame">
-      <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="11">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="10">
         <defs><marker id="sla" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
-        <!-- SDL-faser som sirkler -->
-        <circle cx="80" cy="90" r="40" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
-        <text x="80" y="86" text-anchor="middle" font-weight="600" fill="#b04428">Krav</text>
-        <text x="80" y="100" text-anchor="middle" fill="#6b6257">Misuse</text>
-        <text x="80" y="113" text-anchor="middle" fill="#6b6257">cases</text>
-        <line x1="122" y1="90" x2="158" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
-        <circle cx="200" cy="90" r="40" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
-        <text x="200" y="86" text-anchor="middle" font-weight="600" fill="#2d4a7a">Design</text>
-        <text x="200" y="100" text-anchor="middle" fill="#6b6257">Threat</text>
-        <text x="200" y="113" text-anchor="middle" fill="#6b6257">modeling</text>
-        <line x1="242" y1="90" x2="278" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
-        <circle cx="320" cy="90" r="40" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
-        <text x="320" y="86" text-anchor="middle" font-weight="600" fill="#3d6b3a">Kode</text>
-        <text x="320" y="100" text-anchor="middle" fill="#6b6257">SAST</text>
-        <text x="320" y="113" text-anchor="middle" fill="#6b6257">Code review</text>
-        <line x1="362" y1="90" x2="398" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
-        <circle cx="440" cy="90" r="40" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1.5"/>
-        <text x="440" y="86" text-anchor="middle" font-weight="600" fill="#c68a1f">Test</text>
-        <text x="440" y="100" text-anchor="middle" fill="#6b6257">DAST</text>
-        <text x="440" y="113" text-anchor="middle" fill="#6b6257">Pentest</text>
-        <line x1="482" y1="90" x2="518" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
-        <circle cx="560" cy="90" r="40" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-width="1" stroke-dasharray="4,3"/>
-        <text x="560" y="86" text-anchor="middle" font-weight="600" fill="#b04428">Drift</text>
-        <text x="560" y="100" text-anchor="middle" fill="#6b6257">Monitoring</text>
-        <text x="560" y="113" text-anchor="middle" fill="#6b6257">IR-plan</text>
-        <line x1="600" y1="90" x2="636" y2="90" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
-        <circle cx="660" cy="90" r="35" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
-        <text x="660" y="88" text-anchor="middle" font-size="10" fill="#b04428">Respons</text>
-        <text x="660" y="100" text-anchor="middle" font-size="10" fill="#6b6257">Patch</text>
+        <!-- Microsoft SDL: 7 faser -->
+        <circle cx="55" cy="100" r="32" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="55" y="98" text-anchor="middle" font-weight="600" fill="#2d4a7a">Opplæring</text>
+        <text x="55" y="112" text-anchor="middle" fill="#6b6257" font-size="9">Sec. 101</text>
+        <line x1="89" y1="100" x2="113" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="150" cy="100" r="32" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="150" y="98" text-anchor="middle" font-weight="600" fill="#b04428">Krav</text>
+        <text x="150" y="112" text-anchor="middle" fill="#6b6257" font-size="9">Misuse cases</text>
+        <line x1="184" y1="100" x2="208" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="245" cy="100" r="32" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="245" y="98" text-anchor="middle" font-weight="600" fill="#2d4a7a">Design</text>
+        <text x="245" y="112" text-anchor="middle" fill="#6b6257" font-size="9">Threat model</text>
+        <line x1="279" y1="100" x2="303" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="340" cy="100" r="32" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="340" y="98" text-anchor="middle" font-weight="600" fill="#3d6b3a">Impl.</text>
+        <text x="340" y="112" text-anchor="middle" fill="#6b6257" font-size="9">SAST</text>
+        <line x1="374" y1="100" x2="398" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="435" cy="100" r="32" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="435" y="98" text-anchor="middle" font-weight="600" fill="#c68a1f">Verifik.</text>
+        <text x="435" y="112" text-anchor="middle" fill="#6b6257" font-size="9">DAST + fuzz</text>
+        <line x1="469" y1="100" x2="493" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="530" cy="100" r="32" fill="rgba(176,68,40,0.05)" stroke="#b04428" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="530" y="98" text-anchor="middle" font-weight="600" fill="#b04428">Frigi.</text>
+        <text x="530" y="112" text-anchor="middle" fill="#6b6257" font-size="9">Final review</text>
+        <line x1="564" y1="100" x2="588" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#sla)"/>
+        <circle cx="625" cy="100" r="32" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="625" y="98" text-anchor="middle" font-weight="600" fill="#b04428">Respons</text>
+        <text x="625" y="112" text-anchor="middle" fill="#6b6257" font-size="9">Patch + IR</text>
       </svg>
-      <figcaption>SDL integrerer sikkerhetskontroller i alle faser av utviklingssyklusen — ikke bare som en avsluttende gate.</figcaption>
+      <figcaption>Microsoft SDL — syv faser fra opplæring til hendelsesrespons. Sikkerhetskontroller integreres i hver fase, ikke som avsluttende gate.</figcaption>
     </figure>
 
     <div class="callout callout-green">
       <h4>Kapittelets kjerneidé</h4>
-      <p>«Shift left» betyr å flytte sikkerhetstesting og -vurdering tidligere i utviklingsprosessen — der kostnadene ved å fikse feil er lavere. En sårbarhet oppdaget i kodegjennomgang koster femten ganger mindre å fikse enn den samme sårbarheten oppdaget i produksjon.</p>
+      <p>«Shift left» betyr å flytte sikkerhetstesting og -vurdering tidligere i utviklingsprosessen — der kostnadene ved å fikse feil er lavere. IBM Systems Sciences Institute estimerte at en defekt funnet i implementeringsfasen koster ca. 6× mer å rette enn én funnet i kravfasen, og en defekt funnet i produksjon koster opp mot 100× mer. Tallene varierer mellom studier, men retningen er entydig: tidligere oppdagelse, billigere fiks.</p>
     </div>
   </div>
 </section>
@@ -125,7 +124,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">20 spørsmål om risiko, SDL og sikkerhetstesting.</p>
+    <p class="section-intro">30 spørsmål om risiko, RMF, SDL, sikkerhetsøkonomi og testing.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -265,6 +264,76 @@
       <div class="q-text">Hva er forskjellen mellom SBOM og SCA, og i hvilke situasjoner trenger man begge?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer"><strong>SCA (Software Composition Analysis)</strong> er en prosess/verktøykategori som analyserer avhengigheter for kjente sårbarheter og lisensproblemer. <strong>SBOM</strong> er et dokument — en komplett liste over komponenter. SCA produserer gjerne et SBOM som en del av sin output. Man trenger begge når: (1) du leverer programvare til kunder og må dokumentere komponenter (krav fra regulatorer, forsvar, helse), (2) du håndterer en hendelse og trenger raskt å avgjøre om en ny CVE rammer dine produkter, og (3) du skal verifisere tredjeparts programvare du kjøper inn.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 21 · Lett</div>
+      <div class="q-text">Hva er forskjellen mellom en forretningsrisiko og en teknisk risiko?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Forretningsrisiko</strong> truer direkte et forretningsmål — f.eks. «omdømmetap fordi sensitive data lekker». <strong>Teknisk risiko</strong> er en konkret trussel mot systemet — f.eks. «SQL injection mot innloggingsendepunktet». RMF kobler tekniske risikoer til forretningsrisikoer for å begrunne investeringer overfor ledelsen.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 22 · Lett</div>
+      <div class="q-text">Hva er BSIMM?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">BSIMM (Building Security In Maturity Model) er en deskriptiv modell — den beskriver hva organisasjoner faktisk gjør, ikke hva de bør gjøre. Bygd på observasjoner fra 100+ firmaer. Brukes til selvevaluering og benchmarking mot bransjegjennomsnitt («Earth»).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 23 · Lett</div>
+      <div class="q-text">Hva er responsible disclosure?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Responsible disclosure er praksisen der en sårbarhetsforsker varsler leverandøren først, gir dem rimelig tid til å patche (typisk 90 dager), og publiserer detaljer etterpå. Alternativene er full disclosure (publiser umiddelbart), profit-driven (selg til tredjepart) og non-disclosure (fortell ingen).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 24 · Middels</div>
+      <div class="q-text">Beskriv McGraws Risk Management Framework (RMF) — de fem stegene.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">1. <strong>Forstå forretningskonteksten</strong> — mål, eiendeler, interessenter. 2. <strong>Identifiser og koble forretnings- og tekniske risikoer</strong> — bygg traceability mellom dem. 3. <strong>Syntetiser og rangér risikoene</strong> — sannsynlighet × konsekvens. 4. <strong>Definer mitigasjonsstrategi</strong> — utled sikkerhetskrav. 5. <strong>Gjennomfør fikser og valider</strong> — risikobasert testing knyttet tilbake til kravene.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 25 · Middels</div>
+      <div class="q-text">Forskjell på preskriptive og deskriptive SDL-modeller? Gi ett eksempel av hver.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Preskriptiv:</strong> sier hva du <em>bør</em> gjøre. Eksempler: McGraw Touchpoints, Microsoft SDL, OWASP CLASP, OpenSAMM. <strong>Deskriptiv:</strong> beskriver hva organisasjoner <em>faktisk</em> gjør. Eksempel: BSIMM. BSIMM er ikke en oppskrift — det er et målebånd for å sammenligne din praksis med bransjen.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 26 · Middels</div>
+      <div class="q-text">Hvorfor er CVSS ikke det samme som risiko?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">CVSS Base Score måler teknisk alvorlighetsgrad i en abstrakt verden — den vet ikke om sårbarheten faktisk er nådd fra ekstern input i ditt system, om en exploit eksisterer i naturen, eller om kompromittert komponent inneholder kritiske data. Risiko = sannsynlighet × konsekvens i <em>din</em> kontekst. CVSS 9.8 i et internt verktøy uten eksternt grensesnitt kan ha lavere reell risiko enn CVSS 6.5 i en internett-eksponert tjeneste.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 27 · Middels</div>
+      <div class="q-text">Hva er Firesmiths kriterier for et godt sikkerhetskrav?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Et godt krav beskriver <strong>hva</strong> som kreves, ikke <strong>hvordan</strong> (unngå prematur designfastlåsning). Det skal være entydig (ikke tvetydig), kohesivt (én ting per krav), testbart med klare aksepteringskriterier, og ofte kvantifisert. Eksempel på dårlig: «systemet skal være sikkert». Bedre: «opplasting av kundedata skal krypteres med autentisert kryptering, og nøkler genereres av en spesifisert part».</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 28 · Middels</div>
+      <div class="q-text">Hva er forskjellen mellom en SDL og en sikkerhetsstandard?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">SDL er en <strong>metodologi/prosess</strong> — «hvordan vi bygger det» (Microsoft SDL, Touchpoints). En sikkerhetsstandard er et <strong>krav-/sjekklist-rammeverk</strong> — «hva skal bygges» (NIST SSDF 800-218, OWASP ASVS, ISO 27001, PCI DSS). De jobber sammen: SDL er handling, standarden er målestokk. «Vi tester for sårbarheter ved hver build» (SDL) for å «overholde ISO 27001» (standard).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 29 · Vanskelig</div>
+      <div class="q-text">Forklar «forsvarets dilemma» og hvorfor det former hele risikohåndteringsfilosofien.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Forsvareren må ha rett 100 % av tiden — angriperen trenger bare ett vellykket forsøk. Asymmetrien betyr at en strategi om null brudd er urealistisk. I stedet: minimer sannsynlighet via lagdelt forsvar, minimer konsekvens via segmentering og rask deteksjon, og forutsett at brudd skjer (planlegg incident response, øv på det). Risikohåndtering er ikke å eliminere risiko, men å forstå hvilken gjenværende risiko som er akseptabel.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 30 · Vanskelig</div>
+      <div class="q-text">Et selskap har MTTR (Mean Time to Remediate) for kritiske CVEer på 45 dager. Hvilke endringer i SDL og DevSecOps kan redusere det til under 7 dager?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">(1) <strong>Automatisk SCA i CI</strong> som åpner Dependabot-PR-er ved hver ny CVE. (2) <strong>SBOM-drevet hendelsesrespons</strong> — ved ny CVE, søk SBOM og finn berørte tjenester på minutter, ikke dager. (3) <strong>Patch-prosess som del av frigivelsesfasen</strong> — testet rollback, kanary-deploy, automatisert smoke-test. (4) <strong>SLAer i risikoregister</strong> — kritiske CVEer har formell 24–72 timers frist og rapporteres til ledelse. (5) <strong>Sikkerhetschampions per team</strong> som triagerer raskt uten å vente på sentralt sikkerhetsteam. (6) <strong>Bug bounty</strong> for å oppdage hull før de blir CVE-er.</div></div>
     </div>
   </div>
 </section>

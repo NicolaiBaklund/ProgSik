@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI til forsvar — Kapittel 7</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+</head>
+<body>
+<nav class="site-nav">
+  <div class="container">
+    <a href="../" class="brand">TDT4237</a>
+    <a href="index.html" class="nav-back">&larr; Kapittel 7</a>
+    <div class="nav-search-wrapper">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="nav-search" placeholder="Laster…" autocomplete="off" disabled>
+      <div id="nav-search-results"></div>
+    </div>
+  </div>
+</nav>
+<main data-chapter="Kapittel 7: LLM og programvaresikkerhet">
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">Kapittel 7 · AI til forsvar</div>
+    <h1>AI som <em>forsvarsverktøy</em></h1>
+    <p class="lede">LLM-er og agenter brukes ikke bare av angripere — to konkrete forskningsanvendelser viser hvordan de kan jobbe for forsvaret: malware-deteksjon og automatisk identifikasjon av patch-commits.</p>
+    <nav class="toc">
+      <a href="#react"><span class="toc-num">01</span>ReAct-agentmønsteret</a>
+      <a href="#malcve"><span class="toc-num">02</span>MalCVE — malware-deteksjon</a>
+      <a href="#favia"><span class="toc-num">03</span>Favia — patch-commit-identifikasjon</a>
+      <a href="#refleksjon"><span class="toc-num">04</span>Refleksjon</a>
+    </nav>
+  </div>
+</header>
+
+<section id="react">
+  <div class="container">
+    <div class="section-badge">01 · ReAct</div>
+    <h2>ReAct-<em>agentmønsteret</em></h2>
+    <p class="section-intro">En agent uten resonnement er bare en LLM med tilgang til verktøy. ReAct gir agenten et «tenk, gjør, observer»-loop som strukturerer hvordan den jobber.</p>
+    <p class="lead">ReAct (Reasoning + Acting, Yao et al., 2022) er det dominerende mønsteret for LLM-agenter i 2026. Modellen veksler mellom tre steg: <strong>thought</strong> (intern resonnering om hva som bør gjøres), <strong>action</strong> (kall et verktøy), og <strong>observation</strong> (les resultatet og oppdater forståelsen). Loopen fortsetter til agenten konkluderer med et endelig svar — eller den treffer en budsjettgrense.</p>
+
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs><marker id="ra" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2d4a7a"/></marker></defs>
+        <!-- Task -->
+        <rect x="20" y="100" width="100" height="40" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="70" y="125" text-anchor="middle" fill="#3d6b3a">Oppgave</text>
+
+        <!-- Pil inn til LLM -->
+        <line x1="122" y1="120" x2="178" y2="120" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#ra)"/>
+
+        <!-- LLM -->
+        <rect x="180" y="80" width="180" height="80" rx="3" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="270" y="105" text-anchor="middle" font-weight="600" fill="#2d4a7a">LLM-agent</text>
+        <text x="270" y="123" text-anchor="middle" font-size="11" fill="#6b6257">thought →</text>
+        <text x="270" y="138" text-anchor="middle" font-size="11" fill="#6b6257">action →</text>
+        <text x="270" y="153" text-anchor="middle" font-size="11" fill="#6b6257">observation</text>
+
+        <!-- Pil til verktøy -->
+        <line x1="362" y1="105" x2="418" y2="80" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#ra)"/>
+        <text x="395" y="80" text-anchor="middle" font-size="10" fill="#2d4a7a">action</text>
+
+        <!-- Verktøy -->
+        <rect x="420" y="60" width="180" height="50" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="510" y="80" text-anchor="middle" font-weight="600" fill="#b04428">Verktøy</text>
+        <text x="510" y="98" text-anchor="middle" font-size="11" fill="#6b6257">søk · kode · API · fil</text>
+
+        <!-- Pil til miljø -->
+        <line x1="600" y1="85" x2="650" y2="85" stroke="#b04428" stroke-width="1.5" marker-end="url(#ra)"/>
+        <!-- Miljø -->
+        <rect x="650" y="60" width="50" height="50" rx="3" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="675" y="90" text-anchor="middle" font-size="11" fill="#c68a1f">Miljø</text>
+
+        <!-- Resultat tilbake -->
+        <line x1="675" y1="112" x2="675" y2="160" stroke="#c68a1f" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="675" y1="160" x2="362" y2="160" stroke="#c68a1f" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ra)"/>
+        <text x="500" y="155" text-anchor="middle" font-size="10" fill="#c68a1f">observation</text>
+
+        <!-- Endelig svar -->
+        <line x1="270" y1="162" x2="270" y2="200" stroke="#3d6b3a" stroke-width="1.5" marker-end="url(#ra)"/>
+        <rect x="200" y="200" width="140" height="30" rx="3" fill="rgba(61,107,58,0.15)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="270" y="220" text-anchor="middle" font-size="11" fill="#3d6b3a">Endelig svar</text>
+      </svg>
+      <figcaption>ReAct-loopen: agenten resonnerer, kaller et verktøy, observerer resultatet, og itererer til den har nok grunnlag for å svare. Kraften ligger i at hver action er styrt av en eksplisitt thought.</figcaption>
+    </figure>
+
+    <p>Forskjellen mellom en «vanlig» LLM-applikasjon og en agent er at agenten <em>velger</em> hvilke verktøy som skal brukes og i hvilken rekkefølge. Det er kraftig — og det er nettopp dette som gjør prompt injection alvorlig: hvis konteksten kapres, kapres også verktøyvalgene.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk · 30 sek</div>
+      <div class="q-text">Hvilke tre steg utgjør én iterasjon i ReAct-loopen, og hva er poenget med å tvinge fram <em>thought</em> som eget steg?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Thought → action → observation. Poenget med eksplisitt thought er at modellen tvinges til å skrive ut sitt resonnement før den handler. Det gir bedre beslutninger (modellen «tenker høyt»), gjør traseene reviewbare i ettertid, og lar logger fungere som forensisk evidens dersom agenten skulle gjøre noe galt.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="malcve">
+  <div class="container">
+    <div class="section-badge">02 · MalCVE</div>
+    <h2>MalCVE — <em>malware-deteksjon</em> med LLM</h2>
+    <p class="section-intro">Cristea, Molnes og Li (FORGE 2026): kan LLM-er klassifisere dekompilerte JAR-filer som godartet eller skadelig — og kan det gjøres billigere enn kommersielle løsninger?</p>
+    <p class="lead">Bakgrunn: kommersiell malware-analyse er dyr (CrowdStrike Falcon ~$2 per fil, ANY.RUN ~$2,40 per fil), og malwarekostnader projiseres til over 276 milliarder USD i 2035. En billig, automatisert deteksjon ville endret økonomien for små organisasjoner og forskningsformål. Forskningsspørsmålet er rett fram: kan en LLM klassifisere en dekompilert binær korrekt?</p>
+
+    <h3>Pipelinen — tre steg</h3>
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs><marker id="ma" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
+        <!-- JAR -->
+        <rect x="20" y="80" width="100" height="50" rx="3" fill="rgba(198,138,31,0.1)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="70" y="100" text-anchor="middle" font-weight="600" fill="#c68a1f">JAR-fil</text>
+        <text x="70" y="115" text-anchor="middle" font-size="10" fill="#6b6257">obfuskert bytecode</text>
+
+        <line x1="122" y1="105" x2="158" y2="105" stroke="#b04428" stroke-width="1.5" marker-end="url(#ma)"/>
+
+        <!-- Step 1 -->
+        <rect x="160" y="70" width="140" height="70" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="230" y="90" text-anchor="middle" font-weight="600" fill="#b04428">1. Dekompilering</text>
+        <text x="230" y="108" text-anchor="middle" font-size="10" fill="#6b6257">CFR 0.152</text>
+        <text x="230" y="123" text-anchor="middle" font-size="10" fill="#6b6257">Procyon 0.6.0</text>
+        <text x="230" y="138" text-anchor="middle" font-size="10" fill="#6b6257">(fallback)</text>
+
+        <line x1="302" y1="105" x2="338" y2="105" stroke="#b04428" stroke-width="1.5" marker-end="url(#ma)"/>
+
+        <!-- Step 2 -->
+        <rect x="340" y="70" width="140" height="70" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="410" y="90" text-anchor="middle" font-weight="600" fill="#2d4a7a">2. Deobfuskering</text>
+        <text x="410" y="108" text-anchor="middle" font-size="10" fill="#6b6257">AST-walk +</text>
+        <text x="410" y="123" text-anchor="middle" font-size="10" fill="#6b6257">konstantfolding</text>
+        <text x="410" y="138" text-anchor="middle" font-size="10" fill="#6b6257">(egenutviklet)</text>
+
+        <line x1="482" y1="105" x2="518" y2="105" stroke="#b04428" stroke-width="1.5" marker-end="url(#ma)"/>
+
+        <!-- Step 3 -->
+        <rect x="520" y="70" width="160" height="70" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="600" y="90" text-anchor="middle" font-weight="600" fill="#3d6b3a">3. LLM-klassifisering</text>
+        <text x="600" y="108" text-anchor="middle" font-size="10" fill="#6b6257">verdict + summary</text>
+        <text x="600" y="123" text-anchor="middle" font-size="10" fill="#6b6257">benign / suspicious /</text>
+        <text x="600" y="138" text-anchor="middle" font-size="10" fill="#6b6257">malicious</text>
+      </svg>
+      <figcaption>MalCVE-pipelinen. Det interessante mellomtrinnet er deobfuskering — eksisterende verktøy (Java Deobfuscator) virket ikke på moderne malware-mønstre, så forfatterne bygde sin egen via AST-walk og konstant-folding.</figcaption>
+    </figure>
+
+    <h3>Prompten</h3>
+    <pre><code>Act as a malware analyst and thoroughly examine this decompiled
+executable code. Break it down step by step, identifying key
+behaviors, suspicious patterns, and potential vulnerabilities.
+
+  1. Verdict: Classify the file as Benign, Suspicious, or
+     Malicious, with a confidence score and rationale.
+  2. Summary: Provide a clear explanation of what this code does.</code></pre>
+
+    <p>Eksempelutput på en kjent trojan: <em>«verdict: Malicious. Summary: The code is designed to bypass Java's built-in security mechanisms, download an executable file from a specified URL, and execute it. This is indicative of a trojan behavior.»</em> Verdiket og forklaringen kan brukes både til klassifisering og som forensisk dokumentasjon.</p>
+
+    <h3>Resultatene</h3>
+    <table>
+      <thead><tr><th>Metrikk</th><th>Verdi</th></tr></thead>
+      <tbody>
+        <tr><td>Datasett</td><td>3 839 JAR-filer</td></tr>
+        <tr><td>Modeller testet</td><td>GPT-4o-mini, Gemini 2.0/2.5, GPT-4.1, o4-mini m.fl.</td></tr>
+        <tr><td>Gjennomsnittlig nøyaktighet</td><td><strong>97 %</strong></td></tr>
+        <tr><td>Kostnad per fil</td><td>1/66 av CrowdStrike Falcon · 1/80 av ANY.RUN</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-green">
+      <h4>Hvorfor dette er sikkerhetsfaglig interessant</h4>
+      <p>MalCVE viser at LLM-er gir gode <em>forsvarsverktøy</em>, ikke bare angrepsvektorer. Forskjellen mellom 97 % automatisk og menneskelig analyse er prisen — og det er prisen som avgjør om malwareanalyse skalerer til alle binærer i et SBOM, ikke bare et utvalg.</p>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk · 1 min</div>
+      <div class="q-text">Hvorfor måtte forskerne bygge sin egen deobfuskator i stedet for å bruke eksisterende verktøy?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Eksisterende åpne verktøy som Java Deobfuscator klarte ikke moderne obfuskeringsmønstre i datasettet. Forfatterne implementerte sin egen via AST-walking, konstantevaluering (særlig for streng-genererende uttrykk som <code>"VVVVnVtVi…".replace("V", "")</code>) og erstatning av obfuskerte uttrykk med deres beregnede literale verdier. Uten deobfuskering ville LLM-en bare sett tilfeldig støy, ikke faktisk kodelogikk.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="favia">
+  <div class="container">
+    <div class="section-badge">03 · Favia</div>
+    <h2>Favia — fra <em>CVE</em> til <em>patch-commit</em></h2>
+    <p class="section-intro">Storhaug, Sun og Li: gitt en CVE-oppføring, finn den faktiske patch-commiten i kildekode-repoet — slik at andre kan applisere samme fix.</p>
+    <p class="lead">Problemet er pinlig vanlig. NVD-databasen lister CVE-er, men patcher er ofte ikke direkte lenket til commits. For Linux-kjernen finnes 9 981 CVE-er i mailing-lista, men kjernen har over 1,4 millioner commits. Å finne den ene riktige commiten manuelt er upraktisk.</p>
+
+    <h3>Tre samtidige utfordringer</h3>
+    <ol>
+      <li><strong>Stor søkerom:</strong> alle commits er kandidater. Naiv tilnærming skalerer ikke.</li>
+      <li><strong>Falske negative:</strong> patcher kan strekke seg over flere filer, gå via indirekte kontrollflyt, eller bygge på subtile semantiske endringer som ikke ser ut som «en fix» på diff-nivå.</li>
+      <li><strong>Falske positive:</strong> to commits kan se semantisk like ut, men bare én løser den faktiske CVE-en. LLM-er lokkes lett av overflateliknende endringer.</li>
+    </ol>
+
+    <h3>To-stegs arkitektur</h3>
+    <figure class="fig-frame">
+      <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <defs><marker id="fa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2d4a7a"/></marker></defs>
+        <!-- Input -->
+        <rect x="20" y="90" width="100" height="50" rx="3" fill="rgba(61,107,58,0.1)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="70" y="110" text-anchor="middle" font-weight="600" fill="#3d6b3a">CVE</text>
+        <text x="70" y="125" text-anchor="middle" font-size="10" fill="#6b6257">+ commits</text>
+
+        <line x1="122" y1="115" x2="158" y2="115" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#fa)"/>
+
+        <!-- Step 1 -->
+        <rect x="160" y="70" width="180" height="90" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="250" y="90" text-anchor="middle" font-weight="600" fill="#2d4a7a">Steg 1 · Grov rangering</text>
+        <text x="250" y="108" text-anchor="middle" font-size="11" fill="#6b6257">ML-klassifikator</text>
+        <text x="250" y="123" text-anchor="middle" font-size="11" fill="#6b6257">scorer alle commits</text>
+        <text x="250" y="142" text-anchor="middle" font-size="11" fill="#b04428" font-style="italic">→ topp-10 kandidater</text>
+
+        <line x1="342" y1="115" x2="378" y2="115" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#fa)"/>
+
+        <!-- Step 2 -->
+        <rect x="380" y="70" width="200" height="90" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="480" y="90" text-anchor="middle" font-weight="600" fill="#b04428">Steg 2 · ReAct-agent</text>
+        <text x="480" y="108" text-anchor="middle" font-size="11" fill="#6b6257">verktøy: code/file search,</text>
+        <text x="480" y="123" text-anchor="middle" font-size="11" fill="#6b6257">CVE/CWE API, fil-scroll</text>
+        <text x="480" y="142" text-anchor="middle" font-size="11" fill="#3d6b3a" font-style="italic">→ verifisert patch</text>
+
+        <line x1="582" y1="115" x2="618" y2="115" stroke="#2d4a7a" stroke-width="1.5" marker-end="url(#fa)"/>
+
+        <rect x="620" y="90" width="80" height="50" rx="3" fill="rgba(61,107,58,0.15)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="660" y="118" text-anchor="middle" font-size="11" font-weight="600" fill="#3d6b3a">Patch</text>
+
+        <text x="360" y="195" text-anchor="middle" font-size="11" fill="#6b6257" font-style="italic">Steg 1 reduserer søkerommet billig. Steg 2 bruker dyr resonnering bare på de 10 mest lovende.</text>
+      </svg>
+      <figcaption>Favias to-stegs arkitektur. Filosofien er klassisk pipeline-design: billig kandidatreduksjon først, dyr verifikasjon etter.</figcaption>
+    </figure>
+
+    <p>Steg 2-agenten har konkrete verktøy: <code>CodeSearch</code>, <code>FileSearch</code>, <code>OpenFile</code>, <code>ScrollFile</code>, <code>CVEReport</code>, <code>CWEReport</code> og <code>FinalAnswer</code>. Den jobber inkrementelt: leser CVE-beskrivelsen, finner relevante filer, leser nøkkelregioner i koden, slår opp CWE-kategorien, og bygger gradvis en konfidensvurdering.</p>
+
+    <h3>Resultater</h3>
+    <table>
+      <thead><tr><th>Modell</th><th>Tilnærming</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+      <tbody>
+        <tr><td>CodeBERT</td><td>VulFixMiner (klassisk ML)</td><td>0,43</td><td>0,03</td><td>0,06</td></tr>
+        <tr><td>CodeReviewer</td><td>PatchFinder (klassisk ML)</td><td>0,40</td><td>0,37</td><td>0,38</td></tr>
+        <tr><td rowspan="3">Llama-3.3-70B-Instruct</td><td>LLM4VFD (ren LLM)</td><td>0,30</td><td>0,89</td><td>0,45</td></tr>
+        <tr><td>CommitShield (ren LLM)</td><td>0,18</td><td>0,87</td><td>0,30</td></tr>
+        <tr><td><strong>Favia (agent)</strong></td><td><strong>0,30</strong></td><td><strong>0,94</strong></td><td><strong>0,46</strong></td></tr>
+        <tr><td rowspan="3">Qwen3-235B-A22B</td><td>LLM4VFD</td><td>0,29</td><td>0,93</td><td>0,45</td></tr>
+        <tr><td>CommitShield</td><td>0,22</td><td>0,85</td><td>0,35</td></tr>
+        <tr><td><strong>Favia</strong></td><td><strong>0,39</strong></td><td><strong>0,98</strong></td><td><strong>0,56</strong></td></tr>
+      </tbody>
+    </table>
+    <p>F1 på 0,56 for Favia vs. 0,38 for beste klassiske ML — et reelt sprang. Recall er gjennomgående svært høy (≥0,93), så agenten finner riktig patch når den finnes; svakheten ligger i precision, altså å være sikker nok på at en kandidat <em>faktisk</em> er patchen.</p>
+
+    <h3>Hvorfor blir det falske positive?</h3>
+    <p>Forfatterne klassifiserte agentens FP-traseer ved å la en annen LLM (gpt-oss-120b) lese loggene:</p>
+    <ul>
+      <li><strong>Superficial Association · 59,6 %</strong> — agenten festet seg ved overflateliknende tekst (samme filnavn, samme funksjonsnavn) uten å verifisere semantisk fix-logikk.</li>
+      <li><strong>CVE Misinterpretation · 30,4 %</strong> — agenten misforsto hva CVE-beskrivelsen faktisk krevde fikset.</li>
+      <li><strong>Incorrect Classification · 4,3 %</strong>, Failed to Find Context · 2,2 %, Memorized CVE · 2,2 %, Gave Up Prematurely / Out-of-budget / Other · &lt;1 % hver.</li>
+    </ul>
+
+    <p>De to dominerende feilkildene er begge språkbaserte: agenten leser tekst og lar overflate-likhet trumfe semantisk verifikasjon. Det er en direkte parallell til hvorfor LLM-er er sårbare for prompt injection — modellen veier ord etter mønster, ikke etter mening.</p>
+
+    <h3>Kostnad</h3>
+    <table>
+      <thead><tr><th>Metode</th><th>Input-tokens</th><th>Output-tokens</th><th>Embedding</th><th>Totalt</th></tr></thead>
+      <tbody>
+        <tr><td>LLM4VFD (ren LLM)</td><td>6 456</td><td>676</td><td>362</td><td>7 494</td></tr>
+        <tr><td>CommitShield (ren LLM)</td><td>9 330</td><td>1 035</td><td>0</td><td>10 365</td></tr>
+        <tr><td><strong>Favia (agent)</strong></td><td>66 159</td><td>1 043</td><td>0</td><td>67 202</td></tr>
+      </tbody>
+    </table>
+    <p>Agent-tilnærmingen bruker omtrent 9× input-tokens fordi den itererer og leser kodefiler. Pris: ~1,30 USD per CVE. Det er fortsatt rimelig sammenliknet med en time menneskelig analytikertid — og det er det reelle sammenlikningsgrunnlaget.</p>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk · 2 min</div>
+      <div class="q-text">Hvorfor er Favias to-stegs arkitektur (ML-rangering først, ReAct-agent etterpå) bedre enn å la agenten prosessere alle commits?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Skala og kostnad. Linux-kjernen har 1,4M commits — å la en agent bruke 67k tokens per commit er praktisk talt umulig. Steg 1 er en billig klassifikator som ranker alle commits og leverer topp-10. Steg 2 (dyr ReAct-agent) brukes bare på disse 10. Det er klassisk pipeline-design: filtrer billig først, verifiser dyrt etterpå. Bonusen er at de to stegene har komplementære feilmoduser — ML er rask men overfladisk, agenten er treg men semantisk.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="refleksjon">
+  <div class="container">
+    <div class="section-badge">04 · Refleksjon</div>
+    <h2>Hva forteller dette <em>oss</em>?</h2>
+    <p class="section-intro">To mønstre fra MalCVE og Favia som strekker seg langt utover disse to systemene.</p>
+
+    <ol>
+      <li><strong>LLM-er er gode til oppsummering, ikke til verifikasjon.</strong> Begge systemer bruker LLM-er som «hjelpsomme analytikere» som leser kode og foreslår vurderinger — men <em>verifikasjon</em> krever fremdeles deterministisk pipeline-logikk (deobfuskering i MalCVE, ML-rangering og verktøykall i Favia). Stol på LLM-en for tolkning, ikke for siste ord.</li>
+      <li><strong>Agentmønsteret skalerer dårlig på store søkerom uten en filter-først-strategi.</strong> Naive «la agenten lese alt»-tilnærminger sprenger kostnadsbudsjettet. To-stegs design (billig kandidatreduksjon → dyr verifikasjon) er det dominerende mønsteret i 2026.</li>
+    </ol>
+
+    <div class="callout callout-green">
+      <h4>Designprinsippet</h4>
+      <p>Bygg LLM-applikasjoner slik at modellen <em>foreslår</em> og deterministisk logikk <em>bekrefter</em>. Det gir både skalerbarhet og forsvarbarhet — og er den motsatte filosofien av å la en agent direkte styre infrastruktur.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">
+    <div class="ornament">&#10043; &#10043; &#10043;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+<script src="../chat-widget.js"></script>
+<script src="../nav-search.js"></script>
+<script src="../quiz.js"></script>
+</body>
+</html>

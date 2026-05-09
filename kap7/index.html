@@ -25,7 +25,7 @@
   <div class="container">
     <div class="eyebrow">Kapittel 7 · AI og sikkerhet</div>
     <h1>LLM og <em>programvaresikkerhet</em></h1>
-    <p class="lede">Store språkmodeller endrer hva angripere kan gjøre — og hva forsvarere kan gjøre. Begge deler er sanne på en gang.</p>
+    <p class="lede">Store språkmodeller endrer hva utviklere skriver, hva angripere kan gjøre, og hva forsvarere har av nye verktøy. Alle tre tingene skjer samtidig.</p>
   </div>
 </header>
 
@@ -43,39 +43,49 @@
   <div class="container">
     <div class="section-badge">Overblikk</div>
     <h2>Det store <em>bildet</em></h2>
-    <p class="section-intro">LLM-er er verken magisk sikre eller magisk usikre — de er et nytt lag i applikasjonsarkitekturen, med sine egne sårbarhetsmønstre.</p>
-    <p class="lead">En LLM-basert applikasjon er et system der brukerinput ikke lenger bare tolkes av kode — det tolkes av en modell. Og modellen kan instrueres til å gjøre noe annet enn det applikasjonen intenderer, av input den mottar. Dette er grunnkonseptet bak prompt injection, og det er strukturelt likt SQL injection: data behandles som instruksjon.</p>
+    <p class="section-intro">LLM-er treffer programvaresikkerhet på fire ulike måter. Kapittelet behandler alle fire — og insisterer på at de henger sammen.</p>
+    <p class="lead">For det første endrer LLM-er <em>hvordan kode skrives</em>: AI-assistenter foreslår kodelinjer, og utvikleren godtar eller avviser. For det andre er LLM-applikasjonene <em>selv en angrepsflate</em> — prompt injection, jailbreak og kapring av agenter med verktøytilgang. For det tredje må vi <em>forsvare</em> disse systemene med sandboxing, input-validering, prompt-hardening og human-in-the-loop. For det fjerde brukes LLM-er aktivt <em>som forsvarsverktøy</em>: malware-deteksjon, sårbarhetspatch-identifikasjon og automatisk kodegjennomgang. Pensumets fire pilarer er angrep, forsvar, AI-assistert utvikling, og AI til forsvar.</p>
 
     <figure class="fig-frame">
-      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
-        <defs><marker id="la" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
-        <!-- Bruker -->
-        <rect x="20" y="80" width="110" height="40" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
-        <text x="75" y="105" text-anchor="middle" fill="#b04428">Bruker</text>
-        <!-- Prompt -->
-        <line x1="132" y1="100" x2="178" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#la)"/>
-        <text x="155" y="93" text-anchor="middle" font-size="10" fill="#b04428">prompt</text>
-        <!-- LLM -->
-        <rect x="180" y="65" width="200" height="70" rx="3" fill="rgba(45,74,122,0.1)" stroke="#2d4a7a" stroke-width="1.5"/>
-        <text x="280" y="95" text-anchor="middle" font-weight="600" fill="#2d4a7a">LLM</text>
-        <text x="280" y="113" text-anchor="middle" font-size="11" fill="#6b6257">system prompt + context</text>
-        <!-- Verktøykall -->
-        <line x1="382" y1="100" x2="428" y2="100" stroke="#b04428" stroke-width="1.5" marker-end="url(#la)"/>
-        <text x="405" y="93" text-anchor="middle" font-size="10" fill="#b04428">verktøykall</text>
-        <!-- Verktøy/handlinger -->
-        <rect x="430" y="65" width="260" height="70" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
-        <text x="560" y="88" text-anchor="middle" font-weight="600" fill="#3d6b3a">Verktøy og handlinger</text>
-        <text x="560" y="106" text-anchor="middle" font-size="11" fill="#6b6257">e-post, søk, database, API</text>
-        <text x="560" y="121" text-anchor="middle" font-size="11" fill="#b04428" font-style="italic">← angrepsflate</text>
-        <!-- Ondsinnet innhold i context -->
-        <text x="280" y="155" text-anchor="middle" font-size="11" fill="#b04428" font-style="italic">Ondsinnet innhold kan injiseres via context (RAG, e-post, websider)</text>
+      <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
+        <!-- Quadrant 1: AI-assistert utvikling (top-left, blue) -->
+        <rect x="40" y="30" width="310" height="120" rx="3" fill="rgba(45,74,122,0.08)" stroke="#2d4a7a" stroke-width="1.5"/>
+        <text x="55" y="55" font-weight="600" fill="#2d4a7a">1 · AI-assistert utvikling</text>
+        <text x="55" y="78" font-size="11" fill="#6b6257">Copilot · Cursor · Claude Code · ChatGPT</text>
+        <text x="55" y="95" font-size="11" fill="#6b6257">Stanford-studien: mer usikker kode</text>
+        <text x="55" y="112" font-size="11" fill="#6b6257">CSET 2024: 48 % av LLM-kode har bugs</text>
+        <text x="55" y="135" font-size="11" fill="#b04428" font-style="italic">«Sikkerhet eller følelse av sikkerhet?»</text>
+
+        <!-- Quadrant 2: LLM-angrep (top-right, red) -->
+        <rect x="370" y="30" width="310" height="120" rx="3" fill="rgba(176,68,40,0.08)" stroke="#b04428" stroke-width="1.5"/>
+        <text x="385" y="55" font-weight="600" fill="#b04428">2 · LLM-angrep</text>
+        <text x="385" y="78" font-size="11" fill="#6b6257">Prompt injection · jailbreak</text>
+        <text x="385" y="95" font-size="11" fill="#6b6257">Indirekte injeksjon via RAG / e-post</text>
+        <text x="385" y="112" font-size="11" fill="#6b6257">Datatyveri · LLM-assistert hacking</text>
+        <text x="385" y="135" font-size="11" fill="#b04428" font-style="italic">«Data behandles som instruksjon»</text>
+
+        <!-- Quadrant 3: LLM-forsvar (bottom-left, green) -->
+        <rect x="40" y="170" width="310" height="120" rx="3" fill="rgba(61,107,58,0.08)" stroke="#3d6b3a" stroke-width="1.5"/>
+        <text x="55" y="195" font-weight="600" fill="#3d6b3a">3 · LLM-forsvar</text>
+        <text x="55" y="218" font-size="11" fill="#6b6257">Input-validering · output-filtrering</text>
+        <text x="55" y="235" font-size="11" fill="#6b6257">Sandboxing av agenter (least priv.)</text>
+        <text x="55" y="252" font-size="11" fill="#6b6257">Prompt-hardening · human-in-the-loop</text>
+        <text x="55" y="275" font-size="11" fill="#3d6b3a" font-style="italic">«Forsvar i applikasjonslaget, ikke i prompten»</text>
+
+        <!-- Quadrant 4: AI til forsvar (bottom-right, gold) -->
+        <rect x="370" y="170" width="310" height="120" rx="3" fill="rgba(198,138,31,0.08)" stroke="#c68a1f" stroke-width="1.5"/>
+        <text x="385" y="195" font-weight="600" fill="#c68a1f">4 · AI til forsvar</text>
+        <text x="385" y="218" font-size="11" fill="#6b6257">MalCVE · LLM-malware-deteksjon (97 %)</text>
+        <text x="385" y="235" font-size="11" fill="#6b6257">Favia · CVE → patch-commit (ReAct-agent)</text>
+        <text x="385" y="252" font-size="11" fill="#6b6257">SAST-assistanse · IR-automasjon</text>
+        <text x="385" y="275" font-size="11" fill="#c68a1f" font-style="italic">«Modellen foreslår, koden bekrefter»</text>
       </svg>
-      <figcaption>LLM-agenter med verktøytilgang — ondsinnet innhold i konteksten kan kapre agentens handlinger.</figcaption>
+      <figcaption>De fire pilarene i kapittelet. Pilaren AI-assistert utvikling og pilaren AI til forsvar er nye for 2026 — det er der mest av forskningsfronten beveger seg.</figcaption>
     </figure>
 
     <div class="callout callout-green">
       <h4>Kapittelets kjerneidé</h4>
-      <p>Prompt injection er til LLM-agenter det SQL injection er til databaser — og forsvaret følger det samme mønsteret: skill data fra instruksjoner, gi minste nødvendige tilgang, logg alle handlinger.</p>
+      <p>LLM-er er kraftige, men ikke til å stole blindt på. Bygg systemer der modellen <em>foreslår</em> og deterministisk logikk <em>bekrefter</em>: separer data fra instruksjon, gi minste nødvendige tilgang, automatiser sikkerhetskontroller, og hold mennesket i sløyfen for irreversible handlinger.</p>
     </div>
   </div>
 </section>
@@ -85,19 +95,35 @@
     <div class="section-badge">Delsider</div>
     <h2>Utforsk <em>kapittelet</em></h2>
     <div class="subpage-list">
+      <a href="ai-utvikling.html" class="subpage-card">
+        <div class="sp-icon">01</div>
+        <div class="sp-info">
+          <div class="sp-title">AI-assistert utvikling</div>
+          <div class="sp-desc">Verktøylandskapet, Stanford-studien (mer usikker kode + høyere selvtillit), garbage-in/garbage-out, sikker prompt-engineering og sanntids SAST.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
       <a href="llm-angrep.html" class="subpage-card">
-        <div class="sp-icon">01–04</div>
+        <div class="sp-icon">02</div>
         <div class="sp-info">
           <div class="sp-title">LLM-angrep</div>
-          <div class="sp-desc">Prompt injection, jailbreak, indirekte angrep og LLM-assistert hacking.</div>
+          <div class="sp-desc">Prompt injection, jailbreak, indirekte angrep via RAG/e-post, datatyveri og LLM-assistert hacking.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
       <a href="llm-forsvar.html" class="subpage-card">
-        <div class="sp-icon">05–08</div>
+        <div class="sp-icon">03</div>
         <div class="sp-info">
           <div class="sp-title">LLM-forsvar</div>
-          <div class="sp-desc">Input-validering, sandboxing, prompt-hardening og LLM i sikkerhetskritiske systemer.</div>
+          <div class="sp-desc">Input-validering, sandboxing av agenter, prompt-hardening og hvorfor LLM-er ikke bør ha siste ord i sikkerhetskritiske systemer.</div>
+        </div>
+        <div class="sp-arrow">&rarr;</div>
+      </a>
+      <a href="ai-forsvar-anvendelser.html" class="subpage-card">
+        <div class="sp-icon">04</div>
+        <div class="sp-info">
+          <div class="sp-title">AI til forsvar</div>
+          <div class="sp-desc">ReAct-agentmønsteret, MalCVE for malware-deteksjon, og Favia for automatisk identifikasjon av patch-commits fra CVE-oppføringer.</div>
         </div>
         <div class="sp-arrow">&rarr;</div>
       </a>
@@ -108,7 +134,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">15 spørsmål om LLM-sikkerhet.</p>
+    <p class="section-intro">15 spørsmål som dekker alle fire pilarene — angrep, forsvar, AI-assistert utvikling og AI til forsvar.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -147,16 +173,16 @@
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 6 · Middels</div>
-      <div class="q-text">Hva er «training data extraction»?</div>
+      <div class="q-text">Stanford-studien (Perry et al., 2022) viste to ting samtidig om utviklere som bruker AI-assistenter. Hvilke?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
-      <div class="answer">Training data extraction er et angrep der en angriper lurer en LLM til å reprodusere memoriset treningsdata — f.eks. passord, private nøkler, personopplysninger eller sensitiv kode. Modeller memoriserer sjeldne og unike sekvenser fra treningsdataene. Ved å gjenta spørsmål eller bruke spesifikke prompts kan angriperen trigge at modellen reproduserer disse.</div></div>
+      <div class="answer">(1) Deltakere med AI-assistent introduserte sikkerhetssårbarheter oftere enn kontrollgruppen på flertallet av oppgavene. (2) De samme deltakerne <strong>vurderte sin usikre kode som sikker</strong> oftere enn kontrollgruppen. Det doble — mer usikker kode <em>og</em> høyere falsk selvtillit — er det som gjør funnet alvorlig: code review-prosesser bygger på utviklerens egen risikovurdering, så feilsignalet forplanter seg.</div></div>
     </div>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 7 · Middels</div>
-      <div class="q-text">Hva er «human-in-the-loop» i LLM-agenter?</div>
+      <div class="q-text">Hvorfor produserer kode-LLM-er sårbare mønstre i ~48 % av tilfellene (CSET 2024), og hvilket prinsipp beskriver fenomenet?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
-      <div class="answer">Human-in-the-loop betyr at en person godkjenner agentens handlinger før de utføres — spesielt for høyrisiko- eller irreversible operasjoner som å sende e-post, slette filer eller kjøre kode. Det er et av de sterkeste forsvarene mot indirekte prompt injection: angriperen kan instruere agenten, men en person godkjenner ikke den ondsinnede handlingen.</div></div>
+      <div class="answer">Garbage in, garbage out. Treningskorpusene består av offentlige kilder — GitHub, Stack Overflow, OSS-dokumentasjon — som inneholder reelt sårbare mønstre i stor skala (SQL-konkatenering, hardkodede credentials, utdaterte krypto-API-er, manglende inputvalidering). Modellen lærer disse som «normale» fordi de statistisk sett er normale. Når modellen genererer kode, reproduserer den sårbare mønstre med samme selvtillit som sikre.</div></div>
     </div>
 
     <div class="quiz" data-quiz>
@@ -189,16 +215,16 @@
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 12 · Vanskelig</div>
-      <div class="q-text">Hva er «model inversion» og under hvilke forutsetninger er det praktisk gjennomførbart?</div>
+      <div class="q-text">Forklar ReAct-mønsteret. Hvilke tre steg utgjør én iterasjon, og hvorfor er det å eksplisitt skrive ut <em>thought</em>-steget viktig for sikkerhet?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
-      <div class="answer">Model inversion er et angrep der en angriper rekonstruerer treningsdata ved å spørre modellen systematisk. Praktisk gjennomførbart under: (1) <strong>white-box tilgang:</strong> angriperen har tilgang til modellens gradienter (lokale modeller). (2) <strong>Overtrente modeller:</strong> modeller som er overtilpasset treningsdataene husker spesifikke eksempler. (3) <strong>Sensitive kontekstdata:</strong> modeller finetunet på sensitive data (journaler, juridiske dokumenter) er mer sårbare. Mot skybaserte API-er er det vanskeligere men ikke umulig — extraction via repetitive prompts er dokumentert.</div></div>
+      <div class="answer">ReAct (Reasoning + Acting, Yao et al. 2022) veksler mellom tre steg: <strong>thought</strong> (modellen resonnerer eksplisitt om hva som bør gjøres), <strong>action</strong> (modellen kaller et verktøy), <strong>observation</strong> (modellen leser resultatet og oppdaterer forståelsen). Loopen fortsetter til endelig svar eller budsjettgrense. Sikkerhetsmessig er det å tvinge fram thought-steget viktig fordi: (1) modellen «tenker høyt» og tar bedre beslutninger, (2) traseene blir reviewbare i ettertid, og (3) loggene kan brukes som forensisk evidens hvis agenten gjør noe galt.</div></div>
     </div>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 13 · Vanskelig</div>
-      <div class="q-text">Hva er «data poisoning» i et RAG-system og hvilken kontroll reduserer risikoen?</div>
+      <div class="q-text">Du skal be en LLM generere en autentiseringsfunksjon. Hva skiller en svak prompt fra en sterk prompt — og hvorfor påvirker det sikkerheten i utfallet?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
-      <div class="answer">Data poisoning i RAG betyr at angriperen introduserer ondsinnede dokumenter i kunnskapsbasen som RAG-systemet henter fra. Disse dokumentene kan inneholde falsk informasjon (for å villede svar) eller prompt injection-instruksjoner (for å kapre agentens atferd). Kontroll: (1) valider og godkjenn dokumenter manuelt eller via automatisert pipeline før indeksering. (2) Hold kontroll over hvilke datakilder som indekseres. (3) Implementer kildetransparens — brukeren ser hvilke dokumenter svaret er basert på. (4) Skill mellom betrodde og ikke-betrodde datakilder.</div></div>
+      <div class="answer">Svak prompt: «Lag en funksjon som autentiserer brukere mot databasen.» Sterk prompt: samme oppgave, men med eksplisitte sikkerhetskrav — bcrypt med høy cost factor, parameteriserte spørringer, ikke-avslørende feilmeldinger, rate limiting, logging uten å logge passord, evt. referanse til OWASP. Forskjellen er ikke kosmetisk: den svake prompten lar modellen velge fritt fra hele treningsfordelingen (inkludert sårbare mønstre fra Stack Overflow). Den sterke prompten flytter sannsynlighetsmassen mot trygge mønstre. Dette er kjernen i «secure prompt engineering».</div></div>
     </div>
 
     <div class="quiz" data-quiz>
@@ -210,9 +236,9 @@
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 15 · Vanskelig</div>
-      <div class="q-text">Hva er risikoen ved AI-generert kode i sikkerhetskritiske systemer?</div>
+      <div class="q-text">Favia (Storhaug, Sun, Li) bruker en to-stegs arkitektur for å gå fra CVE til patch-commit. Beskriv stegene og forklar hvorfor en ren LLM- eller ren agent-tilnærming ikke skalerer like godt.</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
-      <div class="answer">LLM-er hallusinerer API-kall, bruker utdaterte og sårbare mønstre, og genererer kode som ser korrekt ut syntaktisk men er semantisk feil i sikkerhetssammenheng (f.eks. en kryptoimplementasjon som er «nesten» korrekt men mangler en nonce-generering). Forskning viser at LLM-generert kode inneholder sikkerhetssvakheter mer frekvent enn menneskeskrevet kode. I sikkerhetskritiske systemer: krev SAST og kodegjennomgang av all LLM-generert kode på linje med menneskeskrevet kode — aldri stol blindt på output.</div></div>
+      <div class="answer"><strong>Steg 1 (grov rangering):</strong> en lett ML-klassifikator scorer alle commits i repoet og leverer topp-n kandidater (n=10 i studien). <strong>Steg 2 (detaljert filtrering):</strong> en ReAct-agent med verktøy (CodeSearch, FileSearch, OpenFile, ScrollFile, CVEReport, CWEReport) verifiserer hver kandidat semantisk. <strong>Hvorfor to steg:</strong> Linux-kjernen alene har 1,4M commits — å la agenten bruke ~67k tokens per commit er praktisk umulig. Steg 1 reduserer søkerommet billig, steg 2 verifiserer dyrt bare på topp-10. Bonus: stegene har komplementære feilmoduser. Resultat: F1=0,56 vs. 0,38 for beste klassiske ML-baseline.</div></div>
     </div>
   </div>
 </section>
