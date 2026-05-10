@@ -41,16 +41,23 @@
     <p class="section-intro">Role-Based Access Control er den mest utbredte tilgangskontrollmodellen — enkel å forstå, men kan lide av rolle-eksplosjon.</p>
     <p class="lead">RBAC tildeler tillatelser til roller, ikke til individuelle brukere. En bruker tildeles én eller flere roller, og arver rollens tillatelser. En <em>editor</em> kan redigere innhold. En <em>viewer</em> kan bare lese. En <em>admin</em> kan gjøre alt. Dette er mye enklere å administrere enn å sette tillatelser per bruker — men «admin»-rollen vokser seg fort til å inneholde 200 tillatelser ingen har oversikt over.</p>
 
-    <p>Vanlige RBAC-problemer:</p>
+    <p><strong>Fordeler med RBAC:</strong></p>
+    <ul>
+      <li><strong>Enkel autorisasjonsadministrasjon:</strong> tildeling skjer på rolle-nivå, ikke per bruker — én endring forplanter seg til alle med rollen.</li>
+      <li><strong>Speiler organisasjonshierarki:</strong> roller som «secretary», «dean», «faculty» mapper direkte til reelle stillinger.</li>
+      <li><strong>Coarse-grain access control:</strong> egnet til å avgjøre «hvilken type bruker får se hvilken modul».</li>
+    </ul>
+
+    <p><strong>Ulemper med RBAC:</strong></p>
     <ul>
       <li><strong>Rolle-eksplosjon:</strong> over tid opprettes stadig nye roller fordi eksisterende ikke passer nøyaktig nok.</li>
       <li><strong>Privilege creep:</strong> brukere akkumulerer roller over tid uten at gamle fjernes ved jobbskifte.</li>
-      <li><strong>Grov granularitet:</strong> rollen «editor» kan kanskje redigere alle dokumenter — inkludert andres.</li>
+      <li><strong>Grov granularitet:</strong> rollen «editor» kan kanskje redigere alle dokumenter — inkludert andres. Ingen kontekst- eller eierskapssjekk.</li>
     </ul>
 
     <div class="callout callout-blue">
       <h4>Merk</h4>
-      <p>RBAC løser «hvilken type bruker har tilgang?», men ikke «har denne spesifikke brukeren tilgang til dette spesifikke objektet?». Det siste krever eierskapssjekk (ABAC) eller dedikert tilgangslogikk per ressurs.</p>
+      <p>RBAC løser «hvilken type bruker har tilgang?», men ikke «har denne spesifikke brukeren tilgang til dette spesifikke objektet?». Det siste krever eierskapssjekk (ABAC) eller dedikert tilgangslogikk per ressurs. Et godt mønster er <em>RBAC før ABAC</em> — RBAC avgjør hvem som ser modulen, ABAC avgjør hva de kan gjøre inni den.</p>
     </div>
   </div>
 </section>
@@ -77,6 +84,20 @@ allow {
 allow {
     input.user.id == input.document.owner_id
 }</code></pre>
+
+    <p><strong>Fordeler med ABAC:</strong></p>
+    <ul>
+      <li><strong>Fine-grain access control:</strong> uttrykker komplekse policyer som RBAC ikke kan — «kun ansvarlig lege på dagvakt kan endre journalen».</li>
+      <li><strong>Kontekstavhengig:</strong> tar inn tid, lokasjon, enhetshelse, ressursattributter — egnet til zero trust.</li>
+      <li><strong>Dynamisk:</strong> regler endres uten å lage nye roller.</li>
+    </ul>
+
+    <p><strong>Ulemper med ABAC:</strong></p>
+    <ul>
+      <li><strong>Vanskelig å bruke korrekt:</strong> komplekse regler er lett å skrive feil. En subtilt feil policy kan utilsiktet lekke data.</li>
+      <li><strong>Vanskelig å revidere:</strong> «hvem har tilgang til X?» krever evaluering av alle attributter for alle brukere.</li>
+      <li><strong>Ytelse:</strong> hvert tilgangskall krever policy-evaluering — kan kreve caching og dedikerte motorer.</li>
+    </ul>
   </div>
 </section>
 

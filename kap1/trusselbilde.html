@@ -28,11 +28,12 @@
     <p class="lede">Hvem angriper, hvorfor, og gjennom hvilke innganger — det er spørsmålene ethvert forsvar starter med.</p>
     <nav class="toc">
       <a href="#aktorer"><span class="toc-num">01</span>Trusselaktører</a>
-      <a href="#angrepsoverflate"><span class="toc-num">02</span>Angrepsoverflate</a>
-      <a href="#angrepsvektorer"><span class="toc-num">03</span>Angrepsvektorer</a>
-      <a href="#hendelser"><span class="toc-num">04</span>Reelle hendelser</a>
-      <a href="#risikolandskap"><span class="toc-num">05</span>Risikolandskapet i 2026</a>
-      <a href="#penetrate-patch"><span class="toc-num">06</span>Penetrate &amp; Patch</a>
+      <a href="#angrepstyper"><span class="toc-num">02</span>Typiske angrep</a>
+      <a href="#angrepsoverflate"><span class="toc-num">03</span>Angrepsoverflate</a>
+      <a href="#angrepsvektorer"><span class="toc-num">04</span>Angrepsvektorer</a>
+      <a href="#hendelser"><span class="toc-num">05</span>Reelle hendelser</a>
+      <a href="#risikolandskap"><span class="toc-num">06</span>Risikolandskapet i 2026</a>
+      <a href="#penetrate-patch"><span class="toc-num">07</span>Penetrate &amp; Patch</a>
     </nav>
   </div>
 </header>
@@ -102,9 +103,62 @@
   </div>
 </section>
 
+<section id="angrepstyper">
+  <div class="container">
+    <div class="section-badge">02 · Hva</div>
+    <h2>Typiske <em>angrep</em></h2>
+    <p class="section-intro">Seks angrepskategorier dekker det meste av det studenter bør kunne kjenne igjen og forklare — fra graffiti på nettsiden til kryptering av hele drift.</p>
+    <p class="lead">Angrep har ulike formål: å ydmyke, å stjele, å lure, å lamme, å presse penger eller å overta kontrollen. Kategoriene under er ikke gjensidig utelukkende — et reelt angrep kombinerer dem ofte — men de er den vokabulæren som lar oss snakke presist om hva som faktisk skjer.</p>
+
+    <h3 style="font-family: var(--serif); font-size: 22px; margin-top: 28px;">Web defacement</h3>
+    <p>En angriper erstatter legitime nettsider med eget innhold — typisk politiske budskap, hacker-signaturer eller propaganda. Etter USAs droneangrep i Irak i 2020 ble <em>fdlp.gov</em> (Federal Depository Library Program) tagget med iransk gjengjeldelses­budskap. Web defacement er ofte symbolsk og medieorientert; teknisk sett bryter det <strong>integritet</strong>, ikke konfidensialitet.</p>
+
+    <h3 style="font-family: var(--serif); font-size: 22px; margin-top: 28px;">Infiltration og control hijacking</h3>
+    <p>Angriperen tar over kontrollen av et system — en server, en mobiltelefon eller hele nettverket. <em>DroidDream</em> (2011) infiserte 58 apper på Android Market og kapret 260 000 enheter for premium-rate SMS. <em>SolarWinds</em> (2019–2020) lot Russlands etterretning kjøre kode inne i 18 000 kundenettverk i et halvt år. Bryter primært <strong>integritet</strong> og <strong>konfidensialitet</strong>, og åpner for vilkårlige etterfølgende angrep.</p>
+
+    <h3 style="font-family: var(--serif); font-size: 22px; margin-top: 28px;">Phishing</h3>
+    <p>Brukeren lures til å levere fra seg legitimasjon eller kjøre ondsinnet kode — typisk via en falsk innloggingsside, en e-post som imiterer banken, eller en SMS om en uavhentet pakke. Phishing utnytter ikke programvarefeil, men menneskelig tillit, og er den vanligste inngangsvektoren ved alvorlige sikkerhetsbrudd. Spear phishing målretter individuelle ofre; vishing bruker telefon; smishing bruker SMS.</p>
+
+    <h3 style="font-family: var(--serif); font-size: 22px; margin-top: 28px;">Data theft og data loss</h3>
+    <p>Datatyveri er bortføring av sensitiv informasjon — passord, e-postadresser, helsedata, posisjonshistorikk. <em>LinkedIn</em> (2016): 117 millioner e-poster og passord. <em>Twitter</em> (2023): 200 millioner e-postadresser. <em>Gravy Analytics</em> (2025): detaljerte posisjonshistorikker for amerikanske og europeiske brukere. Bryter <strong>konfidensialitet</strong> direkte; bryter ofte personvern selv om dataene var ment å være «interne».</p>
+
+    <h3 style="font-family: var(--serif); font-size: 22px; margin-top: 28px;">Denial of service (DoS / DDoS)</h3>
+    <p>Angriperen oversvømmer en tjeneste med så mange forespørsler at legitime brukere ikke når frem. HSBC ble lammet i oktober 2012; norske myndighetsnettsider ble rammet av <em>Mrs Error</em>-aksjonen i juni 2022. <strong>Distributed</strong> DoS bruker botnett (mange kompromitterte enheter) for å gjøre angrepet vanskeligere å filtrere bort. Bryter <strong>tilgjengelighet</strong> uten å berøre data — men kan likevel velte forretningsmodellen i en bank, en flyplass eller en valgnatt.</p>
+
+    <h3 style="font-family: var(--serif); font-size: 22px; margin-top: 28px;">Ransomware</h3>
+    <p>Skadevare som krypterer ofrene sine data og krever løsepenger (typisk i kryptovaluta) for dekrypteringsnøkkelen. Moderne varianter kombinerer kryptering med <em>data exfiltration</em> — såkalt double extortion: betal eller vi publiserer dataene. Europeiske flyplasser (september 2025) viste at ransomware mot kritisk infrastruktur kan stoppe land. Bryter både <strong>tilgjengelighet</strong> (kryptering) og <strong>konfidensialitet</strong> (lekkasjetrussel).</p>
+
+    <table>
+      <thead>
+        <tr><th>Angrepstype</th><th>Primært brutt CIA-egenskap</th><th>Typisk forsvar</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Web defacement</td><td>Integritet</td><td>Tilgangskontroll, fil­integritets­overvåking, WAF</td></tr>
+        <tr><td>Infiltration / hijacking</td><td>Integritet + konfidensialitet</td><td>Patching, MFA, EDR, segmentering</td></tr>
+        <tr><td>Phishing</td><td>Konfidensialitet (legitimasjon)</td><td>MFA, opplæring, e-post­filtrering, FIDO2</td></tr>
+        <tr><td>Data theft</td><td>Konfidensialitet</td><td>Kryptering i hvile, dataminimering, DLP</td></tr>
+        <tr><td>DoS / DDoS</td><td>Tilgjengelighet</td><td>Rate limiting, CDN, anti-DDoS-tjeneste</td></tr>
+        <tr><td>Ransomware</td><td>Tilgjengelighet + konfidensialitet</td><td>Backup off-site, segmentering, MFA, EDR</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>Et reelt sikkerhetsbrudd kombinerer ofte flere kategorier i en angrepskjede: phishing → infiltrasjon → data theft → ransomware. Kategoriene er nyttige for å snakke presist om hva som skjer i hvert ledd, ikke for å plassere et angrep i én boks.</p>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk forståelse</div>
+      <div class="q-text">Et angrep starter med en falsk e-post til en ansatt, fortsetter med at angriperen logger på via VPN med stjålne credentials, og ender med at filserveren krypteres og en løsepengemelding vises. Hvilke tre angrepstyper består angrepskjeden av?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">(1) <strong>Phishing</strong> (e-posten som stjeler legitimasjon), (2) <strong>infiltration / control hijacking</strong> (innloggingen via VPN gir angriperen kontroll i nettverket), (3) <strong>ransomware</strong> (krypteringen og løsepengekravet). Mange reelle angrep følger akkurat denne kjeden — derfor er MFA (stopper steg 1–2) og off-site backup (stopper løsepenge­hevingen) de to mest kostnadseffektive tiltakene en organisasjon kan investere i.</div></div>
+    </div>
+  </div>
+</section>
+
 <section id="angrepsoverflate">
   <div class="container">
-    <div class="section-badge">02 · Eksponeringspunkter</div>
+    <div class="section-badge">03 · Eksponeringspunkter</div>
     <h2>Angreps<em>overflate</em></h2>
     <p class="section-intro">Alt en angriper kan nå, direkte eller indirekte, er en del av angrepsoverflaten — og den er alltid større enn du tror.</p>
     <p class="lead">Angrepsoverflaten er ikke bare det som er bevisst eksponert. Det er alle inngangspunktene en angriper kan forsøke: API-endepunkter, nettverksporter, importerte pakker, konfigurasjonsgrensesnitt, ansattes e-postadresser og telefonnumre. En organisasjon som tror den bare har en webtjeneste eksponert, overser gjerne ti indirekte innganger.</p>

@@ -154,6 +154,33 @@ invoice = Invoice.query.filter_by(id=invoice_id,
       <h4>Credential stuffing vs. brute force</h4>
       <p><strong>Credential stuffing</strong> bruker kjente brukernavn/passord-kombinasjoner fra tidligere lekkasjer. <strong>Brute force</strong> prøver alle kombinasjoner. Credential stuffing er langt mer effektivt fordi passgjenbruk er utbredt — og det er mye vanskeligere å detektere siden angripet prøver et passord per konto, ikke mange passord mot én konto.</p>
     </div>
+
+    <h3>Autentiseringsfaktorer</h3>
+    <p>Autentisering er prosessen med å verifisere hvem en bruker er. Det skjer typisk gjennom én eller flere av tre kategorier av faktorer:</p>
+    <ul>
+      <li><strong>Noe du vet</strong> — passord, PIN, sikkerhetsspørsmål. Enkelt å implementere, men sårbart for phishing, gjetting og lekkasje.</li>
+      <li><strong>Noe du har</strong> — mobiltelefon (TOTP-app som Google Authenticator, SMS-OTP), BankID-brikke, FIDO2-nøkkel. Vanskelig å fjernhacke, men kan stjeles eller mistes.</li>
+      <li><strong>Noe du er</strong> — biometri som fingeravtrykk, ansiktsgjenkjenning, stemme. Vanskelig å forfalske, men kan ikke byttes ut og har feilrater (false positive/negative).</li>
+    </ul>
+    <p>Multifaktor-autentisering (MFA) krever faktorer fra <em>forskjellige</em> kategorier. To passord (vet + vet) er ikke MFA — én phishing-angrep tar begge. Passord + TOTP fra app (vet + har) er ekte MFA: angriperen må både phishe passordet <em>og</em> kompromittere telefonen.</p>
+
+    <h3>Passordpolicy og lagring</h3>
+    <p>Hvordan passord skal velges, lagres og roteres er en del av A07. Anbefalt praksis (NIST, NCSC, NTNU) i 2026:</p>
+    <ul>
+      <li><strong>Lengde fremfor kompleksitet:</strong> minst 10–12 tegn. Lange passphrases (<code>fire-bjørner-spiser-honning</code>) er sterkere og lettere å huske enn korte komplekse strenger.</li>
+      <li><strong>Sjekk mot kjente lekkede passord:</strong> integrer mot HaveIBeenPwned-API for å avvise passord som allerede er kompromittert.</li>
+      <li><strong>Ikke tving regelmessige bytter uten grunn:</strong> tvunget rotasjon (f.eks. hver 30. dag) gir forutsigbare omgåelser som <code>julia03</code>, <code>julia04</code>. NIST og NCSC fraråder det.</li>
+      <li><strong>Lagring:</strong> Argon2id eller bcrypt med kostfaktor som gir ~250 ms/hash. Aldri MD5, SHA-1 eller usaltede SHA-256.</li>
+      <li><strong>Salt</strong> per bruker (lagres med hashen) og <strong>pepper</strong> globalt (i secrets manager) — se kap. om kryptografiske feil.</li>
+      <li><strong>Rate-limiting og lockout:</strong> 3–5 mislykkede forsøk → progressiv forsinkelse eller midlertidig lockout, kombinert med varsling til kontoinnehaveren.</li>
+      <li><strong>CAPTCHA</strong> på registrerings- og innloggings-endepunkter for å begrense automatiserte angrep — selv om maskinlæring nå løser mange CAPTCHA-typer, hever det fortsatt kostnaden for bot-angrep.</li>
+      <li><strong>Trygg passordrecovery:</strong> bruk engangs-URL-token med kort levetid sendt til verifisert e-post/telefon. Sikkerhetsspørsmål er svake (svaret er enten lett å gjette eller lett å glemme).</li>
+    </ul>
+
+    <div class="callout callout-yellow">
+      <h4>NTNU passordpolicy i korte trekk</h4>
+      <p>Minst 10 tegn med tegn fra alle fire grupper (store/små bokstaver, tall, spesialtegn). Kan ikke gjenbrukes eller være for lik tidligere passord. Bytte minst hvert annet år, eller umiddelbart ved mistanke om kompromittering. Ikke gjenbruk på andre tjenester (Facebook, Amazon osv.). Bruk en mnemoteknisk regel for å huske.</p>
+    </div>
   </div>
 </section>
 

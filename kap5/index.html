@@ -199,6 +199,41 @@
     </div>
 
     <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8b · Middels — anvend STRIDE</div>
+      <div class="q-text">Klassifiser hvert av disse angrepene i riktig STRIDE-kategori: (a) en angriper avlytter HTTP-trafikk på en åpen Wi-Fi og leser session-cookies, (b) en bruker endrer prisen i en hidden form-field fra 1000 til 1, (c) en angriper sender 50 000 SYN-pakker per sekund mot serveren, (d) en utvikler laster opp et bilde med en innebygd PHP-shell og oppnår RCE som webserver-bruker.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">(a) <strong>Information Disclosure (I)</strong> — konfidensiell data eksponert til uvedkommende. (b) <strong>Tampering (T)</strong> — uautorisert endring av dataverdi. (c) <strong>Denial of Service (D)</strong> — legitime brukere stenges ute. (d) <strong>Elevation of Privilege (E)</strong> — angriperen oppnår kjøring som en mer privilegert kontekst enn tillatt. Merk: én hendelse kan plausibelt treffe flere kategorier (RCE i (d) bygger ofte på Tampering først), men STRIDE-praksis klassifiserer på primær effekt.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8c · Middels — anvend notasjon</div>
+      <div class="q-text">Du skal modellere ett konkret angrepsmål — «få ut hele kundedatabasen fra en SaaS-tjeneste». Hvilken notasjon passer best, og hvorfor? Skisser to sub-mål med rett operatør (AND/OR).</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Attack tree</strong> passer best — det bryter ned ett konkret mål i sub-mål med AND/OR-operatorer, og lar deg dekorere noder med kost/sannsynlighet/ferdighet. Eksempel: rot = «Eksfiltrere kundedb». OR-grener: (1) «Kompromitter admin-konto» → AND (phish credentials, omgå MFA); (2) «SQL injection mot eksponert API» → OR (finn sårbart endepunkt, stjel API-nøkkel fra GitHub). Misuse case ville gitt for grunn dybde; bow-tie passer bedre når du modellerer én uønsket hendelse med årsaker og konsekvenser, ikke ett angrepsmål.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8d · Middels — anvend DFD</div>
+      <div class="q-text">En nettbutikk består av: nettleser (kunde), webserver, betalings-API hos en ekstern aktør (Stripe), og en intern produktdatabase. Identifiser DFD-elementene (ekstern entitet, prosess, datalager) og pek ut trust boundaries — minst to.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Eksterne entiteter:</strong> nettleser (kunde) og Stripe-API (utenfor egen kontroll). <strong>Prosess:</strong> webserveren. <strong>Datalager:</strong> produktdatabasen. <strong>Trust boundaries:</strong> (1) mellom nettleser og webserver (internett ↔ intern sone — krav om TLS, autentisering, input-validering); (2) mellom webserver og Stripe-API (intern sone ↔ tredjeparts-sone — krav om API-nøkkel-håndtering, signaturverifisering av webhooks); (3) mellom webserver og produktdatabase (applikasjons-sone ↔ data-sone — krav om parameteriserte spørringer, least-privilege DB-bruker). Hver dataflykt som krysser en trust boundary er et høyrisiko-punkt for STRIDE-analyse.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8e · Middels — anvend misuse case</div>
+      <div class="q-text">Du skal modellere sikkerhetskrav for en innloggingsfunksjon i en webapp. Skisser et misuse case-diagram: nevn ett legitimt use case, ett misuse case, og minst én «mitigate»-relasjon. Hvorfor er denne notasjonen valgt for et krav-møte med produkteier?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Use case:</strong> «Logg inn» (bruker-aktør, hvit ellipse). <strong>Misuse case:</strong> «Brute-force passord» (angriper-aktør, svart ellipse) med «threaten»-relasjon til «Logg inn». <strong>Mitigate:</strong> use case «Rate-limit innloggingsforsøk» med «mitigate»-relasjon mot misuse case. Andre relevante misuse cases: «Credential stuffing», «Stjele session-cookie». <strong>Hvorfor:</strong> produkteiere leser allerede UML use cases — utvidelsen koster lite. Misuse cases gir krav-nivå-språk («som angriper, ønsker jeg…») som blir sporbare og testbare på lik linje med funksjonelle krav, og er lett å forstå uten teknisk bakgrunn.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 8f · Middels — anvend bow-tie</div>
+      <div class="q-text">En sykehusjournal-tjeneste skal modellere den uønskede hendelsen «pasientdata lekket». Skisser et bow-tie: gi to årsaker (venstre), to konsekvenser (høyre), én preventiv kontroll og én reaktiv kontroll. Hvilket aspekt fanger bow-tie som DFD og attack tree ikke fanger?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Sentral hendelse:</strong> «Pasientdata lekket». <strong>Årsaker (venstre):</strong> (1) feilkonfigurert S3-bucket; (2) phishing av ansatt med journaltilgang. <strong>Preventiv kontroll:</strong> automatisert konfigurasjons-scanning + obligatorisk MFA. <strong>Konsekvenser (høyre):</strong> (1) GDPR-bot og varsling til Datatilsynet; (2) tap av pasienttillit og medieoppmerksomhet. <strong>Reaktiv kontroll:</strong> incident response-plan med pre-godkjent varslingsmal og DPA-kontakt. <strong>Det bow-tie fanger:</strong> hva skjer <em>etter</em> bruddet — konsekvenser og reaktive kontroller. DFD og attack tree fokuserer på forebygging og angrepsveier; bow-tie tvinger frem spørsmålet «har vi en respons-plan?» og synliggjør om høyresiden er tom.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 9 · Middels</div>
       <div class="q-text">Hva er DREAD-scoringens største svakhet?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>

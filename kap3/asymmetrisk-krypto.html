@@ -54,6 +54,21 @@
       <p>RSA er deterministisk og bevarer multiplikasjon: <code>E(m₁)·E(m₂) = E(m₁·m₂)</code>. Konsekvenser: (1) krypter du én av to mulige meldinger («angrip» / «retrett»), kan angriper bare forhåndsregne begge og sammenligne; (2) sender du samme melding med liten eksponent <em>e</em> til flere mottakere, åpner det algebraiske angrep; (3) Bleichenbacher (1998) brøt RSA i SSL via PKCS#1 v1.5-padding-orakel ved å se på feilmeldinger. <strong>OAEP (Optimal Asymmetric Encryption Padding)</strong> blander meldingen med en tilfeldig nonce gjennom en hashfunksjon før RSA. Hver kryptering blir unik, homomorfismen brytes, sjekket sikker. Standard i PKCS #1 v2. RSA-PSS brukes tilsvarende for signaturer.</p>
     </div>
 
+    <h3>Public-key-kryptering: en trapdoor-funksjon</h3>
+    <p>Asymmetrisk kryptering bygger på en <strong>enveis trapdoor-funksjon</strong> <em>F</em>: gitt offentlig nøkkel PK er <code>y = F(PK, x)</code> lett å beregne, men gitt <em>y</em> er det praktisk umulig å finne <em>x</em> uten privat nøkkel SK. Med SK åpner «trapdooren» seg: <code>F⁻¹(SK, y) = x</code>. RSA bruker faktorisering, ECC bruker diskret logaritme over elliptiske kurver — begge er antatt harde uten trapdoor.</p>
+    <ul>
+      <li><strong>Kryptering (konfidensialitet):</strong> avsender beregner <code>c = F(PK<sub>mottaker</sub>, m)</code>. Bare mottakeren kan dekryptere via <code>m = F⁻¹(SK<sub>mottaker</sub>, c)</code>.</li>
+      <li><strong>Signering (autentisering):</strong> rollene byttes — avsender bruker <em>sin egen</em> private nøkkel. Se under.</li>
+    </ul>
+
+    <h3>Digital signatur: sign med private, verify med public</h3>
+    <p>En digital signatur binder et dokument til en avsender slik at hvem som helst kan verifisere uten å kunne forfalske. Operasjonen går i to faser:</p>
+    <ol>
+      <li><strong>Sign:</strong> Bob hasher dokumentet og signerer hashen med sin private nøkkel:<br><code>signature = F⁻¹(SK<sub>Bob</sub>, Hash(m))</code></li>
+      <li><strong>Verify:</strong> Alice mottar <em>m</em>, <em>signature</em> og Bobs offentlige nøkkel PK<sub>Bob</sub>, og sjekker:<br><code>F(PK<sub>Bob</sub>, signature) = Hash(m)</code> ?</li>
+    </ol>
+    <p>Stemmer likheten, er meldingen (1) uendret og (2) signert av noen som kjente SK<sub>Bob</sub>. Hvorfor hashe først? Tre grunner: ytelse (signaturalgoritmen er tregt på lange meldinger), fast inputstørrelse (RSA opererer på modulus-størrelse), og knusing av algebraisk struktur som ellers gir forfalskningsangrep. RSA-PSS og ECDSA er de vanlige signaturalgoritmene; ECDSA gir kortere signaturer ved samme sikkerhetsnivå.</p>
+
     <div class="quiz" data-quiz>
       <div class="q-label">Inline quiz · Middels</div>
       <div class="q-text">Hvorfor signerer man hash av et dokument i stedet for selve dokumentet?</div>
@@ -232,6 +247,18 @@
       </svg>
       <figcaption>TLS 1.3 handshake: én rundtur til krypterte applikasjonsdata er mulig. ServerHello inneholder key_share for ECDHE.</figcaption>
     </figure>
+
+    <h3>TLS 1.2 RSA-handshake — historisk forløp, steg for steg</h3>
+    <p>For å forstå <em>hvorfor</em> TLS 1.3 ble redesignet er det nyttig å gå gjennom den klassiske TLS 1.2 RSA-handshaken. Den var enkel, men hadde ingen forward secrecy:</p>
+    <ol>
+      <li><strong>ClientHello:</strong> klienten sender støttede TLS-versjoner, cipher suites og en tilfeldig <em>client_random</em>.</li>
+      <li><strong>ServerHello + Certificate:</strong> server velger cipher suite, sender <em>server_random</em> og sitt X.509-sertifikat (som inneholder serverens offentlige RSA-nøkkel PK<sub>server</sub>, signert av en CA).</li>
+      <li><strong>Klienten validerer sertifikatet</strong> mot rotsertifikatene i nettleseren (verifiserer CAs signatur, gyldighetsperiode, domenenavn).</li>
+      <li><strong>ClientKeyExchange:</strong> klienten genererer en <em>pre-master secret</em>, krypterer den med PK<sub>server</sub> og sender <code>c = Encrypt(PK<sub>server</sub>, pre-master)</code>.</li>
+      <li><strong>Server dekrypterer</strong> med SK<sub>server</sub> og henter ut pre-master. Begge sider deriverer samme master-secret og sesjonsnøkler fra <code>(client_random, server_random, pre-master)</code>.</li>
+      <li><strong>ChangeCipherSpec + Finished</strong> begge veier bekrefter at handshaken ikke er manipulert.</li>
+    </ol>
+    <p>Sårbarheten: hvis en angriper logger trafikken og senere får tak i SK<sub>server</sub>, kan de dekryptere <em>all</em> historisk trafikk (ingen forward secrecy). TLS 1.3 fjernet RSA-key-exchange og bruker bare ephemeral ECDHE — og i tillegg signerer serveren handshaken med sertifikatets nøkkel («CertVerify») i stedet for å motta den krypterte pre-master.</p>
 
     <h3>Hvorfor TLS 1.2 ble erstattet</h3>
     <p>TLS 1.2 (2008) bar på 20+ år med kompromisser, eksportkontroll og bakoverkompatibilitet. Resultatet ble en serie alvorlige angrep:</p>

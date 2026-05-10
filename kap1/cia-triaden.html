@@ -77,6 +77,14 @@
 
     <p>Konfidensialitet handler om å hindre uautorisert innsyn. Kryptering, tilgangskontroll og behovsbasert datadeling er de viktigste verktøyene. Integritet handler om at data er korrekte og uendret — kryptografiske hashsummer, digitale signaturer og revisjonslogger er mekanismene. Tilgjengelighet handler om at systemet er oppe og tilgjengelig når det trengs — gjennom redundans, feiltoleranse og kapasitetsplanlegging.</p>
 
+    <div class="callout callout-green">
+      <h4>Read vs. write — den enkleste distinksjonen</h4>
+      <p><strong>Konfidensialitet</strong> svarer på <em>hvem som får lese</em> en melding. <strong>Integritet</strong> svarer på <em>hvem som får skrive</em> den. En kryptert melding kan fortsatt manipuleres på veien (chiffertekst-bytes endres) — kryptering alene gir ikke integritet. En signert melding kan leses av alle, men ikke endres ubemerket — signatur gir ikke konfidensialitet. Trenger du begge, må du kombinere mekanismene (f.eks. AES-GCM eller encrypt-then-MAC).</p>
+    </div>
+
+    <h3 style="font-family: var(--serif); font-size: 22px; margin-top: 36px;">Data integrity vs. control integrity</h3>
+    <p>Integritet har to ansikter som er verdt å skille. <strong>Data integrity</strong> betyr at innholdet — en pris, en journalpost, en konfigurasjonsfil — ikke er endret av noen som ikke skulle ha endret det. <strong>Control integrity</strong> betyr at kontrollflyten i programmet — hvilke instruksjoner som kjører, i hvilken rekkefølge — ikke er kapret av en angriper. En klassisk buffer overflow er et angrep mot control integrity: angriperen overskriver en returadresse og får CPU-en til å hoppe til injisert kode. Et angrep mot data integrity ser annerledes ut: angriperen endrer beløpet i en database-rad uten å overta selve programmet.</p>
+
     <div class="callout callout-blue">
       <h4>Merk</h4>
       <p>I praksis prioriteres CIA ulikt avhengig av domene. Et etterretningssystem prioriterer konfidensialitet. Et finanssystem prioriterer integritet. Et nødetatssystem prioriterer tilgjengelighet. Å forstå domenet er forutsetningen for å prioritere riktig.</p>
@@ -340,6 +348,14 @@
       <h4>Fail-open vs. fail-closed</h4>
       <p>Fail-open (tillat ved feil) prioriterer tilgjengelighet. Fail-closed (nekt ved feil) prioriterer sikkerhet. Valget avhenger av kontekst: medisinsk nødutstyr kan trenge fail-open; en finanstransaksjon trenger fail-closed.</p>
     </div>
+
+    <h3 style="font-family: var(--serif); font-size: 22px; margin-top: 36px;">To slags feil å forutse</h3>
+    <p>«Fail securely» dekker to ulike feilscenarier som ofte blandes sammen:</p>
+    <ul>
+      <li><strong>Selve sikkerhetskontrollen feiler.</strong> Brannmuren krasjer, autentiserings­tjenesten svarer ikke, sertifikatvalidering kaster unntak. Da skal systemet fail-closed — nekt trafikken inntil kontrollen er oppe igjen.</li>
+      <li><strong>En tjeneste sikkerhetskontrollen avhenger av, feiler.</strong> Klassisk eksempel: et betalingsterminal mister linja til kortselskapet og kan ikke verifisere kortet online. Tillater man transaksjonen «for at kunden skal slippe å vente», er det fail-open i praksis — og angripere lærer raskt å utløse linjefeil for å omgå kontrollen.</li>
+    </ul>
+    <p>Spørsmålet i designfasen er ikke «hva gjør vi hvis sikkerheten feiler?», men «hva gjør vi hvis tjenestene den hviler på, er borte?». Standard­svaret må være konservativt — og avvik fra det skal være eksplisitte forretningsbeslutninger med kompenserende kontroller.</p>
   </div>
 </section>
 

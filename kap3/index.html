@@ -125,7 +125,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">22 spørsmål om kryptografi — fra begreper til fallgruver.</p>
+    <p class="section-intro">28 spørsmål om kryptografi — fra begreper til fallgruver.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -279,6 +279,48 @@
       <div class="q-text">Hvorfor må RSA brukes med OAEP-padding og ikke direkte på meldingen?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer">Rå RSA er <em>deterministisk</em> og <em>multiplikativt homomorfisk</em>: <code>E(m₁)·E(m₂) = E(m₁·m₂)</code>. Dette åpner for: (1) ordbokangrep mot lite klartekstrom (kryptér «attack» og «retreat», sammenlign), (2) low-exponent-angrep når samme melding sendes til flere mottakere, (3) bevisste-chiffertekst-angrep. OAEP (Optimal Asymmetric Encryption Padding) blander meldingen med tilfeldighet via en hashfunksjon før RSA — bryter homomorfismen og gjør hver kryptering unik. Bleichenbacher (1998) viste hvor galt det går uten: PKCS#1 v1.5-padding ble brutt via feilmelding-orakel.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 23 · Middels</div>
+      <div class="q-text">Forklar forskjellen mellom hash, MAC og digital signatur — hvilken egenskap gir hver av dem?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Hash (SHA-256):</strong> integritet uten hemmelighet — alle kan beregne og verifisere. Brukes til filsjekksum, Git-objekt-ID. <strong>MAC (HMAC):</strong> autentisert integritet med <em>delt</em> hemmelig nøkkel — bare partene som kjenner nøkkelen kan produsere/verifisere. Brukes der avsender og mottaker stoler på hverandre (TLS-record, API-token). <strong>Digital signatur (RSA-PSS, ECDSA):</strong> autentisert integritet med <em>asymmetrisk</em> nøkkelpar — sign med privat, verifier med offentlig. Gir også ikke-avvisning (non-repudiation): mottaker kan bevise overfor tredjepart at avsender signerte. Brukes i sertifikater, kodesignering, e-signatur.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 24 · Middels</div>
+      <div class="q-text">Forklar steg for steg hvordan en digital signatur lages og verifiseres.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Sign (Bob):</strong> (1) Bob hasher dokumentet: <code>h = SHA-256(m)</code>. (2) Bob signerer hashen med sin private nøkkel: <code>signatur = F⁻¹(SK<sub>Bob</sub>, h)</code>. (3) Bob sender <em>m</em> + <em>signatur</em> til Alice. <strong>Verify (Alice):</strong> (1) Alice mottar <em>m</em>, <em>signatur</em> og Bobs offentlige nøkkel PK<sub>Bob</sub> (typisk via et sertifikat). (2) Alice hasher meldingen: <code>h' = SHA-256(m)</code>. (3) Alice anvender Bobs offentlige nøkkel på signaturen: <code>h'' = F(PK<sub>Bob</sub>, signatur)</code>. (4) Alice sjekker at <code>h' == h''</code>. Stemmer det, er meldingen uendret <em>og</em> signert av en med tilgang til SK<sub>Bob</sub>. Hvorfor hashe først? Ytelse, fast inputstørrelse for signaturalgoritmen, og knusing av algebraisk struktur.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 25 · Middels</div>
+      <div class="q-text">Forklar hva et X.509-sertifikat er, hvilke felter det inneholder, og hvordan «chain of trust» fungerer.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Et X.509-sertifikat binder en offentlig nøkkel til en identitet (domenenavn, organisasjon) via en CA-signatur. Viktige felter: <em>Subject</em> (eier — f.eks. CN=bank.no), <em>Issuer</em> (utstedende CA), <em>Validity</em> (Not Before/Not After), <em>Subject Public Key Info</em> (algoritme + offentlig nøkkel), <em>Serial Number</em>, <em>Signature Algorithm</em> og <em>CA-signatur</em> over alle disse feltene. <strong>Chain of trust:</strong> nettleseren stoler på et forhåndsdefinert sett root CA-er. Server-sertifikatet («leaf») er signert av en intermediate CA, som er signert av en root CA. Klienten validerer kjeden: leaf → intermediate → root, sjekker hver signatur, gyldighetsperiode, revokering (CRL/OCSP) og at domenenavnet matcher. Bryter ett ledd i kjeden — sertifikatet avvises.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 26 · Middels</div>
+      <div class="q-text">Forklar TLS 1.2-handshake steg for steg og hvorfor TLS 1.3 erstattet RSA-nøkkelutveksling med ECDHE.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>TLS 1.2 RSA-handshake:</strong> (1) <em>ClientHello</em> — klient sender støttede versjoner, cipher suites og <em>client_random</em>. (2) <em>ServerHello + Certificate</em> — server velger suite, sender <em>server_random</em> og X.509-sertifikat med PK<sub>server</sub>. (3) Klienten validerer sertifikatet mot rot-CA. (4) <em>ClientKeyExchange</em> — klient genererer pre-master-secret og sender <code>c = Encrypt(PK<sub>server</sub>, pre-master)</code>. (5) Server dekrypterer med SK<sub>server</sub>. Begge utleder samme sesjonsnøkler fra <code>(client_random, server_random, pre-master)</code>. (6) <em>ChangeCipherSpec + Finished</em> bekrefter at handshaken ikke er manipulert. <strong>Hvorfor erstattet:</strong> ingen forward secrecy — lekker SK<sub>server</sub> i fremtiden, kan all logget historisk trafikk dekrypteres. TLS 1.3 bruker ECDHE: ephemerale nøkler genereres per sesjon og kastes etterpå; serverens sertifikatnøkkel signerer bare handshaken, krypterer den ikke.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 27 · Anvendelse · Middels</div>
+      <div class="q-text"><strong>Scenario:</strong> Du designer en chat-app som skal kryptere meldinger end-to-end mellom to brukere som aldri har møttes. Hvilke kryptografiske primitiver velger du, og hvorfor — symmetrisk, asymmetrisk, hash, MAC, signatur?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Riktig kombinasjon — hybrid kryptografi: <strong>(1) Asymmetrisk for nøkkelutveksling:</strong> ECDH (X25519) for å etablere en delt sesjonsnøkkel uten forhåndsmøte. Med ephemeral ECDH (ECDHE) får man forward secrecy. <strong>(2) Digitale signaturer (Ed25519):</strong> signer ECDH-meldingene for å hindre MITM — uten dette er DH sårbar. Langsiktig identitetsnøkkel kan attesteres via en Trust-On-First-Use-modell eller QR-kode-verifisering. <strong>(3) Symmetrisk AEAD (AES-256-GCM eller ChaCha20-Poly1305):</strong> kryptér selve meldingene — rask, og GCM/Poly1305 gir både konfidensialitet og integritet i én operasjon. <strong>(4) Hash (SHA-256):</strong> nøkkelderivasjon (HKDF) fra ECDH-output, og fingerprints av identitetsnøkler for verifisering. Asymmetrisk alene er for tregt for meldingsstrøm; symmetrisk alene løser ikke nøkkelutveksling. Eksempel: Signal-protokollen bygger nøyaktig slik.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 28 · Anvendelse · Middels</div>
+      <div class="q-text"><strong>Scenario:</strong> Du skal kryptere én stor fil (10 GB) for sikker lagring i skyen, som senere skal kunne dekrypteres av samme bruker. Hvilken algoritme og modus velger du, og hvordan håndterer du nøkkelen?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Algoritme:</strong> AES-256-GCM (eller ChaCha20-Poly1305 hvis ingen AES-NI). Symmetrisk, fordi asymmetrisk er for tregt for 10 GB. AEAD-modus, fordi vi vil ha både konfidensialitet og integritet — så ingen kan endre filen i hvile uten at det oppdages. <strong>IV/nonce:</strong> 96-bits tilfeldig nonce per fil, lagres ukryptert sammen med chifferteksten. <strong>Nøkkel:</strong> ikke hard-kod den. To gode alternativer: (a) deriver nøkkelen fra brukerens passord med Argon2id (key derivation), så ingen krypteringsnøkkel lagres — passordet er tilstrekkelig; (b) generer en tilfeldig data-encryption-key (DEK), kryptér DEK med en master-nøkkel fra en HSM/secrets manager, og lagre den krypterte DEK ved siden av filen (envelope encryption, slik AWS KMS, GCP KMS gjør). <strong>ECB:</strong> aldri. <strong>CBC uten MAC:</strong> aldri. <strong>RSA på 10 GB:</strong> aldri (for tregt og kun små blokker).</div></div>
     </div>
   </div>
 </section>

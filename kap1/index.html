@@ -130,7 +130,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">23 spørsmål — fra definisjon til dilemma.</p>
+    <p class="section-intro">26 spørsmål — fra definisjon til dilemma.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -245,6 +245,20 @@
     </div>
 
     <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 17a · Middels</div>
+      <div class="q-text">Forklar forskjellen på <em>data integrity</em> og <em>control integrity</em>, og gi ett eksempel på et angrep mot hver.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Data integrity</strong> = innhold (filer, database-rader, meldinger) er ikke endret av uautoriserte. Eksempel: en angriper endrer beløpet i en bank-transaksjon fra 100 til 10 000 kr. <strong>Control integrity</strong> = programmets kontrollflyt er ikke kapret. Eksempel: en buffer overflow overskriver returadressen og får CPU-en til å hoppe til injisert shellcode (control hijacking). Begge faller under «integritet» i CIA, men forsvares med forskjellige mekanismer (hash/signatur for data; stack canaries, ASLR, CFI for control).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 17b · Middels</div>
+      <div class="q-text">Forskjell på konfidensialitet og integritet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Read</strong> (konfidensialitet — hvem som får lese meldingen) vs. <strong>write</strong> (integritet — hvem som får skrive den). En meldig kan være kryptert (uleselig) men fortsatt manipulerbar — chiffertekst-bytes kan flippes. Trenger du begge garantier samtidig, må mekanismene kombineres: AES-GCM, encrypt-then-MAC, eller signert + kryptert.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 17 · Middels</div>
       <div class="q-text">Hva er forskjellen på integritet og ikke-benektelse?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
@@ -284,6 +298,13 @@
       <div class="q-text">Hvorfor mener Gary McGraw at «penetrate &amp; patch» er et antimønster, ikke en strategi?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer">Penetrate &amp; patch lar angripere sette agendaen: man venter til noen finner sårbarheter, så lapper man. Problemene: (1) sårbarheten er typisk utnyttet før patch finnes, (2) patcher krever redeploy med kostnad og risiko, (3) mange brukere installerer aldri patchen, (4) underliggende designfeil består. McGraws alternativ — software security som byggepraksis — flytter arbeidet til design og implementasjon, der det er billigere og mer fullstendig. Ross Anderson: forsvareren er sjelden i undertall mot et sofistikert angrep, men ofte i undertall mot egen uoppmerksomhet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 22b · Vanskelig (anvendelse)</div>
+      <div class="q-text">Tenk på SolarWinds-, LinkedIn- og EU-flyplass-hendelsene. Hvilke <em>tre</em> av de ti security guiding principles ville ha hatt størst forebyggende effekt på tvers av alle tre — og hvorfor?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">(1) <strong>Defense in depth</strong> — ingen av angrepene ble fanget av ett enkelt lag, men flere lag (overvåking av byggesystem hos SolarWinds, hashing+salt+rate limiting hos LinkedIn, segmentering+offline-backup på flyplassene) ville ha begrenset skaden. (2) <strong>Least privilege</strong> — Orion-oppdateringen kjørte med høye rettigheter hos kunder; en kompromittert leverandør-konto bør ikke kunne nå produksjons-DB. (3) <strong>Compartmentalize</strong> — én sårbar tredjepart (Collins Aerospace MUSE) skulle ikke kunne stoppe drift hos Heathrow, Brussels og Berlin samtidig. Mønsteret: prinsippene er generiske nok til å virke på tvers av angrepstyper, og det er der studenter skal kunne anvende dem.</div></div>
     </div>
 
     <div class="quiz" data-quiz>

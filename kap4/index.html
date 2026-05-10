@@ -129,7 +129,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">34 spørsmål om identitet, tokens, klassiske tilgangsmodeller, moderne tilgangskontroll og kontrollflyt-angrep.</p>
+    <p class="section-intro">37 spørsmål om identitet, tokens, klassiske tilgangsmodeller, moderne tilgangskontroll og kontrollflyt-angrep.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -367,6 +367,27 @@
       <div class="q-text">Hvorfor hjelper et typesikkert språk mot buffer overflow, og hvorfor migrerer Linux-kjernen til Rust?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer">Typesikre språk håndhever array-grenser ved runtime (Java, Python, Go) eller compile-time (Rust). Et indeks-aksess utenfor grenser kaster unntak eller blir avvist av kompilator — ingen vill skriving til tilstøtende minne. <strong>Rust</strong> går lenger: ownership og borrow checker hindrer dangling pointers, double-free og data races uten garbage collector. Linux-kjernen er sikkerhetskritisk og må kjøre nær hardware (tradisjonelt C). Rust gir samme ytelse som C med kompilator-håndhevet minnesikkerhet — så Linux har siden 2022 godtatt Rust-moduler. Microsoft og Google rapporterer ~70 % av sikkerhetshull historisk har vært minnesikkerhetsfeil; Rust eliminerer hele kategorien.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 35 · Middels</div>
+      <div class="q-text">Sammenlign DAC, MAC, RBAC og ABAC — hva er hovedfordel og hovedulempe ved hver, og hvilken passer best til finkornet kontekstavhengig tilgang?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>DAC:</strong> + enkel og effektiv tilgangsadministrasjon, skalerbar; − svak kontroll over informasjonsflyt, sårbar for Trojan-hest. <strong>MAC:</strong> + streng kontroll over informasjonsflyt og sterk exploit containment; − tung administrasjon, lite fleksibel. <strong>RBAC:</strong> + enkel autorisasjonsadministrasjon, mapper til organisasjonshierarki; − coarse-grain, rolle-eksplosjon, ingen kontekstsjekk. <strong>ABAC:</strong> + fine-grain og kontekstavhengig (tid, lokasjon, ressursattributter), dynamisk; − vanskelig å bruke korrekt, vanskelig å revidere, ytelseskostnad. <strong>ABAC</strong> passer best til finkornet kontekstavhengig tilgang. Mønsteret er gjerne <em>RBAC før ABAC</em>: RBAC avgjør hvem som ser modulen, ABAC avgjør hva de kan gjøre inni den.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 36 · Middels</div>
+      <div class="q-text">Bell-LaPadula sier «no read up, no write down». Biba sier «no write up, no read down». Hvilken modell beskytter konfidensialitet, og hvilken beskytter integritet — og hvorfor er reglene speilvendt?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Bell-LaPadula (BLP) beskytter konfidensialitet</strong> — hemmeligheter skal ikke lekke nedover. NRU hindrer at lavt klarert subjekt leser hemmelig data; NWD hindrer at en Trojan-prosess på høyt nivå skriver hemmelig data ned til offentlig nivå. <strong>Biba beskytter integritet</strong> — kritiske data skal ikke forurenses av upålitelige kilder. NWU hindrer at lite betrodd kode (f.eks. nedlastet programvare) skriver til kritiske objekter (OS-kjerne); NRD hindrer at høyt klassifisert prosess leser upålitelige data (navigasjonssystem leser ikke fra underholdningssystem). Reglene er speilvendt fordi konfidensialitet og integritet er duale: konfidensialitet handler om at data ikke flyter <em>nedover</em>, integritet om at data ikke flyter <em>oppover</em>. Forveksles ofte — huskeregelen er at BLP = hemmelighold, Biba = pålitelighet.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 37 · Middels</div>
+      <div class="q-text">«OAuth 2.0 logger inn brukere» — hvorfor er denne påstanden feil, og hva er den korrekte rollefordelingen mellom OAuth 2.0, OpenID Connect og SAML 2.0?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Påstanden er feil fordi <strong>OAuth 2.0 er et autorisasjonsrammeverk, ikke et autentiseringsprotokoll</strong>. OAuth utsteder access tokens som lar en klient kalle et API på vegne av en bruker — det sier ingenting om hvem brukeren er. Å bruke OAuth alene som «innlogging» er en kjent fallgruve som har ført til reelle sårbarheter. Korrekt rollefordeling: <strong>OAuth 2.0 (autorisasjon)</strong> — access token, API-tilgang, scope. <strong>OpenID Connect (autentisering)</strong> — autentiseringslag bygget på OAuth 2.0, leverer ID-token (JWT med <code>sub</code>, <code>email</code>, <code>iss</code>, <code>aud</code>) som beviser hvem brukeren er. <strong>SAML 2.0 (autentisering + SSO)</strong> — XML-basert, signert assertion fra IdP til SP, brukt i enterprise og utdanning (Feide). Både OIDC og SAML løser SSO; OAuth løser delegert API-tilgang.</div></div>
     </div>
   </div>
 </section>
