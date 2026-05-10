@@ -124,7 +124,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">30 spørsmål om risiko, RMF, SDL, sikkerhetsøkonomi og testing.</p>
+    <p class="section-intro">36 spørsmål om risiko, RMF, SDL, sikkerhetsøkonomi og testing.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -334,6 +334,48 @@
       <div class="q-text">Et selskap har MTTR (Mean Time to Remediate) for kritiske CVEer på 45 dager. Hvilke endringer i SDL og DevSecOps kan redusere det til under 7 dager?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer">(1) <strong>Automatisk SCA i CI</strong> som åpner Dependabot-PR-er ved hver ny CVE. (2) <strong>SBOM-drevet hendelsesrespons</strong> — ved ny CVE, søk SBOM og finn berørte tjenester på minutter, ikke dager. (3) <strong>Patch-prosess som del av frigivelsesfasen</strong> — testet rollback, kanary-deploy, automatisert smoke-test. (4) <strong>SLAer i risikoregister</strong> — kritiske CVEer har formell 24–72 timers frist og rapporteres til ledelse. (5) <strong>Sikkerhetschampions per team</strong> som triagerer raskt uten å vente på sentralt sikkerhetsteam. (6) <strong>Bug bounty</strong> for å oppdage hull før de blir CVE-er.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 31 · Middels (kvantifisering)</div>
+      <div class="q-text">Forklar forskjellen på kvalitativ og kvantitativ risikokvantifisering. Beregn ALE for følgende scenario: et e-handelsselskap estimerer at en ransomware-hendelse ville koste 5 000 000 kr (SLE), og bransjedata tilsier én slik hendelse hvert fjerde år (ARO = 0,25). Hvilken årlig mitigasjonskostnad gir cost-benefit?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Kvalitativ:</strong> bruker ordinale skalaer (Lav/Middels/Høy) og risikomatrise — rask, subjektiv, brukes til prioritering. <strong>Kvantitativ:</strong> bruker tall i kroner og frekvens — gir cost-benefit-grunnlag. Formel: <code>ALE = ARO × SLE</code>. <br>Beregning: ALE = 0,25 × 5 000 000 kr = <strong>1 250 000 kr/år</strong>. En kontroll som koster mindre enn 1 250 000 kr/år og reduserer ARO eller SLE merkbart, er økonomisk forsvarlig. F.eks. EDR + offline-backup til 400 000 kr/år som halverer ARO til 0,125 reduserer ALE til 625 000 kr — netto besparelse 225 000 kr/år.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 32 · Vanskelig (Apply RMF)</div>
+      <div class="q-text">Et nytt nettbankprosjekt skal introdusere mobil signering av betalinger. Anvend McGraws RMF (de fem stegene) konkret på dette systemet. Vis traceability fra ett forretningsmål helt ned til en testcase.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Steg 1 (Forretningskontekst):</strong> BG: «Kunder kan signere transaksjoner sikkert fra mobil med 99,9 % oppetid». Eiendeler: kontosaldo, kundens private nøkkel, transaksjonsintegritet. Interessenter: kunder, Finanstilsynet, banken.<br><strong>Steg 2 (Identifiser/koble):</strong> BR: «Uautoriserte transaksjoner gjennomføres → økonomisk tap + omdømmeskade + bot fra Finanstilsynet». Tekniske risikoer fra misuse case: TR1 SIM-swap overtar SMS-OTP, TR2 mobilen er rotet og private nøkler eksfiltreres, TR3 phishing-app etterligner ekte app.<br><strong>Steg 3 (Synthesize/rank):</strong> TR1 = Høy×Ekstrem = Kritisk. TR2 = Lav×Ekstrem = Høy. TR3 = Middels×Høy = Høy. TR1 prioriteres først.<br><strong>Steg 4 (Mitigasjon):</strong> SR1: «Transaksjoner over 5 000 kr skal kreve cryptographic challenge bundet til app-instans, ikke SMS-OTP». SR2: «App skal verifisere device integrity (Play Integrity / DeviceCheck) før signering».<br><strong>Steg 5 (Fix + valider):</strong> Implementer FIDO2-basert signering. Testcase TC1.1 (kobler tilbake til SR1 → TR1 → BR → BG): SIM-swap simuleres i staging → forsøk å signere transaksjon → MUST avvises. Dokumenter resultat i risikoregister; gjenværende risiko klassifiseres på nytt.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 33 · Middels (Define sec req)</div>
+      <div class="q-text">Du sitter i et team som bygger en pasientportal. Funksjonelt krav: «Pasienten skal kunne laste opp helsedokumenter». Skriv to gode sikkerhetskrav for denne funksjonen som tilfredsstiller Firesmiths kriterier. Forklar deretter hvorfor «Systemet skal beskytte pasientdata» er et dårlig krav.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Gode sikkerhetskrav:</strong><br>(1) «Opplastede helsedokumenter skal lagres med autentisert kryptering at rest, slik at en angriper med direkte tilgang til lagringen ikke kan lese innholdet.» — beskriver hva, åpen for løsning (AES-GCM, libsodium etc.), testbar (forsøk å lese fil direkte fra disk → skal være uleselig).<br>(2) «Filopplasting skal avvise filer over 25 MB og filer der innholdstype (magic bytes) ikke matcher en hviteliste over godkjente formater (PDF, JPEG, PNG, DICOM).» — kvantifisert, testbar, kohesiv.<br><strong>Hvorfor «Systemet skal beskytte pasientdata» er dårlig:</strong> ikke testbart (hva betyr «beskytte»?), ikke entydig (mot hvem? hvilke trusler?), ikke kvantifisert, og bryter kohesjon (samler konfidensialitet, integritet og tilgjengelighet i én setning). Et akseptansetest-team kan ikke skrive en testcase for det.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 34 · Vanskelig (Define a CVSS score)</div>
+      <div class="q-text">En sårbarhet lar en uautentisert angriper over nettverket utføre full remote code execution på applikasjonsserveren uten brukerinteraksjon. Sett opp CVSS v4 base-vector for sårbarheten og estimer Base Score-gruppen. Hvordan endrer en miljøjustering med høy konfidensialitetskravsverdi (CR:H) bildet?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Base-vector:</strong> <code>AV:N / AC:L / AT:N / PR:N / UI:N / VC:H / VI:H / VA:H / SC:N / SI:N / SA:N</code>. Forklaring: angripbart over nettverk (AV:N), lav kompleksitet (AC:L), ingen ekstra forutsetninger (AT:N), ingen privilegier (PR:N), ingen brukerinteraksjon (UI:N), full C/I/A på sårbart system (VC:H/VI:H/VA:H). Etterfølgende system antas upåvirket (SC/SI/SA:N).<br><strong>Base Score:</strong> ca. 9.3–9.8 → <strong>Kritisk</strong>. Responstid 24–72 timer.<br><strong>Environmental med CR:H:</strong> hvis konfidensialiteten av systemets data er kritisk for organisasjonen (f.eks. helsedata), løftes konfidensialitetsbidraget i scoringen og scoren forblir på øvre kritiske nivå — eller stiger marginalt. Motsatt: hvis systemet er en ren dev-sandbox (CR:L), kan den miljøjusterte scoren senkes betydelig. Poenget: Base alene = teknisk alvorlighetsgrad; Environmental = ditt miljø; <em>risiko</em> krever begge + Threat (Exploit Maturity).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 35 · Middels (touch points)</div>
+      <div class="q-text">List opp McGraws syv touch points for software security og forklar hvilken artefakt eller fase i SDLC hver av dem henger på.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">(1) <strong>Code review (SAST)</strong> — på <em>kode</em>. (2) <strong>Architectural risk analysis</strong> — på <em>arkitektur og design</em>. (3) <strong>Penetration testing</strong> — på <em>ferdig kjørende system / feedback fra prod</em>. (4) <strong>Risk-based security testing</strong> — på <em>testplan og testresultater</em>. (5) <strong>Abuse cases (misuse cases)</strong> — på <em>krav og use cases</em>. (6) <strong>Security requirements</strong> — på <em>krav</em>. (7) <strong>Security operations</strong> — på <em>feedback fra produksjon</em>. McGraw rangerer 1–3 som de viktigste å starte med dersom man bare har ressurser til delvis adopsjon.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 36 · Vanskelig (anvendelsesscenarier)</div>
+      <div class="q-text">Tre situasjoner: (a) en startup uten formell sikkerhetsprosess vil komme i gang, (b) en stor finansgruppe vil dokumentere overfor styret at de ikke ligger etter konkurrentene, (c) et SaaS-selskap må sertifiseres mot NIST SSDF for å selge til det offentlige. For hver situasjon: hvilken modell (preskriptiv eller deskriptiv) passer best, og hvilket konkret rammeverk velger du?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>(a) Startup:</strong> <em>Preskriptiv</em>. De trenger en oppskrift, ikke en målestokk. Velg <strong>OWASP SAMM</strong> (lav inngangsterskel, modenhetsskala fra nivå 0) eller <strong>McGraw Touchpoints</strong> for å hekte sikkerhet på eksisterende SDLC uten prosessomskriving.<br><strong>(b) Finansgruppe:</strong> <em>Deskriptiv</em>. Styret vil se «hvor vi står mot bransjen». Velg <strong>BSIMM</strong> — Earth-profilen for finansvertikalen gir direkte benchmarking, og longitudinelle målinger viser forbedring over tid.<br><strong>(c) SaaS mot NIST SSDF:</strong> <em>Preskriptiv</em> — etterlevelse krever konkrete praksiser. Implementer <strong>NIST SSDF (SP 800-218)</strong> direkte; kombiner gjerne med <strong>Microsoft SDL</strong> som operativ metodologi siden den er bredt anerkjent og dokumenterer mange av SSDF-praksisene. BSIMM er irrelevant her — det måler ikke compliance.</div></div>
     </div>
   </div>
 </section>

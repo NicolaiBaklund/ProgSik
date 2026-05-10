@@ -116,6 +116,26 @@
       <h4>Sikkerhet ≠ safety</h4>
       <p>Safety håndterer effekten av tilfeldige feil. I sikkerhet antar vi en <em>fiendtlig motstander</em> som kan få komponenter til å feile på det mest beleilige tidspunkt og på den mest skadelige måten. Tilfeldighet er optimisme — gjenværende risiko skal ikke beregnes som om angriperen er en terning.</p>
     </div>
+
+    <h3>Kvalitativ vs. kvantitativ kvantifisering</h3>
+    <p>Risiko kan kvantifiseres på to måter, og de fleste organisasjoner kombinerer begge:</p>
+    <ul>
+      <li><strong>Kvalitativ:</strong> sannsynlighet og konsekvens uttrykkes med ordinale skalaer (Lav/Middels/Høy/Ekstrem) og plottes i en risikomatrise. Rask, billig og kommuniserbar — men subjektiv. Egnet for tidlig prioritering og diskusjon med ledelse.</li>
+      <li><strong>Kvantitativ:</strong> sannsynlighet og konsekvens uttrykkes som tall (frekvens og kroner). Klassisk formel: <strong>ALE = ARO × SLE</strong>, der <em>SLE</em> (Single Loss Expectancy) er forventet tap per hendelse, <em>ARO</em> (Annual Rate of Occurrence) er forventet antall hendelser per år, og <em>ALE</em> (Annualized Loss Expectancy) er forventet årlig tap. Krever data — men gir grunnlag for direkte cost-benefit-vurdering av kontroller.</li>
+    </ul>
+
+    <table>
+      <thead><tr><th>Variabel</th><th>Eksempel</th><th>Verdi</th></tr></thead>
+      <tbody>
+        <tr><td>SLE — tap per kompromittering</td><td>Kostnad ved breach av kundedatabase (granskning, varsling, bot)</td><td>2 000 000 kr</td></tr>
+        <tr><td>ARO — forventet hyppighet</td><td>Anslått 1 hendelse hvert 5. år</td><td>0,2 per år</td></tr>
+        <tr><td>ALE — forventet årstap</td><td>SLE × ARO</td><td>400 000 kr/år</td></tr>
+        <tr><td>Mitigasjonskostnad</td><td>WAF + SIEM-overvåkning</td><td>150 000 kr/år</td></tr>
+        <tr><td>Beslutning</td><td>Kontrollen koster mindre enn forventet tap → implementer</td><td>Redusere</td></tr>
+      </tbody>
+    </table>
+
+    <p>I praksis er ALE en grov estimering — angrepsfrekvens er sjelden kjent eksakt, og «90 % sikre» ekspertestimater tar feil 65 % av tiden (Kahneman, <em>Noise</em> 2021). Bruk derfor flere kilder: ekspertvurderinger, cyberforsikringsstatistikk, hendelsesrapporter og prislister i undergrunnsmarkeder (se §07).</p>
   </div>
 </section>
 

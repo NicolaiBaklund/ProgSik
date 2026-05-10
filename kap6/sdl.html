@@ -100,6 +100,19 @@
     </figure>
 
     <p>Touchpoints er fortsatt ett av de mest brukte mentale rammeverkene fordi det ikke krever at organisasjonen skifter prosess. Det er også sterkt knyttet til BSIMM, som måler i hvilken grad firmaer faktisk gjennomfører disse aktivitetene.</p>
+
+    <h3>De syv touch points</h3>
+    <p>McGraw rangerte dem etter erfaringsmessig effekt — den første har høyest avkastning per innsats:</p>
+    <ol>
+      <li><strong>Code review (SAST):</strong> finn implementeringsfeil i kildekoden tidlig.</li>
+      <li><strong>Architectural risk analysis:</strong> trusselmodellering og designgjennomgang før kode skrives.</li>
+      <li><strong>Penetration testing:</strong> ekstern angrepssimulering mot ferdig system.</li>
+      <li><strong>Risk-based security testing:</strong> testplaner drevet av identifiserte risikoer og krav.</li>
+      <li><strong>Abuse cases (misuse cases):</strong> krav formulert fra angriperens perspektiv.</li>
+      <li><strong>Security requirements:</strong> eksplisitte funksjonelle krav for sikkerhetsegenskaper.</li>
+      <li><strong>Security operations:</strong> feedback fra produksjon — hendelser, logger og overvåkning — tilbake til utvikling.</li>
+    </ol>
+    <p>De tre første («top three») er de McGraw anbefaler å starte med dersom organisasjonen bare har ressurser til en delvis adopsjon.</p>
   </div>
 </section>
 
@@ -194,6 +207,21 @@
       <h4>Når BSIMM er nyttig</h4>
       <p>Bruk BSIMM når du må forklare ledelsen «vi ligger på snittet for finansbransjen», når du må prioritere mellom investeringer («pen-testing er allerede over snittet, men architecture analysis er under»), og når du sammenligner forretningsenheter internt. Bruk SAMM når du trenger en oppskrift for hvordan du skal forbedre deg.</p>
     </div>
+
+    <h3>Anvendelsesscenarier — når bruker man hva?</h3>
+    <p>Preskriptive og deskriptive modeller besvarer ulike spørsmål, og passer derfor til ulike situasjoner. De fleste modne organisasjoner bruker begge.</p>
+    <table>
+      <thead><tr><th>Situasjon</th><th>Preskriptiv (Touchpoints, MS SDL, SAMM)</th><th>Deskriptiv (BSIMM)</th></tr></thead>
+      <tbody>
+        <tr><td>Nytt initiativ uten eksisterende prosess</td><td>Ja — gir konkret oppskrift å starte med</td><td>Nei — gir ingen handlingsplan</td></tr>
+        <tr><td>Etablert program som vil benchmarke seg mot bransjen</td><td>Nei — sier ikke hva andre gjør</td><td>Ja — Earth-profil viser bransjegjennomsnitt</td></tr>
+        <tr><td>Overbevise ledelse om gap mot konkurrenter</td><td>Mindre kraftfull</td><td>Ja — «vi ligger under snittet for finansbransjen»</td></tr>
+        <tr><td>Lage konkret roadmap fra nivå 1 til 2</td><td>Ja — SAMM-vurdering peker direkte til praksiser</td><td>Nei — beskriver bare nåtilstand</td></tr>
+        <tr><td>Sammenligne forretningsenheter internt</td><td>Mulig, men subjektivt</td><td>Ja — felles målestokk på tvers av enheter</td></tr>
+        <tr><td>Etterlevelse av regulering (NIS2, EO 14028)</td><td>Ja — NIST SSDF og MS SDL er ofte referert</td><td>Nei — ikke et regulatorisk rammeverk</td></tr>
+      </tbody>
+    </table>
+    <p class="lead">Praktisk strategi: bruk <strong>SAMM</strong> til å velge hvilke praksiser du skal forbedre, <strong>Touchpoints/MS SDL</strong> til hvordan du gjennomfører dem, og <strong>BSIMM</strong> til å sjekke om innsatsen flytter deg i forhold til bransjen.</p>
   </div>
 </section>
 
