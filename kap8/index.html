@@ -119,7 +119,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">18 spørsmål om mikrotjenester og supply chain-sikkerhet.</p>
+    <p class="section-intro">25 spørsmål om mikrotjenester og supply chain-sikkerhet.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -245,6 +245,55 @@
       <div class="q-text">Hva er lateral movement i et microservice-oppsett og hvilke kontroller begrenser det?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer">Lateral movement betyr at en kompromittert tjeneste beveger seg til andre tjenester i infrastrukturen. I microservices: en kompromittert front-end-tjeneste forsøker å kalle database-tjenesten direkte, lese secrets fra Vault, eller overta identiteten til en annen tjeneste. Kontroller: (1) mTLS — tjenesten trenger et gyldig sertifikat for å kommunisere. (2) Nettverkspolicyer (Kubernetes NetworkPolicy) — blokkerer trafikk mellom tjenester som ikke skal kommunisere. (3) Service mesh trafikk-policyer — eksplisitt tillatelse for hvert tjeneste-par. (4) Secrets management med least privilege — tjenesten kan bare lese sine egne secrets. (5) Auditlogg av alle API-kall internt.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 19 · Lett · Pensum-bullet 1</div>
+      <div class="q-text">Forklar microservice-arkitektur og hva som skiller den fra en monolittisk arkitektur.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En microservice-arkitektur deler en applikasjon i mange små, løst koblede tjenester som kommuniserer via API-er (typisk REST eller gRPC). Hver tjeneste er organisert rundt en forretningsfunksjon, kan deployeres uavhengig, og kan skrives i ulike språk (polyglot). En monolitt er én stor applikasjon der UI, forretningslogikk og dataaksess er pakket og deployes sammen — endringer krever rebuild av alt, skalering er begrenset, og hele systemet kan falle ved én feil. Microservices gir bedre skalerbarhet, vedlikeholdbarhet og testbarhet, men koster i operasjonell og sikkerhetsmessig kompleksitet (nettverk, observabilitet, tillit).</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 20 · Middels · Pensum-bullet 2</div>
+      <div class="q-text">Forklar de viktigste sikkerhetsutfordringene i en microservice-arkitektur.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">(1) <strong>Stor angrepsflate:</strong> top-level API mot internett, load balancere, inter-service-kommunikasjon, containere og host-hardware er hver et angrepspunkt. (2) <strong>Trust between services:</strong> insufficient authentication og improper authorization gjør at en kompromittert tjeneste lett kan kalle andre. (3) <strong>Lav synlighet:</strong> cloud-deployerte tjenester kjører i opake miljøer — vanskelig å revidere helhetlig. (4) <strong>Polyglot-arkitektur:</strong> ulike språk har ulike livssykluser og sårbarheter, krever bred sikkerhetskompetanse. (5) <strong>Secret management:</strong> mange tjenester trenger hver sine credentials uten lekkasje. (6) <strong>Container- og orkestreringssikkerhet:</strong> Kubernetes-misconfig er hyppig kompromitteringsårsak.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 21 · Middels · Pensum-bullet 3</div>
+      <div class="q-text">Forklar de viktigste mottiltakene som adresserer sikkerhetsutfordringene i microservices.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Ved perimeter:</strong> API gateway med verifiserbar klient-ID/access token, autorisasjonspolicyer og rate throttling mot DoS. <strong>Mellom tjenester:</strong> mTLS for transport-lags-autentisering (hver tjeneste har sertifikat), JWT/OAuth-tokens på applikasjonslag for fin-granulær autorisasjon, identity propagation fra ekstern bruker til intern «passport». <strong>I tjenestene:</strong> service-level authorization (PEP/PDP), secrets management (Vault), least privilege. <strong>Infrastruktur:</strong> service mesh (Istio, Linkerd) for automatisk mTLS og policy, Kubernetes NetworkPolicy for mikrosegmentering, container scanning, HSM for hardware-rotanker, og en zero trust-arkitektur som ikke stoler på nettverksposisjon.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 22 · Middels · Pensum-bullet 4</div>
+      <div class="q-text">Forklar minst fire sikkerhetspatterns for microservices og hvilket problem de løser.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">(1) <strong>API Gateway:</strong> sentral inngang for autentisering, rate-limiting og audit — løser problemet med spredt perimeterhåndhevelse. (2) <strong>Sidecar (proxy):</strong> kjører ved siden av tjenesten og håndterer mTLS, telemetri, retries — gir krysskuttende sikkerhet uten endring i applikasjonskoden, fundamentet i service mesh. (3) <strong>Ambassador:</strong> lokal proxy som standardiserer utgående eksterne kall (TLS, secrets-injeksjon). (4) <strong>Circuit breaker:</strong> bryter kall etter X feil og gir fallback — hindrer at en treg/feilende tjeneste tar med seg hele systemet. (5) <strong>Phantom token:</strong> klient får opak token, reverse proxy bytter den mot intern JWT — eliminerer datalekkasje ved at sensitiv JWT-info aldri når klient. (6) <strong>Identity propagation:</strong> intern signert «passport» propageres ned tjenestekjeden så hver tjeneste vet hvem den opprinnelige brukeren er. (7) <strong>Secret management pattern:</strong> sentralisert vault med dynamiske, korte secrets.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 23 · Middels · Pensum-bullet 5</div>
+      <div class="q-text">Forklar hva software supply chain-trusler er, og klassifiser SolarWinds, event-stream og ua-parser-js i de fire angrepsfasene (compromise, alteration, propagation, exploitation).</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Supply chain-trusler utnytter tilliten mellom leverandør og forbruker av programvare — angriperen kompromitterer noe oppstrøms og lar det propagere til ofrene. Et angrep har fire faser: <strong>Compromise</strong> (finne svakhet), <strong>Alteration</strong> (ondsinnet endring oppstrøms), <strong>Propagation</strong> (sprednings via update/repo), <strong>Exploitation</strong> (utnyttelse hos sluttbruker). Eksempler: <strong>SolarWinds (2020):</strong> kompromitterte byggesystemet (compromise) → injiserte SUNBURST-bakdør i Orion-build (alteration) → signert update distribuert til 18 000 kunder (propagation) → bakdør utnyttet hos utvalgte mål (exploitation). <strong>event-stream (2018):</strong> ny vedlikeholder overtok npm-pakken (compromise) → injiserte wallet-stealer mot copay-applikasjonen (alteration) → npm pushet til avhengige (propagation) → Bitcoin stjålet hos copay-brukere (exploitation). <strong>ua-parser-js (2021):</strong> account takeover av vedlikeholderens npm-konto (compromise) → tre versjoner publisert med cryptominer og password-stealer (alteration) → automatisk dependency-oppgradering trakk ned ondsinnet kode (propagation) → cryptomining og credential-tyveri (exploitation). Andre typer: dependency confusion, typosquatting (<code>reqeusts</code> i stedet for <code>requests</code>), CI/CD-pipeline-angrep.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 24 · Middels · Pensum-bullet 6</div>
+      <div class="q-text">Forklar mottiltak mot supply chain-angrep — gjerne i lys av strategiene transparency, validity, separation og recovery.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Transparency</strong> (mot compromise): SBOM, npm audit, Dependabot, code scanning — gjør avhengigheter og operasjoner synlige. <strong>Validity</strong> (mot alteration): Git commit signing, Sigstore/Cosign keyless signing av artefakter med OIDC-identitet og logg i Rekor, in-toto-layout og link metadata som beviser at hvert byggesteg ble utført av rett funksjonær, reproducible builds, SLSA-nivåer (1–4) for byggesystem-modenhet. <strong>Separation</strong> (mot propagation): containerisering, scoped packages (<code>@org/pkg</code>), private registry-mirrors med proxy som ikke faller tilbake til offentlig registry, version locking (lockfiles med integritetshash), dependency pinning. <strong>Recovery</strong> (mot exploitation): responsplan, raskt rollback, revokasjon av kompromitterte credentials, segmentert deployment slik at radius for skade er begrenset.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 25 · Middels · Pensum-bullet 7</div>
+      <div class="q-text">Forklar transparency-teknologier som SBOM — hva en SBOM inneholder, hvilke formater finnes, og hvorfor den er viktig.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">En <strong>SBOM (Software Bill of Materials)</strong> er en maskinlesbar nested inventory over alle komponenter, versjoner, lisenser og avhengighetsrelasjoner i en programvare. NTIA-minimum: leverandør, komponentnavn, versjon, unike identifikatorer (PURL/CPE), avhengighetsrelasjon, forfatter og tidsstempel. <strong>Formater:</strong> <em>SPDX</em> (ISO-standard, lisensorientert, felter som <code>PackageName</code>, <code>PackageLicenseConcluded</code>, <code>FileChecksum: SHA256</code>); <em>CycloneDX</em> (OWASP, sårbarhetsorientert, har VEX-støtte); <em>SWID tags</em> (ISO, produktidentifikasjon). <strong>Hvorfor:</strong> CVE-respons (vet på minutter om Log4Shell rammer deg), lisenscompliance, leverandørattestasjon, og er stadig oftere regulatorisk krav (US Executive Order 14028). Relaterte transparency-teknologier: <em>attestations</em> (signerte påstander om bygget), <em>provenance</em> (hvor artefakt kommer fra), <em>VEX</em> (er en CVE faktisk eksponert?) og offentlige <em>transparency logs</em> som Rekor som gjør signaturer etterprøvbare.</div></div>
     </div>
   </div>
 </section>

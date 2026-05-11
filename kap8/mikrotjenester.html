@@ -26,11 +26,13 @@
     <h1>Mikro<em>tjenester</em></h1>
     <p class="lede">Tillit er ikke lenger et nettverksspørsmål — den er et identitetsspørsmål som hvert tjeneste-kall må besvare.</p>
     <nav class="toc">
-      <a href="#angrepsoverflate-ms"><span class="toc-num">01</span>Angrepsoverflate</a>
-      <a href="#mtls"><span class="toc-num">02</span>mTLS og service mesh</a>
-      <a href="#secrets"><span class="toc-num">03</span>Secrets management</a>
-      <a href="#container"><span class="toc-num">04</span>Container security</a>
-      <a href="#zero-trust-ms"><span class="toc-num">05</span>Zero trust i microservices</a>
+      <a href="#angrepsoverflate-ms"><span class="toc-num">01</span>Arkitektur og angrepsoverflate</a>
+      <a href="#mtls"><span class="toc-num">02</span>mTLS, JWT og service mesh</a>
+      <a href="#identity-prop"><span class="toc-num">03</span>Identity propagation og autorisasjon</a>
+      <a href="#secrets"><span class="toc-num">04</span>Secrets management</a>
+      <a href="#container"><span class="toc-num">04</span>Container og hardware</a>
+      <a href="#patterns"><span class="toc-num">05</span>Sikkerhetspatterns</a>
+      <a href="#zero-trust-ms"><span class="toc-num">06</span>Zero trust i microservices</a>
     </nav>
   </div>
 </header>
@@ -40,12 +42,26 @@
     <div class="section-badge">01 · Angrepsoverflate</div>
     <h2>Angreps<em>overflate</em></h2>
     <p class="section-intro">Hvert nettverkskall er et potensielt angrepspunkt — og i et microservice-system er det mange kall.</p>
-    <p class="lead">En monolitt har én prosess-grense, én autentiseringsmekanisme og én angrepsoverflate mot omverdenen. Et system med 50 mikrotjenester har 50 potensielle inngangspunkter, hundrevis av interne kommunikasjonskanaler og en rekke avhengige infrastruktur-tjenester (serviceregistre, message busser, logging-pipelines). Hver av disse er et potensielt angrepspunkt — og kompromittering av én tjeneste kan gi lateral movement til andre.</p>
+    <p class="lead">En monolitt har én prosess-grense, én autentiseringsmekanisme og én angrepsoverflate mot omverdenen. Et microservice-arkitektur er <strong>løst koblet</strong> (tjenester kommuniserer via API-er), <strong>uavhengig deploybar</strong> (én tjeneste kan oppdateres uten å rebygge hele systemet), og er <strong>organisert rundt forretningsfunksjoner</strong>. Til forskjell fra monolittens enkle skalering og ett-språk-utvikling, gir microservices mulighet for <em>polyglot</em>-arkitektur — ulike tjenester kan skrives i ulike språk (Java, Python, Go, Scala). Et system med 50 mikrotjenester har 50 potensielle inngangspunkter, hundrevis av interne kommunikasjonskanaler og en rekke avhengige infrastruktur-tjenester (serviceregistre, message busser, logging-pipelines). Hver av disse er et potensielt angrepspunkt — og kompromittering av én tjeneste kan gi lateral movement til andre.</p>
     <ul>
-      <li><strong>Eksponerte API-er:</strong> mikroservicers API-er bør ikke eksponeres direkte mot internett uten en API Gateway.</li>
-      <li><strong>Interne kall:</strong> tjeneste-til-tjeneste-kommunikasjon antas sjeldent å trenge autentisering — det er feil.</li>
-      <li><strong>Infrastructure-tjenester:</strong> Kubernetes API-server, etcd, container registry — alle er mål.</li>
+      <li><strong>Eksponerte API-er (top-level):</strong> mikroservicers API-er bør ikke eksponeres direkte mot internett uten en API Gateway.</li>
+      <li><strong>Load balancers:</strong> et bredt mål mot DoS — rate throttling bidrar til forsvar.</li>
+      <li><strong>Interne kall mellom tjenester:</strong> insufficient authentication og improper authorization gir tillit basert kun på nettverksposisjon — det er feil.</li>
+      <li><strong>Containere:</strong> deler Linux-kjernen — kjerne-exploit eller misconfig kan gi rømming.</li>
+      <li><strong>Host-hardware:</strong> Kubernetes API-server, etcd, container registry og selve hardware (HSM) er alle mål.</li>
     </ul>
+
+    <div class="callout callout-blue">
+      <h4>Spesifikke challenges i microservices</h4>
+      <ul>
+        <li><strong>Trust between services:</strong> kompromitterte eller ondsinnede tjenester kan utnytte svak inter-service autentisering og autorisasjon til lateral movement.</li>
+        <li><strong>Stor angrepsflate:</strong> mange API-endepunkter, load balancere, inter-service-kanaler, containere og host-lag — hver med egne sårbarheter.</li>
+        <li><strong>Lav synlighet:</strong> cloud-deployerte microservices kjører i opake og distribuerte miljøer — vanskelig å observere og revidere helhetlig.</li>
+        <li><strong>Polyglot security:</strong> ulike språk har ulike livssykluser og sårbarheter — kreves sikkerhetskompetanse på hver stack.</li>
+        <li><strong>Secret management:</strong> hundretals tjenester trenger hver sine credentials uten å lekke dem.</li>
+        <li><strong>Container/orchestration:</strong> Kubernetes-konfigurasjonsfeil er en hyppig kilde til kompromittering.</li>
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -126,9 +142,38 @@ securityContext:
   </div>
 </section>
 
+<section id="patterns">
+  <div class="container">
+    <div class="section-badge">05 · Sikkerhetspatterns</div>
+    <h2>Sikkerhets<em>patterns</em> for microservices</h2>
+    <p class="section-intro">Velkjente patterns gir struktur til de tilbakevendende sikkerhetsproblemene i microservices — fra perimeter til inter-service-kommunikasjon.</p>
+    <p class="lead">I stedet for å oppfinne på nytt finnes det et knippe sikkerhetsmønstre som er blitt de facto-standarder i moderne microservice-design. Hvert mønster løser et spesifikt problem og kan kombineres.</p>
+
+    <table>
+      <thead><tr><th>Pattern</th><th>Problem det løser</th><th>Hvordan</th></tr></thead>
+      <tbody>
+        <tr><td><strong>API Gateway</strong></td><td>Felles inngang for autentisering, rate-limiting, audit</td><td>Alle eksterne kall går gjennom én gateway som verifiserer klient-ID/access token og håndhever policy</td></tr>
+        <tr><td><strong>Identity propagation</strong></td><td>Tjenester trenger å vite hvem den opprinnelige brukeren er</td><td>API gateway veksler ekstern token til intern «passport»/JWT som propageres nedover tjenestekjeden</td></tr>
+        <tr><td><strong>Sidecar (proxy)</strong></td><td>Krysskuttende sikkerhetslogikk uten å endre applikasjonskoden</td><td>Envoy-proxy som sidecar håndterer mTLS, retries, telemetri — kjernen i en service mesh</td></tr>
+        <tr><td><strong>Ambassador</strong></td><td>Tjenesten må snakke med eksterne systemer på en kontrollert måte</td><td>Lokal proxy som standardiserer utgående kall (TLS, retry, secrets-injeksjon)</td></tr>
+        <tr><td><strong>Circuit breaker</strong></td><td>En tregt feilende tjeneste tar ned alle som kaller den</td><td>Etter X feil åpnes «kretsen» — kall blir avvist og fallback-svar gis i stedet for å henge</td></tr>
+        <tr><td><strong>Phantom token</strong></td><td>JWT med sensitiv info bør ikke eksponeres til klienter</td><td>Klient får opak token; reverse proxy bytter den mot JWT internt — eliminerer datalekkasje</td></tr>
+        <tr><td><strong>CQRS</strong></td><td>Lese- og skrivebaner har ulike sikkerhetskrav</td><td>Separate read-/write-modeller; lettere å begrense hvem som kan skrive</td></tr>
+        <tr><td><strong>Strangler</strong></td><td>Migrere monolitt til microservices uten big-bang-risiko</td><td>Router foran monolitten dirigerer gradvis trafikk til nye microservices til monolitten er borte</td></tr>
+        <tr><td><strong>Secret management pattern</strong></td><td>Hemmeligheter må ikke ligge i kode eller env-variabler</td><td>Sentralisert vault med dynamiske, korte secrets injisert ved oppstart eller via sidecar</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-blue">
+      <h4>Sidecar og service mesh</h4>
+      <p>Sidecar-mønsteret er fundamentet for service mesh (Istio, Linkerd). Sidecaren legger til mTLS, observabilitet og policy-håndhevelse til en tjeneste som ikke ble designet med slik funksjonalitet — separasjon av ansvar gir både bedre vedlikehold og bedre sikkerhet.</p>
+    </div>
+  </div>
+</section>
+
 <section id="zero-trust-ms">
   <div class="container">
-    <div class="section-badge">05 · Zero trust i microservices</div>
+    <div class="section-badge">06 · Zero trust i microservices</div>
     <h2>Zero trust i <em>microservices</em></h2>
     <p class="section-intro">I et microservice-oppsett er «aldri stol, alltid verifiser» en praktisk arkitekturpolicy, ikke bare et prinsipp.</p>
     <p class="lead">Zero trust i microservices betyr at ingen tjeneste stoler på en annen basert på nettverksposisjon alene. Hvert kall autentiseres (mTLS), autoriseres (tjenesteidentitet kontrolleres mot tillatte kaller), og logges (alle kall er observerbare). Mikrosegmentering via nettverkspolicyer begrenser hvilke tjenester som kan kommunisere med hverandre i det hele tatt.</p>

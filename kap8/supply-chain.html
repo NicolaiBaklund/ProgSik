@@ -27,10 +27,11 @@
     <p class="lede">Koden du ikke har skrevet er nå det primære angrepsmålet — fordi den er pålitelig, utbredt og vanskelig å overvåke.</p>
     <nav class="toc">
       <a href="#hva-er-sca"><span class="toc-num">01</span>Hva supply chain-angrep er</a>
-      <a href="#dep-confusion"><span class="toc-num">02</span>Dependency confusion og typosquatting</a>
-      <a href="#sbom"><span class="toc-num">03</span>SBOM</a>
-      <a href="#sigstore"><span class="toc-num">04</span>Sigstore og kodesignering</a>
-      <a href="#forsvar-sc"><span class="toc-num">05</span>Forsvar i dybde</a>
+      <a href="#countermeasures-strategies"><span class="toc-num">02</span>Countermeasure-strategier</a>
+      <a href="#dep-confusion"><span class="toc-num">03</span>Dependency confusion og typosquatting</a>
+      <a href="#sbom"><span class="toc-num">04</span>SBOM og transparency</a>
+      <a href="#sigstore"><span class="toc-num">05</span>Sigstore og kodesignering</a>
+      <a href="#forsvar-sc"><span class="toc-num">06</span>Forsvar i dybde</a>
     </nav>
   </div>
 </header>
@@ -45,14 +46,45 @@
     <p>To primære supply chain-angrepsvektorer:</p>
     <ul>
       <li><strong>Kompromittering av leverandør:</strong> angriperen kompromitterer leverandørens systemer og injiserer ondsinnet kode i legitime utgivelser (SolarWinds, XZ Utils).</li>
-      <li><strong>Pakkeinjeksjon:</strong> angriperen publiserer ondsinnet kode i pakkeregistere som konsumenter henter automatisk (dependency confusion, typosquatting, account takeover).</li>
+      <li><strong>Pakkeinjeksjon:</strong> angriperen publiserer ondsinnet kode i pakkeregistere som konsumenter henter automatisk (dependency confusion, typosquatting, account takeover som event-stream og ua-parser-js).</li>
+    </ul>
+
+    <p>Et supply chain-angrep følger fire faser:</p>
+    <ol>
+      <li><strong>Compromise:</strong> angriperen finner og utnytter en svakhet i en «link» i kjeden (autentiseringssvikt, sårbar dependency, eksponert byggesystem).</li>
+      <li><strong>Alteration:</strong> ondsinnet endring gjøres oppstrøms — kode, byggesteg eller artefakt manipuleres.</li>
+      <li><strong>Propagation:</strong> endringen sprer seg nedstrøms — via update-push, sentralt repository eller automatisk dependency-henting.</li>
+      <li><strong>Exploitation:</strong> hos sluttbruker utnyttes endringen — brudd på konfidensialitet, integritet, tilgjengelighet eller personvern.</li>
+    </ol>
+
+    <p>Et supply chain-angrep er ikke det samme som <em>vulnerable and outdated components</em> (OWASP A06): sistnevnte handler om uforvarende bruk av sårbare biblioteker, mens supply chain-angrep har en aktiv aktør som <strong>med vilje</strong> injiserer en sårbarhet og planlegger å utnytte den senere.</p>
+
+    <p>Andre kjente eksempler ut over SolarWinds og XZ Utils:</p>
+    <ul>
+      <li><strong>event-stream (2018):</strong> populær npm-pakke ble overtatt av en ny «vedlikeholder» som la inn kode som stjal Bitcoin-wallets fra én spesifikk applikasjon.</li>
+      <li><strong>ua-parser-js (2021):</strong> en svært utbredt npm-pakke fikk publisert tre kompromitterte versjoner via account takeover av vedlikeholderen — installerte cryptominer og password-stealer.</li>
+      <li><strong>Log4Shell (2021):</strong> ikke et klassisk supply chain-angrep, men illustrerer hvorfor SBOM trengs — millioner av prosjekter brukte log4j transitive uten å vite det.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="countermeasures-strategies">
+  <div class="container">
+    <div class="section-badge">02 · Countermeasure-strategier</div>
+    <h2>Mottiltaks<em>strategier</em></h2>
+    <p class="section-intro">Forsvar mot supply chain-angrep struktureres i fire strategier som adresserer hver sin angrepsfase.</p>
+    <ul>
+      <li><strong>Transparency</strong> (mot compromise): full innsikt i aktører, operasjoner og artefakter — SBOM, code scanning, npm audit, Dependabot.</li>
+      <li><strong>Validity</strong> (mot alteration): integritet i artefakter og operasjoner, samt autentisering av aktører — Git commit signing, Sigstore, in-toto, reproducible builds.</li>
+      <li><strong>Separation</strong> (mot propagation): kompartmentalisering og kontroll over koblinger — containerisering, scoped packages, private mirrors/proxies, version locking.</li>
+      <li><strong>Recovery</strong> (mot exploitation): responsplan og minimering av konsekvens — incident response, rollback, kompromittert-credential-revokasjon.</li>
     </ul>
   </div>
 </section>
 
 <section id="dep-confusion">
   <div class="container">
-    <div class="section-badge">02 · Dependency confusion</div>
+    <div class="section-badge">03 · Dependency confusion</div>
     <h2>Dependency confusion og <em>typosquatting</em></h2>
     <p class="section-intro">To ulike angrep som begge utnytter at pakkemanagere henter kode automatisk uten å verifisere at den er det du forventet.</p>
     <p class="lead">En sikkerhetsforsker demonstrerte i 2021 at han kunne få kode kjørt hos Apple, Netflix og Microsoft ved å registrere interne pakkenavn på offentlige registere med høyere versjonsnumre. Organisasjonene hadde konfigurert sine pakkemanagere til å sjekke offentlige registere som fallback — og fikk den ondsinnede pakken i stedet for sin interne.</p>
@@ -93,7 +125,7 @@
 
 <section id="sbom">
   <div class="container">
-    <div class="section-badge">03 · SBOM</div>
+    <div class="section-badge">04 · SBOM</div>
     <h2><em>SBOM</em></h2>
     <p class="section-intro">Du kan ikke beskytte det du ikke vet du har — SBOM er grunnlaget for supply chain-synlighet.</p>
     <p class="lead">En SBOM (Software Bill of Materials) er en komplett liste over alle komponenter, avhengigheter, versjoner og lisenser i en programvare. Den inkluderer direkte avhengigheter (de du eksplisitt installerte) og transitive avhengigheter (avhengighetenes avhengigheter). En moderne applikasjon kan ha tusenvis av transitive avhengigheter.</p>
@@ -104,6 +136,17 @@
       <li><strong>Lisenscompliance:</strong> identifiser komponenter med GPL-lisenser i et proprietært produkt.</li>
       <li><strong>Leverandørattestasjon:</strong> lever SBOM til kunder som del av sikkerhetsdokumentasjon.</li>
     </ul>
+
+    <p><strong>Minimum-elementer i en SBOM</strong> (NTIA): leverandør, komponentnavn, versjon, unike identifikatorer (PURL, CPE), avhengighetsrelasjoner, forfatter og tidsstempel. SBOM-en skal være maskinlesbar slik at den kan brukes på tvers av økosystemet.</p>
+
+    <p>Tre dominerende SBOM-formater:</p>
+    <ul>
+      <li><strong>SPDX (Software Package Data eXchange):</strong> ISO/IEC 5962-standardisert format med fokus på lisenser og komponenter. Eksempelfelter: <code>SPDXVersion</code>, <code>PackageName</code>, <code>PackageLicenseConcluded</code>, <code>PackageVerificationCode</code>, <code>FileChecksum: SHA256</code>.</li>
+      <li><strong>CycloneDX:</strong> OWASP-prosjekt designet for sårbarhetsanalyse — har eksplisitt VEX-støtte (Vulnerability Exploitability eXchange) for å angi om en kjent CVE faktisk er utnyttbar i din kontekst.</li>
+      <li><strong>SWID tags:</strong> ISO/IEC 19770-2-format brukt for produktidentifikasjon.</li>
+    </ul>
+
+    <p><strong>Transparency technologies</strong> bygger på SBOM med ytterligere lag av tillit: <em>attestations</em> (signerte påstander om hvordan noe ble bygget), <em>provenance</em> (hvor en artefakt kommer fra), <em>VEX</em> (er denne CVE-en faktisk eksponert?), og offentlige <em>transparency logs</em> (Rekor) som gjør signaturer etterprøvbare for alle.</p>
 
     <pre><code><span class="comment"># Generer SBOM med syft</span>
 syft packages . -o spdx-json > sbom.spdx.json
@@ -118,7 +161,7 @@ syft packages . -o cyclonedx-json > sbom.cdx.json</code></pre>
 
 <section id="sigstore">
   <div class="container">
-    <div class="section-badge">04 · Sigstore</div>
+    <div class="section-badge">05 · Sigstore</div>
     <h2>Sigstore og <em>kodesignering</em></h2>
     <p class="section-intro">Kodesignering gir mottakeren en kryptografisk garanti for at artefaktet kom fra den angitte kilden og ikke er endret.</p>
     <p class="lead">Sigstore er et open-source-prosjekt som gjør kodesignering praktisk uten å kreve at utviklere administrerer PGP-nøkler manuelt. Via Cosign, Fulcio og Rekor kan utviklere signere container images og andre artefakter med identiteten sin (GitHub Actions OIDC token, e-postadresse) — og signaturen logges i en public transparency log.</p>
@@ -139,7 +182,7 @@ cosign verify \
 
 <section id="forsvar-sc">
   <div class="container">
-    <div class="section-badge">05 · Forsvar</div>
+    <div class="section-badge">06 · Forsvar</div>
     <h2>Forsvar i <em>dybde</em></h2>
     <p class="section-intro">Supply chain-angrep kan ikke elimineres, men de kan gjøres vesentlig vanskeligere og raskere å oppdage.</p>
     <p class="lead">Ingen enkelt kontroll eliminerer supply chain-risiko. Defense in depth gjelder her som ellers: lag på lag med kontroller som gjør angrepet dyrere og mer sannsynlig å oppdages.</p>
@@ -150,7 +193,9 @@ cosign verify \
       <li><strong>SCA i pipeline:</strong> scan avhengigheter for CVEer ved hvert bygg.</li>
       <li><strong>SBOM:</strong> generer og lagre SBOM per release.</li>
       <li><strong>Revisjonslogg for avhengighetsendringer:</strong> varsle ved nye eller endrede avhengigheter i PR-er.</li>
-      <li><strong>SLSA-rammeverket:</strong> Supply chain Levels for Software Artifacts — et modenhetsnivå-rammeverk for byggesystem-integritet.</li>
+      <li><strong>SLSA-rammeverket:</strong> Supply chain Levels for Software Artifacts — et modenhetsnivå-rammeverk for byggesystem-integritet. SLSA-nivå 1 krever skriftlig byggeprosess; nivå 2 versjonskontroll og signerte provenance-attestations; nivå 3 isolerte, ikke-overstyrbare byggetjenere; nivå 4 to-personers-gjennomgang og hermetiske, reproducible builds.</li>
+      <li><strong>in-toto:</strong> rammeverk for å verifisere at hele kjeden av byggesteg ble utført som tiltenkt. En signert <em>layout</em> spesifiserer hvilke steg skal gjøres av hvem og i hvilken rekkefølge; hver funksjonær publiserer signert <em>link metadata</em> som bevis på sitt steg; sluttbruker verifiserer artefaktet mot layout + links.</li>
+      <li><strong>Reproducible builds:</strong> samme kildekode gir bit-for-bit-identisk binary uavhengig av byggetidspunkt og -miljø. Gjør det mulig å oppdage byggesystem-kompromittering ved at uavhengige rebuilders sammenligner resultater.</li>
     </ul>
 
     <div class="callout callout-green">
