@@ -28,9 +28,10 @@
     <nav class="toc">
       <a href="#prinsipper"><span class="toc-num">01</span>GDPR-prinsipper</a>
       <a href="#grunnlag"><span class="toc-num">02</span>Behandlingsgrunnlag</a>
-      <a href="#dpa"><span class="toc-num">03</span>Databehandleravtaler</a>
-      <a href="#dpia"><span class="toc-num">04</span>DPIA</a>
-      <a href="#rettigheter"><span class="toc-num">05</span>Den registrertes rettigheter</a>
+      <a href="#roller"><span class="toc-num">03</span>Roller</a>
+      <a href="#dpa"><span class="toc-num">04</span>Databehandleravtaler</a>
+      <a href="#dpia"><span class="toc-num">05</span>DPIA</a>
+      <a href="#rettigheter"><span class="toc-num">06</span>Rettigheter</a>
     </nav>
   </div>
 </header>
@@ -77,9 +78,34 @@
   </div>
 </section>
 
+<section id="roller">
+  <div class="container">
+    <div class="section-badge">03 · Roller</div>
+    <h2>Roller under <em>GDPR</em></h2>
+    <p class="section-intro">Hvem som er hvem avgjør hvem som har ansvar — og hvem som blir bøtelagt når noe går galt.</p>
+    <p class="lead">GDPR definerer en håndfull roller (art. 4 og 24–39). For produktutvikling er det avgjørende å avklare rollene tidlig — de bestemmer hvem som skal inngå databehandleravtale, hvem som svarer for de registrerte, og hvem som har ansvar for at en DPIA blir gjort.</p>
+    <table>
+      <thead><tr><th>Rolle</th><th>Hva rollen gjør</th></tr></thead>
+      <tbody>
+        <tr><td>Behandlingsansvarlig (controller)</td><td>Bestemmer formål med og midler for behandlingen. Har hovedansvaret overfor de registrerte og Datatilsynet.</td></tr>
+        <tr><td>Databehandler (processor)</td><td>Behandler personopplysninger på vegne av behandlingsansvarlig — på dennes instruks. Typisk: skyleverandører, SaaS-tjenester.</td></tr>
+        <tr><td>Felles behandlingsansvarlige (joint controllers, art. 26)</td><td>To eller flere som sammen bestemmer formål og midler. Må avtale ansvarsfordeling og gjøre den tilgjengelig for de registrerte.</td></tr>
+        <tr><td>Personvernombud (DPO, art. 37–39)</td><td>Uavhengig rådgiver som overvåker etterlevelse. Pålagt for offentlige myndigheter og virksomheter med kjernevirksomhet som innebærer storstilt overvåking eller behandling av særlige kategorier.</td></tr>
+        <tr><td>Den registrerte (data subject)</td><td>Personen opplysningene gjelder. Har rettigheter etter art. 12–22 (innsyn, retting, sletting, …).</td></tr>
+        <tr><td>Mottaker (recipient)</td><td>Den som får utlevert personopplysninger — kan være tredjepart eller intern enhet.</td></tr>
+        <tr><td>Tilsynsmyndighet</td><td>Datatilsynet i Norge. Mottar avviksvarsler, konsulteres ved høy restrisiko etter DPIA, ilegger sanksjoner.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-blue">
+      <h4>Merk</h4>
+      <p>Rolleavklaring er ikke et juridisk teknikalitet — det styrer hvem som må inngå hvilke avtaler (art. 28-avtale med databehandlere, art. 26-avtale mellom felles ansvarlige) og hvem som mottar krav fra de registrerte. Få det på plass tidlig.</p>
+    </div>
+  </div>
+</section>
+
 <section id="dpa">
   <div class="container">
-    <div class="section-badge">03 · DPA</div>
+    <div class="section-badge">04 · DPA</div>
     <h2>Databehandler<em>avtaler</em></h2>
     <p class="section-intro">Når du bruker en skytjeneste til å behandle kunders personopplysninger, er du behandlingsansvarlig og tjenesten er din databehandler.</p>
     <p class="lead">En databehandleravtale (DPA) er obligatorisk etter GDPR artikkel 28 når du lar en tredjepart behandle personopplysninger på dine vegne. AWS, Google Cloud, Heroku, Stripe — alle er databehandlere for sin kunde. Avtalen skal definere: hva som behandles, på hvilke instruksjoner, hvilke sikkerhetstiltak som kreves, og rutiner for brudd.</p>
@@ -96,10 +122,11 @@
 
 <section id="dpia">
   <div class="container">
-    <div class="section-badge">04 · DPIA</div>
+    <div class="section-badge">05 · DPIA</div>
     <h2><em>DPIA</em></h2>
     <p class="section-intro">Data Protection Impact Assessment — forhåndsvurdering av personvernrisiko for høyrisiko-behandling.</p>
     <p class="lead">DPIA er GDPR's versjon av threat modeling for personvern. Før du implementerer behandling som medfører høy risiko, skal du vurdere: hva er risikoen for de registrerte, hvilke tiltak reduserer risikoen, og er risikoen etter tiltak akseptabel? Resultatet dokumenteres og er tilgjengelig for tilsynsmyndigheten.</p>
+    <p>Datatilsynet anbefaler en iterativ <strong>fire-trinns prosess</strong>: (1) beskriv behandlingen, (2) vurder nødvendighet og proporsjonalitet opp mot personvernprinsippene, (3) vurder risiko for de registrertes rettigheter og friheter, (4) oppsummer tiltak og valider. Trinn 1–3 skal egentlig gjøres for <em>all</em> behandling — det er bare dokumentasjonskravet som strammes inn når «høy risiko» foreligger. Indikatorer på høy risiko (etter Art. 29-gruppens veiledning, 2 eller flere kriterier): scoring/profilering, automatiserte avgjørelser med rettsvirkning, systematisk overvåking, særlige kategorier eller data av høyst personlig natur, storskala behandling, kombinering av datasett, sårbare registrerte (barn, ansatte), innovativ teknologi, eller behandling som hindrer utøvelse av en rett.</p>
     <p>Innhold i en DPIA:</p>
     <ol>
       <li>Beskrivelse av behandlingen og dens formål.</li>
@@ -117,7 +144,7 @@
 
 <section id="rettigheter">
   <div class="container">
-    <div class="section-badge">05 · Rettigheter</div>
+    <div class="section-badge">06 · Rettigheter</div>
     <h2>Den registrertes <em>rettigheter</em></h2>
     <p class="section-intro">GDPR gir individer konkrete rettigheter — og systemet ditt må kunne håndheve dem.</p>
     <p class="lead">«Slett meg» er ikke bare en brukeranmodning — det er et juridisk krav som systemet ditt må støtte teknisk. Og det er langt vanskeligere å implementere i et system som ble designet uten tanke på det: data finnes i databaser, logger, backups, analytics-systemer og tredjepartstjenester. Start med å tegne opp en datakartlegging.</p>

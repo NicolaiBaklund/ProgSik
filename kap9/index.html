@@ -45,6 +45,8 @@
     <h2>Det store <em>bildet</em></h2>
     <p class="section-intro">GDPR er ikke primært en regulatorisk byrde — det er en kodifisering av grunnleggende respekt for individers kontroll over sine egne data.</p>
     <p class="lead">Personvern og sikkerhet er beslektede, men ikke identiske. Sikkerhet handler om å beskytte data mot uautorisert tilgang — det innebærer å beskytte data en tjeneste legitimt samler inn. Personvern handler om å avgjøre om data bør samles inn i utgangspunktet, og på hvilke vilkår. Privacy by design integrerer disse vurderingene i arkitekturen fra start.</p>
+    <p>Et viktig skille: <strong>personvern (privacy)</strong> er retten til å bestemme over egne personopplysninger — hvem som får bruke dem, til hva og når. <strong>Konfidensialitet (confidentiality)</strong> er kun ett av flere sikkerhetstiltak som beskytter data mot uautorisert innsyn. Personvern omfatter konfidensialitet, men også formålsbegrensning, dataminimering, åpenhet, den registrertes rettigheter og lovlig behandlingsgrunnlag. Et system kan ha sterk konfidensialitet (alt er kryptert, ingen ulovlig innsyn) og likevel bryte personvernet — for eksempel ved å samle inn data uten grunnlag, beholde det for lenge eller bruke det til formål brukeren ikke samtykket til.</p>
+    <p>GDPR (forordning 2016/679) har <strong>ekstraterritoriell rekkevidde</strong> (artikkel 3): den gjelder enhver virksomhet som behandler personopplysninger om personer i EU/EØS, uavhengig av hvor virksomheten er etablert. Sanksjonene er betydelige — opptil <strong>20 millioner euro eller 4 % av global årsomsetning</strong> (det høyeste av de to) for de alvorligste bruddene.</p>
 
     <figure class="fig-frame">
       <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
@@ -107,7 +109,7 @@
 <section id="quiz">
   <div class="container">
     <h2>Test deg <em>selv</em></h2>
-    <p class="section-intro">15 spørsmål om GDPR og privacy engineering.</p>
+    <p class="section-intro">Spørsmål om GDPR og privacy engineering.</p>
 
     <div class="quiz" data-quiz>
       <div class="q-label">Spørsmål 1 · Lett</div>
@@ -212,6 +214,55 @@
       <div class="q-text">Hva er de fem registrertes rettigheter under GDPR og hva er konsekvensene for systemdesign?</div>
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer"><strong>1. Innsyn (art. 15):</strong> brukeren kan be om hvilke data som er lagret — systemet må kunne eksportere alt om én bruker. <strong>2. Retting (art. 16):</strong> korrigere uriktige opplysninger. <strong>3. Sletting («retten til å bli glemt», art. 17):</strong> systemet må kunne slette alle data om én bruker — inkludert fra logger, backups og datalagre. <strong>4. Portabilitet (art. 20):</strong> eksportere data i maskinlesbart format (JSON, CSV). <strong>5. Protest (art. 21):</strong> nekte behandling basert på berettiget interesse. <strong>Designkonsekvenser:</strong> bygg støtte for disse rettighetene fra start — det er langt vanskeligere å legge til en «slett bruker komplett»-funksjon i et system som ble designet uten den.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 16 · Middels</div>
+      <div class="q-text">Forklar forskjellen mellom personvern (privacy) og konfidensialitet (confidentiality).</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Konfidensialitet</strong> er ett sikkerhetstiltak: data er bare tilgjengelig for de som har autorisasjon (typisk via kryptering, tilgangskontroll). <strong>Personvern</strong> er bredere og inkluderer retten til å bestemme over egne data — hvem som får bruke dem, til hvilket formål, hvor lenge, og rettighetene man har overfor de som behandler dem. Et system kan ha perfekt konfidensialitet og likevel bryte personvernet, for eksempel ved å samle data uten lovlig grunnlag, bruke dem til uforenlige formål, eller beholde dem etter at formålet er oppnådd. Konfidensialitet er bare ett av GDPRs syv prinsipper (art. 5(1)(f)) — personvern krever også formålsbegrensning, dataminimering, åpenhet, og at den registrertes rettigheter respekteres.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 17 · Lett</div>
+      <div class="q-text">Hvor langt rekker GDPR geografisk, og hva er maksimal bot?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Territoriell rekkevidde (art. 3):</strong> GDPR gjelder enhver behandling av personopplysninger om personer som befinner seg i EU/EØS, uavhengig av hvor virksomheten er etablert. En amerikansk SaaS-leverandør med europeiske brukere er underlagt GDPR. <strong>Sanksjoner (art. 83):</strong> opptil 20 millioner euro eller 4 % av global årsomsetning — det høyeste av de to — for brudd på grunnprinsippene, behandlingsgrunnlag eller den registrertes rettigheter. Lavere sanksjonsnivå (10 mill. €/2 %) gjelder for mer administrative brudd som manglende DPIA eller manglende avviksvarsling.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 18 · Middels</div>
+      <div class="q-text">En netthandel vil sende nyhetsbrev til kunder, lagre leveringsadresse for å oppfylle bestillingen, og rapportere salgstall til Skatteetaten. Hvilket behandlingsgrunnlag (art. 6) er riktig for hvert formål?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Nyhetsbrev:</strong> <em>samtykke</em> (art. 6(1)(a)) — markedsføring krever fritt, spesifikt, informert samtykke som kan trekkes tilbake. <strong>Leveringsadresse:</strong> <em>kontrakt</em> (art. 6(1)(b)) — nødvendig for å oppfylle kjøpsavtalen med kunden. <strong>Skatterapportering:</strong> <em>rettslig forpliktelse</em> (art. 6(1)(c)) — pålagt av bokførings- og skatteloven. <strong>Viktig poeng:</strong> hvert formål trenger sitt eget grunnlag. «Vi godtar vilkårene» kan ikke kombinere markedsføring med leveranse — det bryter både samtykkekravet og formålsbegrensningen.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 19 · Middels</div>
+      <div class="q-text">Hva er særlige kategorier personopplysninger (art. 9), og hvorfor er de strengere regulert?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Særlige kategorier (sensitive opplysninger) er definert i art. 9(1): <strong>rasemessig/etnisk opphav, politisk oppfatning, religiøs/filosofisk overbevisning, fagforeningsmedlemskap, genetiske data, biometriske data brukt til identifikasjon, helseopplysninger, opplysninger om seksualliv eller -orientering</strong>. Behandling er <em>forbudt</em> som hovedregel; art. 9(2) gir uttømmende unntak — bl.a. <em>eksplisitt samtykke</em>, ivaretakelse av arbeidsrett, vitale interesser, allmenn helseinteresse. For digitale tjenester betyr dette at et art. 6-grunnlag alene ikke er nok — du må også oppfylle et art. 9-unntak. Eksempel: en treningsapp som logger pulsdata behandler helseopplysninger.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 20 · Middels</div>
+      <div class="q-text">Hva er en Data Protection Officer (DPO), og når er en virksomhet pliktig å utnevne en?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>DPO (personvernombud)</strong> er en uavhengig rådgiver som overvåker virksomhetens GDPR-etterlevelse, gir råd ved DPIA-er, og er kontaktpunkt mot Datatilsynet og de registrerte. GDPR art. 37 pålegger DPO når: (1) behandlingen utføres av en offentlig myndighet, (2) kjernevirksomheten omfatter systematisk monitorering av personer i stor skala, eller (3) kjernevirksomheten omfatter storstilt behandling av særlige kategorier eller straffeopplysninger. DPO skal rapportere til høyeste ledelsesnivå og kan ikke instrueres om utførelsen av oppgavene sine. Andre roller: <strong>behandlingsansvarlig</strong> bestemmer formål og midler; <strong>databehandler</strong> behandler på vegne av ansvarlig; <strong>felles behandlingsansvarlige (joint controllers, art. 26)</strong> deler ansvar når de sammen bestemmer formålet; <strong>tilsynsmyndighet</strong> er Datatilsynet i Norge.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 21 · Middels</div>
+      <div class="q-text">Hvilke personvernaktiviteter må et produktteam gjennomføre under produktutvikling for å oppfylle «data protection by design and by default» (art. 25)?</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">Personvern må integreres iterativt i produktutviklingen — ikke som et compliance-skritt på slutten. Aktivitetene er: <strong>(1) Beskriv behandlingen:</strong> formål, kategorier opplysninger, kategorier registrerte, kilder, mottakere, roller (behandlingsansvarlig/databehandler), teknisk arkitektur. <strong>(2) Vurder etterlevelse av artikkel 5-prinsippene</strong> for hvert formål, med konkrete tiltak. <strong>(3) Identifiser behandlingsgrunnlag</strong> (art. 6, evt. art. 9-unntak). <strong>(4) Før protokoll over behandlingsaktiviteter</strong> (art. 30). <strong>(5) DPIA</strong> hvis høy risiko (art. 35). <strong>(6) Inngå databehandleravtaler</strong> (art. 28) med underleverandører. <strong>(7) Implementer rutiner</strong> for de registrertes rettigheter og for avviksvarsling (art. 33/34 — 72 timer til Datatilsynet). Produktteamet (eier, teamlead, arkitekt, designer) leder dette; juridiske avklaringer hentes inn ved behov. Dokumentasjonen oppdateres ved releaser som endrer behandlingen.</div></div>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Spørsmål 22 · Middels</div>
+      <div class="q-text">En behandlingsansvarlig vurderer å utføre en DPIA. Beskriv de fire trinnene Datatilsynet anbefaler i prosessen.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">DPIA er iterativ og består av fire trinn: <strong>(1) Beskriv behandlingen</strong> — formål, art og kontekst, omfang, kilder, mottakere, ansvarsforhold og teknisk løsning. <strong>(2) Vurder nødvendighet og proporsjonalitet</strong> mot de syv personvernprinsippene (lovlighet, formålsbegrensning, dataminimering, nøyaktighet, lagringsbegrensning, integritet/konfidensialitet, ansvarlighet) og dokumenter behandlingsgrunnlag. <strong>(3) Identifiser risikoer</strong> for de registrertes rettigheter og friheter — sannsynlighet og konsekvens. <strong>(4) Oppsummer tiltak og valider</strong> — tiltakene knyttes til risikoer, restrisiko vurderes, og DPIA-en autoriseres (typisk av behandlingsansvarlig/DPO). Ved høy restrisiko skal Datatilsynet konsulteres før behandlingen starter (art. 36). Trinn 1–3 skal alltid gjennomføres for all behandling av personopplysninger; bare ved «høy risiko» kreves formell DPIA-dokumentasjon etter art. 35.</div></div>
     </div>
   </div>
 </section>
