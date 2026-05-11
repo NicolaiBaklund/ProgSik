@@ -66,6 +66,13 @@
       <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
       <div class="answer">Fra syntakshjelp til semantisk forståelse. Autocomplete fyller inn neste token basert på lokale mønstre. AI-assistanse forstår intensjonen i koden, kan generere hele funksjoner og diskutere designvalg. Det gir kraft — og åpner et nytt feilrom.</div></div>
     </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk · 1 min</div>
+      <div class="q-text">Forklar hva en moderne AI-kodingsassistent (Copilot, Cursor, Claude Code, ChatGPT) faktisk <em>kan</em> gjøre for en utvikler. Nevn minst fire konkrete kapabiliteter.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer">AI-kodingsassistenter kan: (1) <strong>code completion</strong> — fylle ut neste linje eller hel funksjon basert på kontekst, (2) <strong>code generation</strong> — generere ny kode fra naturlig språk-prompt, (3) <strong>refactoring</strong> — omstrukturere eksisterende kode, (4) <strong>code explanation</strong> — forklare hva eksisterende kode gjør, (5) <strong>test-generering</strong> — skrive enhetstester for en funksjon, (6) <strong>dokumentasjon</strong> — generere docstrings og kommentarer, (7) navigere ukjente språk og rammeverk, (8) hjelpe utvikleren å holde «flow state» ved å redusere kontekstskifte. Gartner anslår at 75 % av enterprise-utviklere vil bruke slike assistenter innen 2028.</div></div>
+    </div>
   </div>
 </section>
 
@@ -105,6 +112,13 @@
     <div class="callout callout-orange-warning callout-blue">
       <h4>Men: «manuell sårbarhetsjakt» har vist seg vanskelig å automatisere</h4>
       <p>I forskningen fra Gartner og andre er <em>«manually finding vulnerabilities»</em> markert som en oppgave AI-assistenter <strong>ikke</strong> løser godt — selv om det er nettopp den oppgaven sikkerhetsteam håpet på. Hvorfor? Fordi sårbarheter ofte krever kontekst som modellen ikke har: trusselmodellen, miljøet, dataeierskapet, hvilke data som går hvor.</p>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Sjekk · 2 min</div>
+      <div class="q-text">Veie nytte mot risiko: list opp tre konkrete <em>benefits</em> og tre konkrete <em>risks</em> ved å bruke AI-kodingsassistenter, og forklar hvorfor en organisasjon ikke kan trekke konklusjon basert på kun den ene siden.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>Benefits:</strong> (1) produktivitet — raskere koding, mindre boilerplate, redusert kontekstskifte; (2) læring — assistenten akselererer onboarding i ukjente språk, rammeverk og kodebaser; (3) bedre utvikleropplevelse — flow state, mindre tid på dokumentasjonssøk og syntaksretting, høyere utviklerretensjon. <strong>Risks:</strong> (1) sårbar kode-generering — CSET 2024 fant feil i 48 % av LLM-output som kunne lede til ondsinnet utnyttelse; (2) sensitive data leakage — prompts kan inneholde hemmeligheter, kundekode eller IP som sendes til LLM-leverandøren; (3) overlooking security / over-trust — Stanford-studien viser at utviklere ikke bare skriver mer usikker kode, men også vurderer den som sikker. <strong>Hvorfor ikke kun én side:</strong> en ren benefit-lesing leder til ukritisk utrulling og sårbar kode i produksjon; en ren risiko-lesing leder til forbud som mister produktivitetsgevinsten konkurrentene høster. Riktig svar er prosess-tilpasning: bruk verktøyene, men kombiner med SAST, code review, prompt-engineering og dataklassifisering.</div></div>
     </div>
   </div>
 </section>
@@ -284,6 +298,13 @@ OWASP secure coding practices. Krav:
     <div class="callout callout-green">
       <h4>Hovedlærdommen</h4>
       <p>AI-assistanse er ikke et sikkerhetsproblem i seg selv — det er en <em>endring i hvordan kode produseres</em>, og prosessene rundt må endres tilsvarende. Behold prompt-disiplin, automatiser deteksjon, og gjenoppretter en sunn skepsis i code review.</p>
+    </div>
+
+    <div class="quiz" data-quiz>
+      <div class="q-label">Anvendelsesscenario · 3 min</div>
+      <div class="q-text">Du bruker GitHub Copilot til å skrive et autentiserings-modul (passordhashing, login-endepunkt, sesjonshåndtering) for en webapp i produksjon. Hvilke fire–fem developer-praksiser bruker du for å redusere sjansen for at modulen havner i produksjon med sårbarheter? Begrunn hver praksis.</div>
+      <div class="quiz-reveal"><button class="reveal-btn">Se svar</button>
+      <div class="answer"><strong>1. Sikker prompt-engineering.</strong> Be eksplisitt om OWASP-anbefalinger, navngitt hashing-algoritme (bcrypt cost ≥ 12), parameteriserte spørringer, ikke-avslørende feilmeldinger og rate limiting. Den svake prompten lar modellen velge fra hele treningsfordelingen — den sterke flytter sannsynlighetsmassen mot trygge mønstre. <strong>2. Code review av all LLM-output.</strong> Behandle assistentens forslag som kode fra en juniorutvikler — Stanford-studien viser at utviklere som bruker AI ofte vurderer usikker kode som sikker, så review må kompensere. <strong>3. SAST/lint-verktøy i IDE-en.</strong> Snyk Code, SonarQube IDE eller Veracode Fix kjører i sanntid mens AI genererer kode og fanger sårbarhetsmønstre før commit. <strong>4. Sikkerhetstesting og dependency review.</strong> Pre-commit hooks, secret scanning, dependency-skanning og enhetstester for autentiseringslogikken — verifiser at LLM-foreslåtte biblioteker faktisk eksisterer (LLM-er hallusinerer pakkenavn). <strong>5. Ikke gi sensitive data til LLM-en.</strong> Ikke lim inn produksjons-credentials, ekte brukerdata eller hemmelige API-nøkler i prompten. <strong>6. Human-in-the-loop / sandboxing.</strong> Hvis du bruker en agent som kan kjøre kode, kjør den i sandbox og krev menneskelig godkjenning før deployment.</div></div>
     </div>
   </div>
 </section>
