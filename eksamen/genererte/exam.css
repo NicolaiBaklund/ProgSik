@@ -360,6 +360,72 @@ body::before {
 .fasit-body .ref a { color: var(--rust); text-decoration: none; border-bottom: 1px solid rgba(176,68,40,0.3); }
 .fasit-body .ref a:hover { border-bottom-color: var(--rust); }
 
+/* --- Svartekstboks for åpne spørsmål --- */
+
+.exam-q__answer {
+  margin: 0.4rem 0 1rem;
+  padding: 0.85rem 0.95rem 0.95rem;
+  background: var(--paper-dark);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.exam-q__answer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px dashed var(--line);
+}
+
+.exam-q__answer-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rust);
+}
+
+.exam-q__answer-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faded);
+  font-variant-numeric: tabular-nums;
+}
+
+.exam-q__answer-input {
+  display: block;
+  width: 100%;
+  min-height: 8.5rem;
+  resize: vertical;
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0.7rem 0.85rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  box-shadow: inset 0 1px 2px rgba(26, 22, 18, 0.04);
+}
+
+.exam-q__answer-input::placeholder {
+  color: var(--ink-ghost);
+  font-style: italic;
+}
+
+.exam-q__answer-input:focus {
+  border-color: var(--rust);
+  background: #fbfaf5;
+  box-shadow: 0 0 0 3px rgba(176, 68, 40, 0.14);
+}
+
 /* --- Self-grade for åpne spørsmål --- */
 
 .exam-q__self {

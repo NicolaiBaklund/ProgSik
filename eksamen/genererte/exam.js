@@ -387,7 +387,67 @@
     }
   }
 
-  /* ------------------ Åpne spørsmål (self-grade) ------------------ */
+  /* ------------------ Åpne spørsmål (textarea + self-grade) ------------------ */
+
+  function answerStorageKey(article) {
+    const num = article.querySelector('.exam-q__num');
+    const id = num ? num.textContent.trim().replace(/\s+/g, '_') : 'q';
+    return `exam_answer::${location.pathname}::${id}`;
+  }
+
+  function setupAnswerBox(article) {
+    if (article.querySelector('.exam-q__answer')) return;
+    const body = article.querySelector('.exam-q__body');
+    const fasit = article.querySelector('.fasit-details');
+    if (!body || !fasit) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'exam-q__answer';
+
+    const head = document.createElement('div');
+    head.className = 'exam-q__answer-head';
+    const label = document.createElement('span');
+    label.className = 'exam-q__answer-label';
+    label.textContent = 'Skriv ditt svar';
+    const meta = document.createElement('span');
+    meta.className = 'exam-q__answer-meta';
+    meta.textContent = '0 ord · 0 tegn';
+    head.appendChild(label);
+    head.appendChild(meta);
+
+    const ta = document.createElement('textarea');
+    ta.className = 'exam-q__answer-input';
+    ta.rows = 8;
+    ta.spellcheck = true;
+    ta.placeholder = 'Formulér svaret ditt her før du folder ut modellsvaret. Teksten lagres lokalt i nettleseren.';
+
+    const storageKey = answerStorageKey(article);
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) ta.value = saved;
+    } catch (e) {}
+
+    const updateMeta = () => {
+      const text = ta.value;
+      const chars = text.length;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      meta.textContent = `${words} ord · ${chars} tegn`;
+    };
+    updateMeta();
+
+    let saveTimer = null;
+    ta.addEventListener('input', () => {
+      updateMeta();
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        try { localStorage.setItem(storageKey, ta.value); } catch (e) {}
+      }, 250);
+    });
+
+    wrap.appendChild(head);
+    wrap.appendChild(ta);
+    body.insertBefore(wrap, fasit);
+  }
 
   function setupOpen(article) {
     const fasit = article.querySelector('.fasit-details');
@@ -395,6 +455,8 @@
     const body = fasit.querySelector('.fasit-body');
     if (!body) return;
     if (body.querySelector('.exam-q__self')) return;
+
+    setupAnswerBox(article);
 
     const points = parseFloat(article.dataset.examPoints) || 0;
 
