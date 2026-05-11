@@ -11,15 +11,15 @@ Slik lager vi nye øvingseksamener til **TDT4237 Programvaresikkerhet og dataper
   - **~1/4 lukkede** (MC med 4 alternativer — én riktig).
 - **Ingen case study i 2026.** Tidligere år hadde et 30-poengs case studie som første oppgave; det er fjernet i år. Gjenbruk derfor *ikke* case-oppgaver fra 2020–2025-settene som mal.
 - **Interaktivitet:**
-  - Åpne spørsmål viser et **modellsvar** i en `<details>`-blokk som studenten kan klikke for å folde ut (det er ingen automatisk retting — studenten sammenligner selv).
-  - MC-spørsmål oppfører seg som før: klikk på alternativ låser oppgaven, fargelegger riktig grønt / feil rødt, og åpner forklaringen.
-  - Begge deler styres av [exam.js](exam.js) og [exam.css](exam.css) så lenge HTML-strukturen i §2 følges. (Hvis filene ikke finnes i denne mappa enda — kopiér fra et eksisterende prosjekt, eller lag minimal versjon: åpne spørsmål trenger bare `<details>`, så stylesheet er valgfritt for de.)
+  - Åpne spørsmål viser et **modellsvar** i en `<details>`-blokk. Etter at studenten har folder den ut og sammenlignet sitt eget svar, klikker hen en **self-grade-knapp** (Full pott / Nesten alt / Halvveis / Lite / Ingenting — 100/75/50/25/0 % av oppgavens poeng). exam.js teller dette inn i poeng-trackeren.
+  - MC-spørsmål: klikk på alternativ låser oppgaven, fargelegger riktig grønt / feil rødt, og åpner forklaringen automatisk.
+  - Begge deler styres av [exam.js](exam.js) + [exam.css](exam.css) så lenge HTML-strukturen i §2 følges.
 - **Poeng:** Hvert spørsmål har et eget poengtall (typisk 1–5). Settet skal summere til **100 poeng totalt**, samme fordeling som ekte eksamen.
 - **Lengde per sett:** **22–28 oppgaver** (ca. 16–22 åpne + 6–8 lukkede). Reelle eksamener ligger på 25 ± 3.
 - **Vanskelighetsgrad:** Et øvingssett skal *utfordre* en student som har lest pensum. Unngå at hvert spørsmål bare er "definér X". Bland inn anvendelse: gi en kodebit, et angrepscenario, en arkitekturskisse, et GDPR-spørsmål med kontekst — og krev at studenten *resonnerer*. Se [TDT4237 Spring 2025 exam questions.pdf](TDT4237%20Spring%202025%20exam%20questions.pdf) og [TDT4237 2024 exam questions without sensor guide.pdf](TDT4237%202024%20exam%20questions%20without%20sensor%20guide.pdf) for tonen.
 - **Tidsramme (anbefalt):** 4 timer for et komplett sett, som ekte eksamen.
 
-> **Viktig om gamle eksamener:** PDF-filene i denne mappa er referanser for *stil og vanskelighetsgrad*, ikke fasit. Bruk dem til å forstå hvilke spørsmålstyper som dukker opp, men **ikke replikér oppgaver direkte**. Variér scenario, kodebit, kontekst — og pass spesielt på at hvert nytt sett ikke bare gjentar de samme klassikerne ("forklar XSS reflected vs stored", "fire prinsipper for social engineering", "fem GDPR-prinsipper"). Disse er sentrale, men ett sett trenger ikke teste alle de "obligatoriske" kjernespørsmålene — velg *andre* vinklinger.
+> **Viktig om gamle eksamener:** PDF-filene i oppgavebanken er referanser for *stil og vanskelighetsgrad*, ikke fasit. Bruk dem til å forstå hvilke spørsmålstyper som dukker opp, men **ikke replikér oppgaver direkte**. Variér scenario, kodebit, kontekst — og pass spesielt på at hvert nytt sett ikke bare gjentar de samme klassikerne ("forklar XSS reflected vs stored", "fire prinsipper for social engineering", "fem GDPR-prinsipper"). Disse er sentrale, men ett sett trenger ikke teste alle de "obligatoriske" kjernespørsmålene — velg *andre* vinklinger.
 
 > **Variasjon på tvers av sett:** Før du lager et nytt sett, scroll gjennom eksisterende `eksamen_NN.html` og noter hvilke spørsmål som dominerer. Det er greit at *noen* kjernekonsepter går igjen (de er kjernepensum), men ikke greit at hvert nytt sett er en omformulering av forrige. Test også *underrepresentert* stoff: privacy-by-design teknikker, mikrotjeneste-spesifikke trusler, supply chain-trinn, SAST-begrensninger, prompt injection-typer.
 
@@ -89,6 +89,8 @@ Oppgavene trenger ikke deles i to seksjoner — alt går i én strøm, slik som 
 
 For åpne spørsmål er det studenten selv som vurderer eget svar mot modellsvaret. Skriv derfor modellsvaret som om det skulle gi full pott — kompakt, men dekkende. Hvis spørsmålet har deloppgaver (a/b/c eller "minst fire"), strukturer modellsvaret med samme inndeling.
 
+`exam.js` injiserer automatisk self-grade-knapper i `.fasit-body` ved init (Full pott / Nesten alt / Halvveis / Lite / Ingenting). Du trenger ikke å skrive disse i HTML-en.
+
 ### 2.2 Mal for lukket spørsmål (MC) (`.exam-q.exam-q--mc`)
 
 ```html
@@ -128,7 +130,7 @@ For åpne spørsmål er det studenten selv som vurderer eget svar mot modellsvar
 3. Oppgaven låses.
 4. `<details class="fasit-details">` åpnes automatisk.
 
-For `.exam-q--open` lar JS-en `<details>` være — studenten åpner og lukker den selv.
+For `.exam-q--open` lar JS-en `<details>` være — studenten åpner og lukker den selv, og bruker self-grade-knappene nederst i `.fasit-body` til å registrere poeng.
 
 ### 2.4 Code-quiz-spørsmål
 

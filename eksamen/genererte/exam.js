@@ -5,6 +5,14 @@
   const NEXT_THRESHOLDS = [41, 53, 65, 77, 89];
   const GRADE_ORDER = ['F', 'E', 'D', 'C', 'B', 'A'];
 
+  const SELF_GRADES = [
+    { key: 'full',   label: 'Full pott',   factor: 1.0 },
+    { key: 'mostly', label: 'Nesten alt',  factor: 0.75 },
+    { key: 'half',   label: 'Halvveis',    factor: 0.5 },
+    { key: 'little', label: 'Lite',        factor: 0.25 },
+    { key: 'none',   label: 'Ingenting',   factor: 0.0 },
+  ];
+
   const score = {
     earned: 0,
     totalPoints: 0,
@@ -43,8 +51,14 @@
   }
 
   function setupQuestion(article) {
-    setupMultiChoice(article);
-    setupTrueFalse(article);
+    const isOpen = article.classList.contains('exam-q--open');
+    const isMC = article.classList.contains('exam-q--mc');
+    const hasOpts = !!article.querySelector('.exam-q__opts');
+    const hasTF = !!article.querySelector('.exam-q__tf');
+
+    if (isMC || (!isOpen && hasOpts)) setupMultiChoice(article);
+    if (hasTF) setupTrueFalse(article);
+    if (isOpen || (!isMC && !hasOpts && !hasTF)) setupOpen(article);
   }
 
   function parsePoints(el) {
@@ -81,17 +95,13 @@
   }
 
   function loadCollapsedPref() {
-    try {
-      return localStorage.getItem(STORAGE_COLLAPSED) === '1';
-    } catch (e) {
-      return false;
-    }
+    try { return localStorage.getItem(STORAGE_COLLAPSED) === '1'; }
+    catch (e) { return false; }
   }
 
   function saveCollapsedPref(collapsed) {
-    try {
-      localStorage.setItem(STORAGE_COLLAPSED, collapsed ? '1' : '0');
-    } catch (e) {}
+    try { localStorage.setItem(STORAGE_COLLAPSED, collapsed ? '1' : '0'); }
+    catch (e) {}
   }
 
   function setCollapsed(collapsed) {
@@ -249,6 +259,8 @@
     updateTracker();
   }
 
+  /* ------------------ MC ------------------ */
+
   function setupMultiChoice(article) {
     const opts = article.querySelector('.exam-q__opts');
     if (!opts) return;
@@ -261,8 +273,6 @@
     const correctLetter = match[1].toUpperCase();
 
     const fasit = article.querySelector('.fasit-details');
-    const summary = fasit ? fasit.querySelector('summary') : null;
-    if (summary) summary.style.display = 'none';
 
     opts.classList.add('is-quiz');
     const items = Array.from(opts.querySelectorAll(':scope > li'));
@@ -298,12 +308,8 @@
       li.removeAttribute('tabindex');
       li.removeAttribute('role');
       const letter = li.dataset.letter;
-      if (letter === correctLetter) {
-        li.classList.add('is-correct');
-      }
-      if (li === chosenLi && !isCorrect) {
-        li.classList.add('is-wrong');
-      }
+      if (letter === correctLetter) li.classList.add('is-correct');
+      if (li === chosenLi && !isCorrect) li.classList.add('is-wrong');
     });
 
     const points = parseFloat(article.dataset.examPoints) || 0;
@@ -312,6 +318,8 @@
 
     if (fasit && !fasit.open) fasit.open = true;
   }
+
+  /* ------------------ Sant/usant ------------------ */
 
   function setupTrueFalse(article) {
     const tfList = article.querySelector('.exam-q__tf');
@@ -377,6 +385,54 @@
       markAnswered();
       if (fasit && !fasit.open) fasit.open = true;
     }
+  }
+
+  /* ------------------ Åpne spørsmål (self-grade) ------------------ */
+
+  function setupOpen(article) {
+    const fasit = article.querySelector('.fasit-details');
+    if (!fasit) return;
+    const body = fasit.querySelector('.fasit-body');
+    if (!body) return;
+    if (body.querySelector('.exam-q__self')) return;
+
+    const points = parseFloat(article.dataset.examPoints) || 0;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'exam-q__self';
+
+    const label = document.createElement('span');
+    label.className = 'exam-q__self-label';
+    label.textContent = 'Hvor mye fikk du rett?';
+    wrap.appendChild(label);
+
+    SELF_GRADES.forEach((g) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'exam-q__self-btn';
+      btn.dataset.factor = String(g.factor);
+      btn.dataset.key = g.key;
+      const pts = Math.round(points * g.factor * 10) / 10;
+      btn.textContent = `${g.label} (${fmtPoints(pts)} p)`;
+      btn.addEventListener('click', () => handleSelfGrade(wrap, btn, points));
+      wrap.appendChild(btn);
+    });
+
+    body.appendChild(wrap);
+  }
+
+  function handleSelfGrade(wrap, btn, points) {
+    if (wrap.classList.contains('is-answered')) return;
+    wrap.classList.add('is-answered');
+
+    Array.from(wrap.querySelectorAll('.exam-q__self-btn')).forEach((b) => {
+      if (b === btn) b.classList.add('is-active');
+    });
+
+    const factor = parseFloat(btn.dataset.factor) || 0;
+    const earned = Math.round(points * factor * 10) / 10;
+    if (earned > 0) addEarned(earned);
+    markAnswered();
   }
 
   if (document.readyState === 'loading') {
