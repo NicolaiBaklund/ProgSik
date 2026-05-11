@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 *.pyo
 tools/
+node_modules/
+package-lock.json
+dist/
+build_chunks.py
