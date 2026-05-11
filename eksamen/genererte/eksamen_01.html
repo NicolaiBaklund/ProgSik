@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Øvingseksamen 01 — TDT4237</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="stylesheet" href="exam.css">
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+  <header class="exam-head">
+    <p style="font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--rust); margin-bottom: 18px;">
+      <a href="../" style="color: var(--rust); text-decoration: none; border-bottom: 1px solid rgba(176,68,40,0.35);">&larr; Tilbake til øvingseksamener</a>
+    </p>
+    <h1>Øvingseksamen 01 — <em>TDT4237</em></h1>
+    <p>Programvaresikkerhet og datapersonvern · Vår 2026</p>
+    <p>Tidsramme: 4 timer · Hjelpemidler: Ingen · Total: 100 poeng · 28 oppgaver</p>
+    <p>Blanding av åpne spørsmål (~78 %) og flervalgsspørsmål (~22 %).</p>
+    <p style="margin-top: 14px; font-style: italic; color: var(--ink-faded);">Dette settet dekker alle ti kapitler i pensum. Hovedvekt på OWASP-anvendelse, kryptografi og autorisasjon — i tråd med læringsmålene i kursoppsummeringen (forelesning 13).</p>
+  </header>
+
+  <section class="exam-part">
+    <h2>Oppgaver</h2>
+
+    <!-- ============== KAP 1 ============== -->
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 1</span>
+        <span class="exam-q__points">5 poeng</span>
+        <span class="exam-q__topic">Kap. 1 — Sikkerhetsprinsipper</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Du designer en nettbutikk der innloggede brukere kan administrere ordrene sine, og hvor en mindre gruppe ansatte i kundeservice kan slå opp ordrer for å hjelpe kunder. Forklar hvordan prinsippene <em>defense in depth</em> og <em>least privilege</em> kan anvendes konkret i denne applikasjonen. Gi minst to konkrete designvalg per prinsipp.</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>Defense in depth</strong> — bygg flere uavhengige lag slik at ett enkelt brudd ikke gir full kompromittering.</p>
+            <ul>
+              <li>WAF eller reverse-proxy foran applikasjonen (lag 1) <em>og</em> input-validering og parametriserte spørringer i applikasjonskoden (lag 2).</li>
+              <li>HTTPS/TLS på transportlag + krypterte/tokeniserte kortdata i DB + sterke passord-hasher (Argon2/bcrypt) — flere lag som beskytter samme verdi.</li>
+              <li>Logging + alarmering på mistenkelig adferd som siste-linje deteksjonslag når forebyggende kontroller svikter.</li>
+            </ul>
+            <p><strong>Least privilege</strong> — hver komponent og hver bruker får kun de rettighetene den faktisk trenger.</p>
+            <ul>
+              <li>Kundeservice-rolle får <em>kun</em> read-tilgang til ordrer og navn/leveringsadresse — ikke kortdata, ikke passord-hasher, ikke skriverettigheter på andres ordrer.</li>
+              <li>Applikasjonens DB-bruker har <code>SELECT/INSERT/UPDATE</code> på ordretabellen, men <em>ikke</em> <code>DROP</code> eller tilgang til auth-skjemaet (separate roller / separate connection pools).</li>
+              <li>Background-jobs (f.eks. fakturagenerering) kjører som egen tjenestekonto med minimale rettigheter, ikke som "root"-app-bruker.</li>
+            </ul>
+            <p class="ref">Pensum: <a href="../../kap1/kjerneprinsipper.html">Kap. 1 — Kjerneprinsipper</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 2</span>
+        <span class="exam-q__points">3 poeng</span>
+        <span class="exam-q__topic">Kap. 1 — CIA-triaden</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar CIA-triaden. Gi ett konkret eksempel på et angrep eller en hendelse som bryter hver av de tre pilarene.</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <ul>
+              <li><strong>Confidentiality (konfidensialitet)</strong> — kun autoriserte parter får se data. <em>Brudd:</em> en DB-lekkasje hvor angriper laster ned kundetabellen med navn, e-post og hash-er.</li>
+              <li><strong>Integrity (integritet)</strong> — data og kode kan ikke endres uoppdaget. <em>Brudd:</em> en MITM-angriper modifiserer en bankoverføring i transit slik at mottakerkontoen byttes ut.</li>
+              <li><strong>Availability (tilgjengelighet)</strong> — systemet er oppe når det skal. <em>Brudd:</em> en DDoS-flom mot tjenesten gjør at legitime kunder ikke får logget inn.</li>
+            </ul>
+            <p>Et angrep kan ramme flere pilarer samtidig — f.eks. ransomware bryter både integritet (kryptering av filer) og tilgjengelighet (filene kan ikke leses).</p>
+            <p class="ref">Pensum: <a href="../../kap1/cia-triaden.html">Kap. 1 — CIA-triaden</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ============== KAP 2 ============== -->
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 3</span>
+        <span class="exam-q__points">6 poeng</span>
+        <span class="exam-q__topic">Kap. 2 — Kode-quiz (Flask)</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Følgende Flask-endepunkt lar en innlogget bruker hente en faktura ved ID. Identifiser <strong>tre sårbarheter</strong> med linjenumre, forklar hva angriper kan gjøre, og skissér en fiks for hver.</p>
+<pre><code> 1  from flask import Flask, request, render_template_string, session
+ 2  import sqlite3, hashlib
+ 3
+ 4  app = Flask(__name__)
+ 5  app.config['DEBUG'] = True
+ 6
+ 7  @app.route('/invoice')
+ 8  def invoice():
+ 9      inv_id = request.args.get('id')
+10      db = sqlite3.connect('app.db')
+11      row = db.execute(
+12          "SELECT customer, amount, notes FROM invoices WHERE id = " + inv_id
+13      ).fetchone()
+14      html = "&lt;h1&gt;Faktura&lt;/h1&gt;&lt;p&gt;Notater: " + row[2] + "&lt;/p&gt;"
+15      return render_template_string(html)
+16
+17  @app.route('/login', methods=['POST'])
+18  def login():
+19      user = request.form['user']; pw = request.form['pw']
+20      h = hashlib.md5(pw.encode()).hexdigest()
+21      ok = db_lookup(user, h)
+22      if ok: session['user'] = user
+23      return 'ok' if ok else 'nei'</code></pre>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>1) SQL injection (linje 11–13).</strong> <code>inv_id</code> kommer direkte fra URL og konkateneres inn i SQL-strengen. Angriper kan sende <code>?id=1 OR 1=1</code> for å lese alle fakturaer, eller injisere <code>UNION</code>-spørringer. <em>Fiks:</em> bruk parametrisert spørring — <code>db.execute("SELECT ... WHERE id = ?", (inv_id,))</code> — og valider at <code>inv_id</code> er et heltall.</p>
+            <p><strong>2) Server-side template injection / stored XSS (linje 14–15).</strong> <code>row[2]</code> (notes-feltet fra DB) settes rett inn i en streng som så sendes til <code>render_template_string</code>. Jinja2 vil <em>evaluere</em> denne strengen som template, og siden HTML-en bygges med konkatenering, gir det også XSS hvis notatet inneholder <code>&lt;script&gt;</code>. <em>Fiks:</em> bruk en ekte template-fil med <code>{% raw %}{{ row.notes }}{% endraw %}</code> (autoescape på) — aldri konkatenér brukerdata inn i template-kilden.</p>
+            <p><strong>3) MD5 til passord (linje 20).</strong> MD5 er rask og ikke designet for passordhashing — brute force / regnbuetabeller knekker den raskt. Det er heller ikke salt. <em>Fiks:</em> bruk en KDF designet for passord (Argon2id, bcrypt eller scrypt) med per-bruker salt; <code>argon2.PasswordHasher().hash(pw)</code> eller <code>bcrypt.hashpw(pw, bcrypt.gensalt())</code>.</p>
+            <p><em>Bonus (ikke krevd):</em> <code>DEBUG=True</code> på linje 5 lekker stack traces og aktiverer Werkzeug-konsoll i prod; bør være <code>False</code> utenfor utvikling.</p>
+            <p class="ref">Pensum: <a href="../../kap2/injection.html">Kap. 2 — Injection</a>, <a href="../../kap2/xss-csrf.html">XSS / CSRF</a>, <a href="../../kap2/authn-autorisasjonsfeil.html">Autentiseringsfeil</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 4</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 2 — XSS</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar forskjellen på <em>reflected</em>, <em>stored</em> og <em>DOM-based</em> XSS. (3 p) Nevn to forsvarstiltak som hjelper mot flere av variantene. (1 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <ul>
+              <li><strong>Reflected:</strong> payload sendes i forespørsel (typisk URL-parameter), serveren "reflekterer" den uendret i responsen. Angriper må lure offer til å klikke preparert lenke. Eksempel: <code>/sok?q=&lt;script&gt;...&lt;/script&gt;</code> som vises i en "du søkte etter …"-melding uten escaping.</li>
+              <li><strong>Stored:</strong> payload lagres på server (kommentarfelt, profil, forumtråd) og leveres til <em>alle</em> som besøker siden. Skalerer langt bedre for angriper og krever ingen lenke-klikking.</li>
+              <li><strong>DOM-based:</strong> sårbarheten ligger i klientside-JS som leser usanert input (typisk <code>location.hash</code>) og skriver det til DOM via <code>innerHTML</code> eller <code>eval</code>. Serveren ser aldri payloaden.</li>
+            </ul>
+            <p><strong>Forsvar (to eksempler):</strong> kontekstuell output-encoding (HTML-escape ved injeksjon i HTML, JS-escape i JS-kontekst) og Content-Security-Policy (CSP) som blokkerer inline-scripts og fremmede domener. Også: <code>HttpOnly</code>-cookies hindrer at JS leser session-cookien selv om XSS finnes; ramme-rensing/sanitering for rik tekst (DOMPurify) gjør stored-varianten vanskeligere.</p>
+            <p class="ref">Pensum: <a href="../../kap2/xss-csrf.html">Kap. 2 — XSS og CSRF</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 5</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 2 — Passordlagring</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">En kollega foreslår å lagre brukerpassord som <code>SHA-256(passord)</code> i databasen. Forklar hvorfor dette er en dårlig idé, og beskriv hva en sikker passordlagring krever. Bruk termene <em>salt</em>, <em>pepper</em>, og en passord-spesifikk KDF i svaret.</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p>SHA-256 er en <em>rask</em> kryptografisk hash designet for integritet — ikke for passordlagring. En moderne GPU kan beregne milliarder av SHA-256 per sekund, så en angriper med tilgang til hash-tabellen kan brute-force korte/svake passord nesten umiddelbart, og slå opp vanlige passord i forhåndsberegnede regnbuetabeller. Uten salt vil to brukere med samme passord ha identisk hash, så lekkasjen avslører gjenbruk.</p>
+            <ul>
+              <li><strong>Salt:</strong> en tilfeldig, unik verdi per bruker som blandes inn i hashen og lagres ved siden av. Hindrer regnbuetabeller og at samme passord gir samme hash.</li>
+              <li><strong>Pepper:</strong> en hemmelig, applikasjonsbred nøkkel som blandes inn — lagres <em>utenfor</em> DB (HSM eller secret manager). Hvis bare DB lekker, er passordene fortsatt beskyttet.</li>
+              <li><strong>Passord-KDF:</strong> Argon2id (anbefalt), bcrypt eller scrypt — bevisst trege og minne-tunge funksjoner med tunbar kostparameter. Gjør brute-force prohibitivt selv med GPU.</li>
+            </ul>
+            <p>Konkret: <code>argon2id(pepper || passord, salt, m=64MB, t=3, p=1)</code>. Kalibrer parametrene slik at hver hash tar ~250 ms på prod-maskinvare.</p>
+            <p class="ref">Pensum: <a href="../../kap3/hashing-mac.html">Kap. 3 — Hashing og MAC</a>, <a href="../../kap2/authn-autorisasjonsfeil.html">Kap. 2 — Autentiseringsfeil</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--mc">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 6</span>
+        <span class="exam-q__points">1 poeng</span>
+        <span class="exam-q__topic">Kap. 2 — SQL injection</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Hvilket tiltak er det mest effektive forsvaret mot SQL injection?</p>
+        <ul class="exam-q__opts">
+          <li><span class="opt-label">A</span> Parametriserte spørringer (prepared statements) der brukerinput sendes som parametre, ikke konkatenert inn i SQL-strengen.</li>
+          <li><span class="opt-label">B</span> Strippe enkle og doble fnutter fra all brukerinput før spørringen kjøres.</li>
+          <li><span class="opt-label">C</span> Skru på en WAF foran databasen som blokkerer kjente SQL-mønstre.</li>
+          <li><span class="opt-label">D</span> Begrense applikasjonens DB-bruker til kun SELECT-rettigheter.</li>
+        </ul>
+        <details class="fasit-details">
+          <summary>Vis fasit</summary>
+          <div class="fasit-body">
+            <span class="fasit-correct">Riktig svar: A</span>
+            <p>Parametriserte spørringer skiller <em>kode</em> fra <em>data</em> på driver-nivå: DB-driveren sender SQL-malen og verdiene separat, og verdiene kan aldri bli tolket som SQL. Dette fjerner hele angrepskategorien, ikke bare kjente varianter.</p>
+            <p>B (blacklist-sanitering) bommer på påvirkning som ikke krever fnutter (<code>1 OR 1=1</code>, numeriske kontekster, kommentarer som <code>--</code>, kodede tegn) — angripere finner alltid omveier. C (WAF) er kompenserende kontroll og kan omgås av nye/varianter — defense in depth, ikke primærforsvar. D (least privilege på DB-bruker) reduserer <em>skade</em> ved vellykket injection, men hindrer ikke selve angrepet — datalekkasje fra SELECT-tabellene er fortsatt mulig.</p>
+            <p class="ref">Pensum: <a href="../../kap2/injection.html">Kap. 2 — Injection</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ============== KAP 3 ============== -->
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 7</span>
+        <span class="exam-q__points">5 poeng</span>
+        <span class="exam-q__topic">Kap. 3 — TLS-handshake og PKI</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar hovedtrinnene i en TLS 1.2-handshake mellom en nettleser og en webserver. (3 p) Hva er en <em>sertifikatkjede</em>, og hvilken rolle spiller en CA (Certificate Authority)? (2 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>TLS-handshake (TLS 1.2, forenklet):</strong></p>
+            <ol>
+              <li><strong>ClientHello:</strong> klient sender støttede TLS-versjoner, cipher suites, en tilfeldig nonce og SNI (hvilket hostname).</li>
+              <li><strong>ServerHello + sertifikat:</strong> server velger TLS-versjon og cipher, sender sin nonce og sitt X.509-sertifikat (med chain).</li>
+              <li><strong>Nøkkelutveksling:</strong> klient verifiserer sertifikatet (gyldig kjede til betrodd CA, riktig CN/SAN, ikke utløpt eller tilbakekalt). I (EC)DHE-suiter sender server signerte DH-parametre; klient sender sin DH-andel. Begge regner ut samme <em>shared secret</em>.</li>
+              <li><strong>Avled session-nøkler:</strong> fra shared secret + nonces utledes symmetriske nøkler (én per retning) for resten av sesjonen.</li>
+              <li><strong>Finished:</strong> begge sender en MAC over alle handshake-meldingene for å bekrefte at ingen er modifisert; deretter veksles applikasjonsdata symmetrisk (AES-GCM e.l.).</li>
+            </ol>
+            <p>(TLS 1.3 har færre rundturer og dropper RSA-key-exchange, men prinsippet om autentisert nøkkelutveksling er det samme.)</p>
+            <p><strong>Sertifikatkjede og CA:</strong> et server-sertifikat er signert av en mellomliggende CA, som igjen er signert av en root-CA. Nettleseren har en innebygd <em>trust store</em> med rotsertifikater. Verifisering går nedenfra-og-opp: hvert sertifikat sjekkes mot signaturen til neste i kjeden, og det øverste må være en betrodd root. CA-ens jobb er å bekrefte at den som søker om sertifikatet faktisk eier domenet (Domain Validation) eller organisasjonen (OV/EV). Uten denne tilliten kunne hvem som helst utstedt et "gyldig" sertifikat for <code>bank.no</code> og utført MITM.</p>
+            <p class="ref">Pensum: <a href="../../kap3/asymmetrisk-krypto.html">Kap. 3 — Asymmetrisk krypto og PKI</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 8</span>
+        <span class="exam-q__points">3 poeng</span>
+        <span class="exam-q__topic">Kap. 3 — Blokk-chiffer-modi</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Hvorfor anses AES-ECB som usikker for de fleste reelle bruksområder? (1,5 p) Hva tilbyr AES-GCM som CBC ikke gjør? (1,5 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>ECB:</strong> hver blokk på 16 byte krypteres uavhengig med samme nøkkel. Identiske klartekstblokker gir identiske chiffertekstblokker — så strukturelle mønstre (f.eks. pikselblokker i et bilde, gjentatte felt i et protokoll-format) lekker rett gjennom. Den klassiske "ECB-pingvinen" er det visuelle beviset: konturene er fortsatt synlige etter kryptering.</p>
+            <p><strong>AES-GCM:</strong> autentisert kryptering (AEAD). I tillegg til konfidensialitet leverer den <em>integritet</em> og <em>autentisitet</em> via en innebygd MAC (GHASH-basert tag). Hvis chifferteksten endres i transit, mislykkes dekrypteringen. CBC gir kun konfidensialitet — uten ekstra HMAC kan en angriper flippe biter eller utføre padding oracle-angrep. GCM krever en unik nonce per nøkkel (gjenbruk er katastrofalt — gjør den autentiserte nøkkelen utledbar).</p>
+            <p class="ref">Pensum: <a href="../../kap3/symmetrisk-krypto.html">Kap. 3 — Symmetrisk krypto</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--mc">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 9</span>
+        <span class="exam-q__points">1 poeng</span>
+        <span class="exam-q__topic">Kap. 3 — One-Time Pad</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">En utvikler krypterer to forskjellige meldinger <em>m₁</em> og <em>m₂</em> med <em>samme</em> OTP-nøkkel <em>k</em>, slik at <em>c₁ = m₁ ⊕ k</em> og <em>c₂ = m₂ ⊕ k</em>. Hva er hovedproblemet?</p>
+        <ul class="exam-q__opts">
+          <li><span class="opt-label">A</span> Nøkkelen blir kortere enn de to meldingene til sammen, så OTP-garantien om perfekt hemmelighold faller bort.</li>
+          <li><span class="opt-label">B</span> En angriper som fanger opp <em>c₁</em> og <em>c₂</em> kan beregne <em>c₁ ⊕ c₂ = m₁ ⊕ m₂</em>, som lekker informasjon om klarteksten uten å kreve kjennskap til nøkkelen.</li>
+          <li><span class="opt-label">C</span> OTP gir ingen integritetsbeskyttelse, så en angriper kan flippe biter i chifferteksten.</li>
+          <li><span class="opt-label">D</span> OTP er deterministisk, så samme melding gir alltid samme chiffertekst og lar angriper kjenne igjen mønstre.</li>
+        </ul>
+        <details class="fasit-details">
+          <summary>Vis fasit</summary>
+          <div class="fasit-body">
+            <span class="fasit-correct">Riktig svar: B</span>
+            <p>Når samme nøkkel brukes to ganger, kanselleres <em>k</em> ved XOR av chiffertekstene: <em>c₁ ⊕ c₂ = (m₁ ⊕ k) ⊕ (m₂ ⊕ k) = m₁ ⊕ m₂</em>. Angriper trenger ikke <em>k</em> i det hele tatt — XOR-en av klartekstene er nok til å gjøre kryptanalyse, særlig hvis én av meldingene har kjent struktur (header, språk, repetisjoner). Dette er det klassiske <em>two-time pad</em>-angrepet (jf. VENONA og Cryptanalysis of the Lorenz Cipher).</p>
+            <p>A er feil — nøkkelen i seg selv er fortsatt like lang som hver enkelt melding; problemet er <em>gjenbruk</em>, ikke lengde. C er sant som påstand, men er ikke <em>hovedproblemet</em> ved nøkkelgjenbruk — det er en separat egenskap ved OTP. D er feil — OTP er ikke deterministisk over forskjellige nøkler; problemet oppstår nettopp fordi <em>samme</em> nøkkel brukes på to forskjellige meldinger.</p>
+            <p class="ref">Pensum: <a href="../../kap3/symmetrisk-krypto.html">Kap. 3 — Symmetrisk krypto</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ============== KAP 4 ============== -->
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 10</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 4 — DAC vs MAC</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar forskjellen mellom <em>Discretionary Access Control</em> (DAC) og <em>Mandatory Access Control</em> (MAC). (2 p) Gi ett konkret eksempel på et system som bruker hver. (1 p) Hva er en typisk svakhet ved DAC sammenlignet med MAC? (1 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>DAC:</strong> eieren av en ressurs bestemmer selv hvem som får tilgang og kan delegere rettigheter videre. Tilgangsbeslutninger er distribuert og fleksible.</p>
+            <p><strong>MAC:</strong> sentralt definert policy — systemet (ikke eieren) avgjør tilgang basert på sikkerhetsklassifisering (subject clearance vs object label). Brukeren kan ikke gi bort eller endre tilganger. Brukes typisk i miljøer der konfidensialitet eller integritet er kritisk: militære systemer (Bell-LaPadula), SELinux/AppArmor, multi-level secure OS.</p>
+            <p><strong>Eksempler:</strong></p>
+            <ul>
+              <li>DAC: Unix/Linux-filsystemet (chmod, eieren styrer), Google Docs/SharePoint, de fleste webapplikasjoner.</li>
+              <li>MAC: SELinux (mandatory labels), militære system med Top Secret/Secret/Confidential-klassifisering, Trusted Computing Base, iOS-sandboxing.</li>
+            </ul>
+            <p><strong>Svakhet ved DAC:</strong> sårbart for <em>trojanske hester</em> og brukerfeil — en bruker (eller skadelig programvare som kjører som brukeren) kan endre eller gi bort rettigheter til sensitive filer uten at en sentral policy kan stoppe det. MAC håndhever klassifiseringen uavhengig av brukerens valg. DAC stoler dessuten på at hver eier gjør riktige tilgangsvalg, noe som skalerer dårlig i store organisasjoner.</p>
+            <p class="ref">Pensum: <a href="../../kap4/tilgangskontroll.html">Kap. 4 — Tilgangskontroll</a>, <a href="../../kap4/multi-level.html">Multi-level security</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 11</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 4 — OAuth 2.0 / SSO</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Beskriv kort hovedtrinnene i OAuth 2.0 <em>Authorization Code Flow</em> (med PKCE) når en native mobil-app vil hente brukerens profil fra en API-leverandør. (3 p) Hva er kjerneforskjellen mellom OAuth 2.0 og SAML 2.0 som SSO-protokoller? (1 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>Authorization Code Flow med PKCE:</strong></p>
+            <ol>
+              <li><strong>App lager PKCE-par:</strong> tilfeldig <code>code_verifier</code> og dens hash <code>code_challenge = SHA256(verifier)</code>.</li>
+              <li><strong>Autorisering:</strong> app åpner systembrowseren mot authorization server med <code>client_id</code>, <code>redirect_uri</code>, <code>scope</code>, og <code>code_challenge</code>. Bruker logger inn og samtykker.</li>
+              <li><strong>Authorization code returneres:</strong> auth-serveren redirigerer til app-ens <code>redirect_uri</code> med en kortlivet <code>code</code>.</li>
+              <li><strong>Token-bytte:</strong> app sender <code>code</code> + <code>code_verifier</code> til token-endepunktet. Serveren sjekker at <code>SHA256(verifier) == challenge</code> — beviser at det er samme app som startet flowen — og returnerer <code>access_token</code> (og evt. <code>refresh_token</code>).</li>
+              <li><strong>API-kall:</strong> app sender forespørsler til ressurs-API med <code>Authorization: Bearer &lt;access_token&gt;</code>.</li>
+            </ol>
+            <p>PKCE er nødvendig fordi en native app er en <em>offentlig klient</em> — den kan ikke trygt holde en client_secret, og en ondsinnet app på samme enhet kunne ellers fanget opp koden i redirect-en.</p>
+            <p><strong>OAuth vs SAML:</strong> OAuth 2.0 er primært en <em>autorisasjons</em>-protokoll (delegert tilgang til API-er, basert på tokens — typisk JSON/JWT, over REST). SAML 2.0 er en <em>autentiserings</em>-protokoll (XML-baserte assertions om brukerens identitet, typisk for enterprise/web-SSO mellom domener). OpenID Connect er autentiseringslaget oppå OAuth som lukker dette gapet.</p>
+            <p class="ref">Pensum: <a href="../../kap4/autentisering.html">Kap. 4 — Autentisering</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 12</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 4 — Buffer overflow</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar hva et stack-basert buffer overflow-angrep er, og hvordan det kan føre til control-flow hijacking. (2 p) Beskriv to konkrete mottiltak som moderne kompilatorer eller operativsystemer bruker for å gjøre slike angrep vanskeligere. (2 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>Stack-basert buffer overflow:</strong> i språk uten bounds-checking (typisk C/C++) skriver en funksjon mer data inn i en stack-allokert buffer enn det er plass til. Overflow-en overskriver tilstøtende stack-data — særlig <em>saved return address</em>. Når funksjonen returnerer, hopper CPU-en til den manipulerte adressen i stedet for tilbake til kalleren. Hvis angriper plasserer en shellcode-payload i samme buffer og setter return-adressen til å peke dit, får hen vilkårlig kodeutførelse.</p>
+            <p><strong>Mottiltak (to eksempler):</strong></p>
+            <ul>
+              <li><strong>Stack canaries (StackGuard / /GS):</strong> kompilatoren legger en hemmelig "kanarifugl"-verdi mellom lokale variabler og return-adressen ved funksjonsinngang, og sjekker den ved return. Overflow som overskriver return-adressen overskriver også kanarien — sjekken feiler og prosessen aborteres før hopp.</li>
+              <li><strong>ASLR (Address Space Layout Randomization):</strong> OS-en randomiserer startsadressen for stack, heap, libc og evt. code-segmentet ved hver oppstart. Angriper kan ikke lenger hardkode adressen til shellcode eller gadgets i ROP-kjeden.</li>
+              <li><strong>DEP/NX (Data Execution Prevention):</strong> stack/heap-sider markeres som ikke-eksekverbare via MMU-en. Selv om angriper får CPU-en til å hoppe til payloaden, kjører den ikke. (Tvinger fram ROP/JOP, som er vanskeligere.)</li>
+              <li><strong>SafeStack / shadow stack (CET):</strong> hardware-håndhevet kopi av return-adresser på en separat, beskyttet stack.</li>
+            </ul>
+            <p>I praksis brukes alle disse sammen — defense in depth — fordi hver enkelt kan omgås (canaries med leak, ASLR med info-leak + ROP, DEP med ROP).</p>
+            <p class="ref">Pensum: <a href="../../kap4/kontrollhijacking.html">Kap. 4 — Kontroll-hijacking</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--mc">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 13</span>
+        <span class="exam-q__points">1 poeng</span>
+        <span class="exam-q__topic">Kap. 4 — JWT</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">En API mottar JWT-er signert med HS256 og verifiserer signaturen ved å lese <code>alg</code>-feltet i headeren og slå opp riktig algoritme. Hvilket angrep blir mulig på grunn av dette?</p>
+        <ul class="exam-q__opts">
+          <li><span class="opt-label">A</span> Replay-angrep der angriper sender samme gyldige token flere ganger og får tilgang gjentatte ganger.</li>
+          <li><span class="opt-label">B</span> Brute-force av HS256-nøkkelen ved å prøve alle mulige hemmelige nøkler offline.</li>
+          <li><span class="opt-label">C</span> Cross-site scripting der token-et stjeles fra <code>localStorage</code> i nettleseren.</li>
+          <li><span class="opt-label">D</span> Angriper setter <code>alg: "none"</code> i headeren og leverer et token uten signatur som likevel aksepteres.</li>
+        </ul>
+        <details class="fasit-details">
+          <summary>Vis fasit</summary>
+          <div class="fasit-body">
+            <span class="fasit-correct">Riktig svar: D</span>
+            <p>Den klassiske <em>alg=none</em>-sårbarheten: tidligere JWT-biblioteker leste <code>alg</code> fra det utokenede header-feltet og kjørte verifisering med den oppgitte algoritmen. Setter angriper <code>alg: "none"</code>, hopper biblioteket signaturverifikasjonen helt over og aksepterer påstandene i payloaden som de er — inkludert <code>"sub": "admin"</code>. Beslektet er <em>RS256→HS256-confusion</em>, der angriper bytter signaturalgoritme og bruker public-nøkkelen som HMAC-hemmelighet.</p>
+            <p>Forsvar: aldri stol på <code>alg</code> fra mottatt token — pin den forventede algoritmen på server-siden. A er en separat sårbarhet (krever ingen alg-tukling — løses med kort levetid + <code>jti</code> + revocation list). B er teoretisk om nøkkelen er kort/svak, men forsvares av en lang, tilfeldig hemmelighet. C er en transport-/lagringsbekymring, ikke noe spesifikt med <code>alg</code>-feltet.</p>
+            <p class="ref">Pensum: <a href="../../kap4/jwt.html">Kap. 4 — JWT</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ============== KAP 5 ============== -->
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 14</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 5 — Threat modeling-tilnærminger</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar forskjellen mellom <em>attacker-centric</em> og <em>software-centric</em> threat modeling. (2 p) Nevn én konkret metode/notasjon som passer godt for hver tilnærming, og forklar kort hva den brukes til. (2 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <ul>
+              <li><strong>Attacker-centric:</strong> start fra angriperen — hvem er hen, hva er motivasjonen, hvilke mål og evner har hen? Tenk seg gjennom angrepsforløp utenfra-og-inn. Egnet i tidlig fase eller når trussellandskapet er uklart.</li>
+              <li><strong>Software-centric:</strong> start fra systemet — komponenter, data flows, trust boundaries — og identifiser hva som kan gå galt på hvert sted. Gir bedre dekning når arkitekturen er kjent og man vil sikre at ingen interaksjon er glemt.</li>
+            </ul>
+            <p><strong>Eksempler på metoder:</strong></p>
+            <ul>
+              <li><em>Attack tree</em> (attacker-centric): treet har angriperens mål (f.eks. "stjel kundeliste") som rot, og dekomponerer i delmål og konkrete teknikker. Hjelper med å resonnere om alternative angrepsstier og hvor mottiltak gir best ROI.</li>
+              <li><em>Data Flow Diagram (DFD)</em> + STRIDE (software-centric): tegn prosesser, datalagre, eksterne entiteter og data flows; tegn trust boundaries der data krysser sikkerhetsnivåer. Bruk STRIDE per element/flow for systematisk å identifisere trusler. Misuse case og bow-tie er andre eksempler — misuse case er use case-diagram med "ondsinnet aktør" og bow-tie kobler trussel-årsaker til konsekvenser via en sentral hendelse.</li>
+            </ul>
+            <p class="ref">Pensum: <a href="../../kap5/metodikk.html">Kap. 5 — Metodikk</a>, <a href="../../kap5/notasjoner.html">Notasjoner</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 15</span>
+        <span class="exam-q__points">6 poeng</span>
+        <span class="exam-q__topic">Kap. 5 — STRIDE anvendt</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">En studentforening bygger en webbasert chat-tjeneste. Arkitekturen består av: en SPA-frontend, en REST-backend, en Postgres-DB, og en S3-bucket der brukere laster opp profilbilder. Brukere logger inn med e-post + passord. Identifiser <strong>én konkret trussel per STRIDE-kategori</strong> rettet mot denne arkitekturen, og foreslå ett mottiltak per trussel.</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <ul>
+              <li><strong>S — Spoofing:</strong> en angriper utfører credential stuffing med lekkede passord fra et annet brudd og logger inn som en annen bruker. <em>Mottiltak:</em> kombinasjon av sterke passord-policyer, MFA (TOTP), rate-limiting og deteksjon av kjente brutte passord (Have I Been Pwned-API).</li>
+              <li><strong>T — Tampering:</strong> en angriper modifiserer en chat-melding i transit eller endrer profilbilder direkte i S3-bucketen. <em>Mottiltak:</em> TLS overalt (transport-integritet) + signerte/strenge IAM-policy på bucketen + server-side write-only signering av upload-URLer.</li>
+              <li><strong>R — Repudiation:</strong> en bruker sender en truende melding og hevder etterpå at hen ikke gjorde det, og det finnes ingen logg som beviser annet. <em>Mottiltak:</em> append-only audit-logg med tidsstempel, bruker-ID og hash-kjede over meldingsinnholdet, lagret separat fra appens DB.</li>
+              <li><strong>I — Information disclosure:</strong> IDOR i meldings-API-et — <code>GET /messages/123</code> returnerer meldinger fra en annen tråd om bruker bytter ID. <em>Mottiltak:</em> server-side autorisasjonssjekk på hver request (bruker X må være medlem av tråd Y), ikke kun obscure ID-er.</li>
+              <li><strong>D — Denial of service:</strong> en bot åpner millioner av WebSocket-tilkoblinger eller laster opp gigabyte-bilder. <em>Mottiltak:</em> rate-limiting per IP/bruker, maks filstørrelse + filtype-validering på upload, autoskalering med tak.</li>
+              <li><strong>E — Elevation of privilege:</strong> en vanlig bruker manipulerer en <code>role=admin</code>-parameter i en API-request og får admin-rettigheter. <em>Mottiltak:</em> aldri stol på klient-leverte roller — server slår opp rollen fra session/DB ved hver autorisasjonsbeslutning, og bruker en sentral access-kontroll-middleware.</li>
+            </ul>
+            <p class="ref">Pensum: <a href="../../kap5/stride.html">Kap. 5 — STRIDE</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ============== KAP 6 ============== -->
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 16</span>
+        <span class="exam-q__points">5 poeng</span>
+        <span class="exam-q__topic">Kap. 6 — Risk Management Framework</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Beskriv de typiske trinnene i en Risk Management Framework (RMF)-prosess slik den brukes i sikker systemutvikling. (3 p) Forklar deretter forskjellen mellom <em>risikoreduksjon</em>, <em>risikooverføring</em>, <em>risikoaksept</em> og <em>risikounngåelse</em> — og gi ett eksempel på hver. (2 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>RMF-trinn (typisk syklus):</strong></p>
+            <ol>
+              <li><strong>Kontekst og asset-identifikasjon:</strong> hva beskytter vi (data, funksjoner, omdømme), hvem er aktørene, hva er kravene fra forretning og regulering.</li>
+              <li><strong>Trusselidentifikasjon:</strong> hvilke trusler er relevante — bruk STRIDE, attack tree, trusselbiblioteker.</li>
+              <li><strong>Risikoanalyse:</strong> for hver trussel, vurdér sannsynlighet × konsekvens (kvalitativ matrise eller kvantitativ <em>ALE = SLE × ARO</em>).</li>
+              <li><strong>Risiko-prioritering:</strong> rangér og bestem akseptkriterier — hva er innenfor risikoappetitten, hva må håndteres.</li>
+              <li><strong>Risikohåndtering (treatment):</strong> velg mottiltak (mitigate, transfer, accept, avoid) og implementér.</li>
+              <li><strong>Overvåking og iterasjon:</strong> trusselbildet endrer seg — RMF kjøres kontinuerlig, ikke som engangsaktivitet.</li>
+            </ol>
+            <p><strong>Fire håndteringsstrategier:</strong></p>
+            <ul>
+              <li><em>Reduksjon (mitigate):</em> sett inn kontroller som senker sannsynlighet eller konsekvens. <em>Eksempel:</em> innfør MFA for å redusere risiko for kontoovertakelse.</li>
+              <li><em>Overføring (transfer):</em> flytt risikoen til en tredjepart. <em>Eksempel:</em> kjøp cyber-forsikring, eller outsource betalingshåndtering til en PCI-DSS-sertifisert leverandør.</li>
+              <li><em>Aksept (accept):</em> bevisst beslutning om å leve med risikoen fordi mottiltaket koster mer enn skaden. <em>Eksempel:</em> aksepter at en intern testserver ikke har TLS, fordi den kun er tilgjengelig over VPN.</li>
+              <li><em>Unngåelse (avoid):</em> fjern aktiviteten som skaper risikoen. <em>Eksempel:</em> ikke lagre kredittkortnumre i det hele tatt — la PSP håndtere det.</li>
+            </ul>
+            <p class="ref">Pensum: <a href="../../kap6/risikohåndtering.html">Kap. 6 — Risikohåndtering</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 17</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 6 — Sikkerhetskrav</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar hva som kjennetegner et <em>godt</em> sikkerhetskrav versus et <em>dårlig</em> sikkerhetskrav. (2 p) Skriv om følgende dårlige krav til et bedre, testbart krav og forklar hva du endret: (2 p)</p>
+        <p class="q-text" style="margin-top: 0.4rem; padding-left: 1rem; border-left: 3px solid var(--ochre); font-style: italic;">"Systemet skal være sikkert mot uautorisert tilgang."</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>Godt sikkerhetskrav</strong> er <em>spesifikt</em>, <em>verifiserbart/testbart</em>, <em>knyttet til en konkret asset eller funksjon</em>, og uttrykker hva systemet skal eller ikke skal gjøre — ikke vage egenskaper. Det bør være sporbart til en trussel eller policy. Ofte uttrykt som "negativt krav" (hva må <em>ikke</em> kunne skje).</p>
+            <p><strong>Dårlig sikkerhetskrav</strong> er svakt, ikke-testbart og bruker subjektive ord som "sikker", "robust", "rimelig beskyttet". Det gir ikke utviklerne noe konkret å bygge eller testere noe å verifisere.</p>
+            <p><strong>Omskrivning:</strong></p>
+            <p style="padding-left: 1rem; border-left: 3px solid var(--green);">"Alle endepunkter under <code>/admin/*</code> skal returnere HTTP 401 hvis forespørselen mangler gyldig session-cookie, og HTTP 403 hvis brukeren er innlogget men ikke har rollen <code>admin</code>. Dette skal verifiseres med automatiserte integrasjonstester som dekker minst tre representative endepunkter."</p>
+            <p><strong>Hva endret seg:</strong> spesifikt scope (<code>/admin/*</code>), spesifikk forventet oppførsel (401 vs 403), nevnte mekanisme (session-cookie + rolle), og en konkret testbarhetskrav (automatiserte tester med eksplisitt dekning). Erstattet det subjektive "sikkert" med målbar oppførsel.</p>
+            <p class="ref">Pensum: <a href="../../kap6/sdl.html">Kap. 6 — SDL</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--mc">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 18</span>
+        <span class="exam-q__points">1 poeng</span>
+        <span class="exam-q__topic">Kap. 6 — CVSS</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">En sårbarhet i en webapplikasjon kan utnyttes av en uautentisert angriper over internett, uten brukerinteraksjon, og gir full kontroll over serveren. Hvilken CVSS Base-metrikk reflekterer at angrepet kan utføres "remote uten lokal tilgang"?</p>
+        <ul class="exam-q__opts">
+          <li><span class="opt-label">A</span> Attack Complexity (AC) — målet er at angrepet ikke krever spesielle forutsetninger.</li>
+          <li><span class="opt-label">B</span> Privileges Required (PR) — målet er at angriper ikke trenger gyldige rettigheter.</li>
+          <li><span class="opt-label">C</span> Attack Vector (AV) — angripbar over nettverk vs lokal eller fysisk tilgang.</li>
+          <li><span class="opt-label">D</span> Scope (S) — om sårbarheten påvirker komponenter utenfor sårbar sikkerhetssone.</li>
+        </ul>
+        <details class="fasit-details">
+          <summary>Vis fasit</summary>
+          <div class="fasit-body">
+            <span class="fasit-correct">Riktig svar: C</span>
+            <p>Attack Vector (AV) angir <em>konteksten</em> for hvor angrepet kan utføres fra: Network (AV:N, fra internett), Adjacent (AV:A, samme nettverkssegment), Local (AV:L, krever local tilgang) eller Physical (AV:P). "Remote uten lokal tilgang" er definisjonen av AV:N — som gir høyest påvirkning på base-scoren for denne dimensjonen.</p>
+            <p>A (AC) beskriver om angrepet krever spesielle forhold (timing, konfigurasjon) — handler om <em>vanskelighet</em>, ikke <em>posisjon</em>. B (PR) beskriver om angriper må ha rettigheter — i dette tilfellet None — men sier ingenting om nettverksposisjon. D (Scope) handler om sårbarheten påvirker ressurser utenfor den sårbare komponentens autoritet (f.eks. en VM-escape) — relevant her, men ikke det "remote uten lokal tilgang" beskriver.</p>
+            <p class="ref">Pensum: <a href="../../kap6/risikohåndtering.html">Kap. 6 — Risikohåndtering (CVSS)</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ============== KAP 7 ============== -->
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 19</span>
+        <span class="exam-q__points">5 poeng</span>
+        <span class="exam-q__topic">Kap. 7 — AI-kodeassistent</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">List minst <strong>tre risikoer</strong> ved bruk av LLM-baserte kodeassistenter (Copilot, Cursor) i et utviklingsteam. (3 p) Foreslå to <strong>konkrete utviklerpraksiser</strong> som reduserer disse risikoene. (2 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>Risikoer:</strong></p>
+            <ul>
+              <li><strong>Sårbar kode-generering:</strong> modellen er trent på offentlig kode, og gjengir mønstre som var vanlige i datasettet — inkludert klassiske CWE-er (SQL-konkatenering, manglende escaping, gamle krypto-bibliotek, hardkodede defaults).</li>
+              <li><strong>Hallusinerte API-er og avhengigheter:</strong> LLM foreslår pakkenavn eller funksjoner som ikke eksisterer; et angrepsmønster (<em>slopsquatting</em>) er at angriper publiserer ondsinnet pakke med det halluserte navnet på PyPI/npm.</li>
+              <li><strong>Lekkasje av proprietær/sensitiv kode:</strong> hvis prompten inkluderer firmaintern kode eller hemmeligheter, kan dette sendes til en tredjepart og potensielt logges eller brukes i fremtidig trening.</li>
+              <li><strong>Lisens-/IP-spørsmål:</strong> generert kode kan være nær-kopi av GPL-lisensiert kode i treningssettet uten attribusjon.</li>
+              <li><strong>Overtillit og kompetansetap:</strong> utviklere godkjenner forslag uten å forstå dem; review-kvaliteten faller; junior-utviklere får mindre dyptgående læring.</li>
+              <li><strong>Prompt injection mot dev-assistent:</strong> ondsinnede strenger i kontekstfiler (README, kommentarer) kan styre agentens oppførsel — særlig i agentiske kode-verktøy med filsystem-/shell-tilgang.</li>
+            </ul>
+            <p><strong>Tiltak (eksempler):</strong></p>
+            <ul>
+              <li>Behandle LLM-output som <em>uvurdert PR fra ekstern bidragsyter</em>: alltid menneskelig review, kjør SAST (Semgrep, Bandit, CodeQL) og dependency-scan på alle endringer.</li>
+              <li>Bruk enterprise/zero-retention-versjon av assistenten, eller selvhostet modell, slik at kontekst ikke logges/trenes på. Konfigurér å ekskludere hemmeligheter-mapper og <code>.env</code> fra prompt-kontekst.</li>
+              <li>Verifisér at foreslåtte pakker eksisterer og er ekte før <code>npm install</code> / <code>pip install</code> (sjekk popularitet, dato, vedlikeholdsfrekvens) for å unngå slopsquatting.</li>
+            </ul>
+            <p class="ref">Pensum: <a href="../../kap7/ai-utvikling.html">Kap. 7 — AI for utvikling</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 20</span>
+        <span class="exam-q__points">3 poeng</span>
+        <span class="exam-q__topic">Kap. 7 — Hvorfor sårbare mønstre i LLM</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Hvorfor har LLM-er en tendens til å foreslå kode med kjente sårbarheter? Gi tre forskjellige grunner.</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <ol>
+              <li><strong>Treningsdata speiler internett.</strong> Modellene er trent på offentlig kode (GitHub, Stack Overflow, blogger) der usikre mønstre er vanlige — SQL-konkatenering, MD5-passord, manglende input-sanitering, gamle eksempler. Modellen reproduserer det den så ofte.</li>
+              <li><strong>Optimaliseringen er for "plausibel kode", ikke "sikker kode".</strong> LLM-en optimaliserer for å generere det mest sannsynlige neste tokenet i kontekst — den har ingen innebygd modell av sikkerhetsegenskaper eller trusselsmodell. Sårbar kode ser ofte enklere og mer "lærebok-aktig" ut, så det er sannsynlig output.</li>
+              <li><strong>Manglende kontekst om systemet.</strong> Modellen ser bare et utdrag — den vet ikke om input er klarert, hvilken trust boundary den krysser, om endepunktet er offentlig. Den foreslår derfor "generisk" kode som ofte mangler de defensive tiltakene applikasjonen trenger.</li>
+              <li><em>(Bonus)</em> Utdaterte best practices — modellens kunnskapsskutt kan være år bakover, slik at den anbefaler bibliotek/algoritmer som siden er deprecated (f.eks. <code>md5</code>, gamle cipher-suites, deprecated APIer).</li>
+            </ol>
+            <p class="ref">Pensum: <a href="../../kap7/ai-utvikling.html">Kap. 7 — AI for utvikling</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ============== KAP 8 ============== -->
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 21</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 8 — Microservice security</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar to sentrale sikkerhetsutfordringer ved en mikrotjeneste-arkitektur sammenlignet med en monolittisk applikasjon. (2 p) Beskriv ett tiltak (security pattern) som adresserer service-to-service-autentisering, og hva man mister hvis man kun bruker JWT uten mTLS. (2 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>Utfordringer:</strong></p>
+            <ul>
+              <li><strong>Stor angrepsflate / mange interne kall.</strong> Det som var et funksjonskall i monolitten er nå et HTTP/gRPC-kall over nettverket — hver kanal må autentiseres, autoriseres og krypteres. Antall trust boundaries vokser raskt.</li>
+              <li><strong>Polyglot stack og inkonsistent sikkerhetspolicy.</strong> Ulike team velger ulike språk, rammeverk og biblioteker per tjeneste — vanskelig å håndheve at f.eks. autentiseringsmiddleware er likt overalt. Sårbarheter i ett bibliotek påvirker bare en delmengde av flåten.</li>
+              <li><strong>Hemmelighetshåndtering på tvers av tjenester.</strong> Hundrevis av tjenester trenger nøkler, sertifikater, DB-credentials — krever sentral secret manager (Vault, KMS) og rotasjon.</li>
+              <li><strong>Distribuert audit/observabilitet.</strong> En forespørsel som krysser ti tjenester må kunne spores end-to-end for å oppdage og granske angrep.</li>
+            </ul>
+            <p><strong>Pattern — mTLS i service mesh:</strong> hver tjeneste får et identitetssertifikat fra en intern PKI/SPIFFE-CA. Alle interne kall går gjennom en sidecar-proxy (Envoy/Linkerd) som etablerer mutuell TLS — begge sider verifiserer hverandres sertifikat. Dette gir <em>kryptografisk transport-identitet</em>: A vet at hen snakker med B, og motsatt.</p>
+            <p><strong>Hva man mister kun med JWT:</strong> JWT gir <em>påstand</em> om identitet, men ikke transport-bevis. Uten mTLS:</p>
+            <ul>
+              <li>Ingen autentisering av <em>kallende</em> tjeneste på transportnivå — en kompromittert nabotjeneste eller bind-mounted token kan brukes fra hvor som helst.</li>
+              <li>Ingen automatisk kryptert kanal — JWT i klartekst over HTTP er sårbar mot avlytting og MITM.</li>
+              <li>Token replay: en lekket JWT er gyldig hvor som helst til den utløper. mTLS binder identiteten til klientens nøkkel, som ikke kan replays.</li>
+            </ul>
+            <p>I praksis kombineres ofte mTLS (transport-identitet) med JWT (bruker-/scope-claims) — defense in depth.</p>
+            <p class="ref">Pensum: <a href="../../kap8/mikrotjenester.html">Kap. 8 — Mikrotjenester</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 22</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 8 — Supply chain</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Beskriv de typiske fire trinnene i et software supply chain-angrep. (2 p) Forklar hva en <em>SBOM</em> (Software Bill of Materials) er, og hvordan den hjelper en organisasjon å respondere når en ny CVE blir publisert i en populær open source-pakke. (2 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>Fire trinn i supply chain-angrep:</strong></p>
+            <ol>
+              <li><strong>Kompromiss av oppstrøms-kilde:</strong> angriper får tilgang til en byggepipeline, et utviklerkonto, en pakke-maintainer-konto, eller en build-server (eksempler: SolarWinds-byggeserveren, event-stream-overtagelsen, ua-parser-js).</li>
+              <li><strong>Innsetting av ondsinnet kode:</strong> ondsinnet payload injiseres inn i artefakten — kan være en bakdør, en data-stealer, eller en betinget aktivert nyttelast (xz-bakdøren).</li>
+              <li><strong>Distribusjon via legitime kanaler:</strong> artefakten signeres og publiseres som vanlig på pakke-registeret eller via auto-oppdatering — fordi den kommer fra "betrodd" kilde, passerer den de fleste sikkerhetskontroller.</li>
+              <li><strong>Utnyttelse nedstrøms:</strong> alle nedstrøms-brukere som installerer/oppdaterer pakken får bakdøren. Angriper kan deretter pivotere, eksfiltrere data, eller utløse målrettede angrep mot enkelte ofre.</li>
+            </ol>
+            <p><strong>SBOM:</strong> en strukturert (typisk CycloneDX eller SPDX), maskinlesbar liste over alle komponenter — direkte og transitive avhengigheter — som inngår i en programvareartefakt, med versjoner, hash-er og lisenser. Genereres som del av build-pipelinen.</p>
+            <p><strong>Respons ved ny CVE:</strong> når CVE-2024-XXXX publiseres for <code>libfoo &lt; 1.4.2</code>, kan en organisasjon med SBOM-er for alle prod-artefakter <em>søke direkte</em>: "hvilke av våre 350 tjenester inkluderer libfoo, og i hvilken versjon?" Dette gjøres på minutter i stedet for dager. Uten SBOM må hvert team gå manuelt gjennom dependency-trærne sine. SBOM-er kan også distribueres til kunder/regulator som dokumentasjon (kreves for nye EU- og US-regelverk).</p>
+            <p class="ref">Pensum: <a href="../../kap8/supply-chain.html">Kap. 8 — Supply chain</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--mc">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 23</span>
+        <span class="exam-q__points">1 poeng</span>
+        <span class="exam-q__topic">Kap. 8 — Dependency confusion</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Hva beskriver et <em>dependency confusion</em>-angrep best?</p>
+        <ul class="exam-q__opts">
+          <li><span class="opt-label">A</span> En angriper publiserer en pakke med samme navn som et internt firma-bibliotek på et offentlig register, slik at build-verktøyet ved et uhell trekker den offentlige (ofte med høyere versjonsnummer) i stedet for den interne.</li>
+          <li><span class="opt-label">B</span> En angriper kjøper opp en uvedlikeholdt open source-pakke ved å tilby seg som ny maintainer, og legger inn ondsinnet kode i neste release.</li>
+          <li><span class="opt-label">C</span> En angriper registrerer et pakkenavn som ligner på et populært bibliotek (<code>reqeusts</code> i stedet for <code>requests</code>), i håp om at brukere skriver feil.</li>
+          <li><span class="opt-label">D</span> En angriper kompromitterer byggeserveren til en leverandør og legger inn en bakdør i den signerte byggetefakten som distribueres til alle kunder.</li>
+        </ul>
+        <details class="fasit-details">
+          <summary>Vis fasit</summary>
+          <div class="fasit-body">
+            <span class="fasit-correct">Riktig svar: A</span>
+            <p>Dependency confusion (først demonstrert av Alex Birsan i 2021) utnytter hvordan pakke-ledere ved konflikt mellom et internt og et offentlig register ofte velger pakken med høyest versjonsnummer — uavhengig av kilde. Angriper publiserer derfor <code>@firma/internal-utils@99.0.0</code> på npmjs.com, og en feilkonfigurert pipeline trekker den i stedet for det interne. Fiks: explicit scoping og pinned private registries.</p>
+            <p>B beskriver <em>maintainer takeover</em> (event-stream, polyfill.io). C beskriver <em>typosquatting</em>. D beskriver et <em>build pipeline compromise</em> (SolarWinds-stil). Alle er supply chain-angrep, men distinkte mekanismer.</p>
+            <p class="ref">Pensum: <a href="../../kap8/supply-chain.html">Kap. 8 — Supply chain</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ============== KAP 9 ============== -->
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 24</span>
+        <span class="exam-q__points">5 poeng</span>
+        <span class="exam-q__topic">Kap. 9 — GDPR-prinsipper</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">List minst <strong>fire</strong> av personvernsprinsippene i GDPR (artikkel 5) og forklar hver kort. (4 p) Gi ett konkret eksempel på en designbeslutning som realiserer ett av prinsippene. (1 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p>GDPR artikkel 5 lister syv prinsipper:</p>
+            <ul>
+              <li><strong>Lovlighet, rettferdighet og åpenhet</strong> — behandling skal ha rettslig grunnlag og være transparent for den registrerte; ingen skjult innsamling.</li>
+              <li><strong>Formålsbegrensning</strong> — personopplysninger samles inn for spesifikke, eksplisitte formål og brukes ikke til andre, uforenlige formål senere.</li>
+              <li><strong>Dataminimering</strong> — kun de opplysningene som faktisk er nødvendige for formålet, skal samles inn.</li>
+              <li><strong>Riktighet</strong> — data skal være korrekte og oppdaterte; uriktige opplysninger skal rettes eller slettes uten ugrunnet opphold.</li>
+              <li><strong>Lagringsbegrensning</strong> — data skal ikke lagres lenger enn nødvendig for formålet; etablér og håndhev sletteperioder.</li>
+              <li><strong>Integritet og konfidensialitet</strong> — passende sikkerhetstiltak (teknisk og organisatorisk) mot uautorisert tilgang, endring eller tap.</li>
+              <li><strong>Ansvarlighet (accountability)</strong> — den behandlingsansvarlige (controller) må kunne <em>dokumentere</em> at de øvrige prinsippene følges (registre, DPIA, kontrakter, opplæring).</li>
+            </ul>
+            <p><strong>Konkret eksempel — dataminimering:</strong> en nettbutikk trenger leveringsadresse for å sende varer, men ikke fødselsdato. Skjemaet for kontoregistrering fjerner derfor fødselsdato-feltet, og kassen ber kun om de feltene som strengt tatt trengs for ordren. (Eller: pseudonymisering — kundens lojalitetsdata kobles via et internt ID i analysepipelinen, ikke navn/e-post.)</p>
+            <p class="ref">Pensum: <a href="../../kap9/gdpr.html">Kap. 9 — GDPR</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 25</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 9 — Roller og DPIA</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar rollene <em>behandlingsansvarlig</em> (controller) og <em>databehandler</em> (processor) i GDPR. (2 p) Hva er en DPIA, og når er den lovpålagt? (2 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <ul>
+              <li><strong>Controller (behandlingsansvarlig):</strong> avgjør <em>formål</em> og <em>midler</em> for behandlingen. Bærer hovedansvaret for at GDPR følges, må kunne dokumentere det (accountability), og er kontaktpunkt for Datatilsynet og de registrerte. <em>Eksempel:</em> en nettbutikk som bestemmer at den vil lagre kundedata for ordre og markedsføring.</li>
+              <li><strong>Processor (databehandler):</strong> behandler personopplysninger <em>på vegne av</em> en controller, etter dokumenterte instrukser. Kan ikke bruke dataene til egne formål. <em>Eksempel:</em> en sky-leverandør (AWS) eller en SaaS for kundesupport (Zendesk) som lagrer/behandler data for nettbutikken. Forholdet reguleres av en databehandleravtale (Art. 28).</li>
+            </ul>
+            <p><strong>DPIA (Data Protection Impact Assessment, art. 35):</strong> en strukturert vurdering av personvernsrisiko som kreves <em>før</em> behandling settes i gang når den sannsynligvis vil medføre høy risiko for de registrertes rettigheter og friheter. Lovpålagt særlig ved:</p>
+            <ul>
+              <li>Systematisk og omfattende automatisert vurdering/profilering med rettsvirkning (kredittscoring, automatiserte beslutninger).</li>
+              <li>Storskala behandling av <em>særlige kategorier</em> data (helse, biometri, etnisk opprinnelse, politisk syn).</li>
+              <li>Systematisk overvåking av offentlig tilgjengelig område (kameraovervåking, ansiktgjenkjenning).</li>
+              <li>Annet som Datatilsynet har ført opp på sin "krever DPIA"-liste.</li>
+            </ul>
+            <p>DPIA-en beskriver behandlingen, vurderer nødvendighet/proporsjonalitet, identifiserer risikoer og dokumenterer mottiltak. Hvis høy restrisiko gjenstår etter tiltak, må controller konsultere Datatilsynet før oppstart.</p>
+            <p class="ref">Pensum: <a href="../../kap9/gdpr.html">Kap. 9 — GDPR</a>, <a href="../../kap9/privacy-engineering.html">Privacy engineering</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <!-- ============== KAP 10 ============== -->
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 26</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 10 — SAST-tilnærminger</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar to forskjellige tilnærminger til statisk kodeanalyse (SAST) og hva de finner. (2 p) Beskriv to typiske <strong>begrensninger</strong> ved automatiserte SAST-verktøy. (2 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>To tilnærminger:</strong></p>
+            <ul>
+              <li><strong>Mønstermatching på AST (regel-/syntax-basert):</strong> verktøyet parser kildekoden til et abstract syntax tree og leter etter kjente sårbare mønstre — f.eks. <code>cursor.execute(f"SELECT ... {x}")</code> eller <code>hashlib.md5(pw)</code>. Raskt, lett å skrive nye regler, men ser ikke om input faktisk er angripbart. <em>Eksempel: Semgrep, Bandit.</em></li>
+              <li><strong>Taint analysis / data-flow:</strong> verktøyet sporer hvor "untrusted" data (taint sources — request-parametere, fil-input) flyter, og varsler hvis det når en "sink" (DB-spørring, <code>exec</code>, <code>innerHTML</code>) uten å passere en sanitizer underveis. Krever full kontrollflyt- og dataflyt-analyse, men finner reelle injection-baner. <em>Eksempel: CodeQL, Fortify.</em></li>
+              <li><em>(Bonus)</em> Symbolic execution / model checking — utforsker mulige eksekveringsstier og verifiserer egenskaper formelt; kraftig, men har skaleringsproblemer (path explosion).</li>
+            </ul>
+            <p><strong>Begrensninger:</strong></p>
+            <ul>
+              <li><strong>Falske positiver/negativer:</strong> SAST har ingen runtime-kontekst — det vet ikke at en bestemt input er klarert ved et høyere lag, eller at en "sink" er deaktivert bak feature-flag. Resultat: støy som drukner reelle funn, eller mangelfulle dekninger som ser ut som ren bug-bar.</li>
+              <li><strong>Manglende business logic-forståelse:</strong> SAST kan ikke vurdere om autorisasjonsmodellen i applikasjonen er korrekt — at "kunde A ikke skal se ordre til kunde B" — fordi det er semantikk, ikke syntaks. IDOR-er, broken access control og logikkfeil glipper.</li>
+              <li><strong>Konfigurasjons- og deploy-blindhet:</strong> sårbarheter som ligger i konfig-filer, infrastruktur (IaC), eller miljøvariabler ses ofte ikke uten egne plugins.</li>
+              <li><strong>Tredjeparts-/binær-kode:</strong> SAST trenger kildekode. Vulnerabilities i kompilerte avhengigheter krever SCA, ikke SAST.</li>
+            </ul>
+            <p>Konklusjon: SAST er nødvendig, ikke tilstrekkelig — kombinér med DAST, manuell review og threat modeling.</p>
+            <p class="ref">Pensum: <a href="../../kap10/sast.html">Kap. 10 — SAST</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--open">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 27</span>
+        <span class="exam-q__points">4 poeng</span>
+        <span class="exam-q__topic">Kap. 10 — Prompt injection vs jailbreak</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Forklar forskjellen på <em>prompt injection</em> og <em>jailbreak</em>-angrep mot LLM-er. (2 p) Beskriv kort hvordan AI og cybersikkerhet relaterer seg langs tre akser ("AI for cybersecurity", "malicious AI", "cybersecurity for AI") — gi ett konkret eksempel på hver. (2 p)</p>
+        <details class="fasit-details">
+          <summary>Vis modellsvar</summary>
+          <div class="fasit-body">
+            <p><strong>Prompt injection vs jailbreak:</strong></p>
+            <ul>
+              <li><strong>Prompt injection</strong> handler om at <em>upålitelig input</em> til modellen overstyrer eller motstrider <em>systemprompt/utviklerens instruksjoner</em>. Skiller mellom <em>direkte</em> (angriper skriver "ignorer alle tidligere instruksjoner og …" direkte i chat-feltet) og <em>indirekte</em> (instruksjoner ligger i et dokument, en e-post eller en nettside som modellen leser via RAG/tool, og kapres derfra). Vanskelig å fikse fordi LLM-en strukturelt ikke kan skille "system" fra "data" — alt er tekst.</li>
+              <li><strong>Jailbreak</strong> handler om at <em>brukeren</em> bevisst forsøker å omgå modellens safety-trening (RLHF-policy) — typisk via rollespill, hypotetiske scenarier, "DAN"-prompter, eller koding av forespørselen — for å få modellen til å produsere innhold den er trent til å nekte (våpen-oppskrifter, hatprat, etc.).</li>
+            </ul>
+            <p>Forskjellen kort: prompt injection er angrep mot <em>integriteten</em> til instruksjonshierarkiet (tredjeparts-input vinner over systemprompt); jailbreak er angrep mot <em>policyen</em> (få modellen til å bryte sine egne regler). De kan kombineres.</p>
+            <p><strong>Tre akser:</strong></p>
+            <ul>
+              <li><em>AI for cybersecurity:</em> AI brukes som forsvarsverktøy. <em>Eksempel:</em> ML-basert anomalideteksjon i SIEM som markerer uvanlige innloggingsmønstre.</li>
+              <li><em>Malicious AI (AI for cyberangrep):</em> angripere bruker AI for å forbedre angrep. <em>Eksempel:</em> generativ AI som lager personaliserte phishing-e-poster i stor skala, eller deepfakes brukt i CEO-fraud.</li>
+              <li><em>Cybersecurity for AI:</em> beskytte AI-systemene selv. <em>Eksempel:</em> hindre data poisoning og model extraction; sikre treningspipelinen og modell-artefakten; håndtere adversarial examples som lurer klassifikatorer.</li>
+            </ul>
+            <p class="ref">Pensum: <a href="../../kap10/ai-sikkerhet.html">Kap. 10 — AI-sikkerhet</a>, <a href="../../kap7/llm-angrep.html">Kap. 7 — LLM-angrep</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <article class="exam-q exam-q--mc">
+      <header class="exam-q__head">
+        <span class="exam-q__num">Spørsmål 28</span>
+        <span class="exam-q__points">1 poeng</span>
+        <span class="exam-q__topic">Kap. 10 — Adversarial ML</span>
+      </header>
+      <div class="exam-q__body">
+        <p class="q-text">Hva beskriver et <em>adversarial example</em>-angrep mot en bildeklassifikator?</p>
+        <ul class="exam-q__opts">
+          <li><span class="opt-label">A</span> Angriper trener om modellen på et eget datasett og bytter ut den deployerte versjonen via et kompromittert build-script.</li>
+          <li><span class="opt-label">B</span> Angriper legger til en liten, nøye konstruert perturbasjon i inputbildet — usynlig for mennesker — som får modellen til å klassifisere bildet feil med høy konfidens.</li>
+          <li><span class="opt-label">C</span> Angriper sender en stor mengde forespørsler for å mappe modellens beslutningsgrense og rekonstruere treningsdataene.</li>
+          <li><span class="opt-label">D</span> Angriper plasserer mislabeled bilder i treningsdatasettet slik at modellen lærer en bakdør som aktiveres ved en bestemt trigger.</li>
+        </ul>
+        <details class="fasit-details">
+          <summary>Vis fasit</summary>
+          <div class="fasit-body">
+            <span class="fasit-correct">Riktig svar: B</span>
+            <p>Adversarial examples er input-rom-angrep der angriper optimaliserer en minimal perturbasjon (typisk via gradient på modellens loss) for å flytte input over en beslutningsgrense. Den klassiske demonstrasjonen er en panda-bilde + lav-amplitude støy → klassifisert som gibbon med 99 % konfidens. Forsvar inkluderer adversarial training, input-preprosessering, og randomisert smoothing.</p>
+            <p>A beskriver <em>modellsubstitusjon/supply chain-angrep</em>. C beskriver <em>model extraction / membership inference</em>. D beskriver <em>data poisoning / backdoor-angrep</em>. Alle tre er reelle angrep mot ML-systemer, men distinkte fra adversarial examples.</p>
+            <p class="ref">Pensum: <a href="../../kap10/ai-sikkerhet.html">Kap. 10 — AI-sikkerhet</a></p>
+          </div>
+        </details>
+      </div>
+    </article>
+
+  </section>
+
+  <footer style="max-width: 820px; margin: 0 auto; padding: 40px 32px 80px; border-top: 1px solid var(--line); position: relative; z-index: 2; font-family: var(--sans); font-size: 13px; color: var(--ink-faded); text-align: center;">
+    <p>Øvingseksamen 01 · TDT4237 · NTNU Vår 2026</p>
+    <p style="margin-top: 6px;"><a href="../" style="color: var(--rust); text-decoration: none; border-bottom: 1px solid rgba(176,68,40,0.35);">Tilbake til øvingseksamener</a> · <a href="../../" style="color: var(--rust); text-decoration: none; border-bottom: 1px solid rgba(176,68,40,0.35);">Forsiden</a></p>
+  </footer>
+
+  <script src="exam.js"></script>
+</body>
+</html>

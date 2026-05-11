@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Øvingseksamener — TDT4237</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+.exam-hero { padding: 100px 0 60px; position: relative; z-index: 10; }
+.exam-hero .course-code {
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--rust); margin-bottom: 20px;
+  display: inline-block; padding: 6px 14px; border: 1px solid var(--rust); border-radius: 2px;
+}
+.exam-hero h1 {
+  font-size: clamp(44px, 7vw, 80px); font-weight: 500; line-height: 1.0;
+  letter-spacing: -0.03em; margin-bottom: 28px;
+}
+.exam-hero h1 em { font-style: italic; color: var(--rust); }
+.exam-hero .lead {
+  font-size: 20px; font-style: italic; color: var(--ink-soft);
+  max-width: 640px; line-height: 1.5;
+}
+.exam-hero .crumb {
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-faded); margin-bottom: 24px;
+}
+.exam-hero .crumb a { color: var(--rust); text-decoration: none; border-bottom: 1px solid rgba(176,68,40,0.35); }
+
+.exam-list { padding: 40px 0 80px; }
+.exam-list .section-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--ink-ghost);
+  margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--line);
+}
+.exam-card {
+  display: grid; grid-template-columns: 90px 1fr auto; align-items: baseline; gap: 24px;
+  padding: 28px 0; border-bottom: 1px solid var(--line-soft);
+  text-decoration: none; color: inherit; transition: background 0.15s, padding 0.15s;
+}
+.exam-card:first-of-type { border-top: 1px solid var(--line-soft); }
+.exam-card:hover {
+  background: var(--paper-dark);
+  padding-left: 16px; padding-right: 16px; margin-left: -16px; margin-right: -16px;
+  border-radius: 4px;
+}
+.exam-card .ec-num { font-family: var(--mono); font-size: 13px; color: var(--rust); font-weight: 500; letter-spacing: 0.08em; }
+.exam-card .ec-title {
+  font-family: var(--serif); font-size: 24px; font-weight: 500; line-height: 1.25;
+  margin-bottom: 6px; letter-spacing: -0.01em;
+}
+.exam-card .ec-meta {
+  font-family: var(--sans); font-size: 13px; color: var(--ink-faded); margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+.exam-card .ec-desc { font-size: 15px; color: var(--ink-soft); font-style: italic; line-height: 1.5; }
+.exam-card .ec-arrow { font-family: var(--mono); font-size: 18px; color: var(--ink-ghost); align-self: center; }
+.exam-card:hover .ec-arrow { color: var(--rust); transform: translateX(4px); }
+
+.bank-section { padding: 60px 0 80px; border-top: 1px solid var(--line); }
+.bank-section h2 {
+  font-family: var(--sans); font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.18em; color: var(--rust); margin: 0 0 24px;
+}
+.bank-section p { font-size: 16px; color: var(--ink-soft); line-height: 1.65; margin-bottom: 14px; }
+.bank-list { list-style: none; margin: 18px 0 0; padding: 0; }
+.bank-list li {
+  font-family: var(--sans); font-size: 14px; padding: 8px 0;
+  border-bottom: 1px dotted var(--line-soft);
+}
+.bank-list li a { color: var(--rust); text-decoration: none; border-bottom: 1px solid rgba(176,68,40,0.25); }
+.bank-list li a:hover { border-bottom-color: var(--rust); }
+
+.info-note {
+  margin-top: 32px; padding: 18px 22px; border-left: 3px solid var(--ochre);
+  background: var(--paper-dark); border-radius: 2px;
+}
+.info-note p { margin: 0; font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+.info-note strong { color: var(--ink); }
+
+@media (max-width: 768px) {
+  .exam-hero { padding: 70px 0 50px; }
+  .exam-card { grid-template-columns: 70px 1fr auto; gap: 14px; }
+  .exam-card .ec-title { font-size: 19px; }
+}
+</style>
+</head>
+<body>
+<header class="exam-hero">
+  <div class="container">
+    <div class="crumb"><a href="../">&larr; Forsiden</a></div>
+    <div class="course-code">TDT4237 · Øving</div>
+    <h1>Øvings<br><em>eksamener</em></h1>
+    <p class="lead">Interaktive sett som ligner det reelle Inspera-formatet — åpne spørsmål med modellsvar og selvvurdering, flervalg med umiddelbar tilbakemelding. Tracker nederst i hjørnet teller poeng og karakter.</p>
+  </div>
+</header>
+
+<main class="exam-list" data-chapter="Øvingseksamener">
+  <div class="container">
+    <div class="section-label">Genererte sett · Vår 2026</div>
+
+    <a href="genererte/eksamen_01.html" class="exam-card">
+      <span class="ec-num">EKSAMEN 01</span>
+      <div class="ec-info">
+        <div class="ec-title">Bredt sett — alle ti kapitler</div>
+        <div class="ec-meta">28 oppgaver · 100 poeng · 4 timer · 22 åpne + 6 flervalg</div>
+        <div class="ec-desc">Hovedvekt på OWASP-anvendelse, kryptografi, autorisasjon og GDPR. Inkluderer et Flask-kode-quiz og en STRIDE-analyse av en chat-app.</div>
+      </div>
+      <span class="ec-arrow">&rarr;</span>
+    </a>
+
+    <div class="info-note">
+      <p><strong>Hvordan settet fungerer:</strong> klikk for å åpne ett sett. Hvert åpent spørsmål viser modellsvar når du folder ut "Vis modellsvar" — etter at du har sammenlignet med ditt eget svar, velger du selv hvor mye du fikk rett (Full pott / Nesten alt / Halvveis / Lite / Ingenting). Flervalg gir umiddelbar grønn/rød tilbakemelding ved klikk. Poeng og karakter (A–F) oppdateres fortløpende i tracker-en nederst til venstre.</p>
+    </div>
+  </div>
+</main>
+
+<section class="bank-section">
+  <div class="container">
+    <h2>Oppgavebank — gamle eksamener</h2>
+    <p>Eksamenssettene fra 2020–2025 ligger i oppgavebanken som PDF. Merk at <em>case-oppgavene</em> fra disse settene <strong>ikke</strong> er relevante for 2026-eksamen — case study er fjernet i år. Bruk dem som inspirasjon for spørsmålstype og vanskelighetsgrad.</p>
+    <ul class="bank-list">
+      <li><a href="oppgavebank/TDT4237%20Spring%202020.pdf">TDT4237 Vår 2020</a></li>
+      <li><a href="oppgavebank/TDT4237%20Spring%202021%20v2.pdf">TDT4237 Vår 2021</a></li>
+      <li><a href="oppgavebank/Exam%20TDT4237%20Spring%202022.pdf">TDT4237 Vår 2022</a></li>
+      <li><a href="oppgavebank/Exam%20TDT4237%20Spring%202023.pdf">TDT4237 Vår 2023</a></li>
+      <li><a href="oppgavebank/TDT4237%202024%20exam%20questions%20without%20sensor%20guide.pdf">TDT4237 Vår 2024</a></li>
+      <li><a href="oppgavebank/TDT4237%20Spring%202025%20exam%20questions.pdf">TDT4237 Vår 2025</a></li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10038; &#10038; &#10038;</div>
+    <p>NTNU · TDT4237 · Vår 2026</p>
+  </div>
+</footer>
+
+<script src="../chat-widget.js"></script>
+</body>
+</html>

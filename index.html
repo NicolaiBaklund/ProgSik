@@ -75,11 +75,36 @@
 .info-block p, .info-block li { font-size: 15px; color: var(--ink-faded); line-height: 1.6; }
 .info-block ul { list-style: none; margin: 0; padding: 0; }
 .info-block li { padding: 6px 0; border-bottom: 1px dotted var(--line-soft); }
+.exam-cta {
+  margin-top: 32px; position: relative; z-index: 10;
+  display: inline-flex; align-items: center; gap: 14px;
+  padding: 16px 26px;
+  background: var(--rust); color: var(--paper);
+  font-family: var(--sans); font-size: 15px; font-weight: 500;
+  letter-spacing: 0.04em; text-decoration: none;
+  border-radius: 3px;
+  box-shadow: 0 4px 14px rgba(176,68,40,0.25);
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.exam-cta:hover {
+  background: var(--rust-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(176,68,40,0.35);
+}
+.exam-cta .cta-icon {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; opacity: 0.85;
+  padding: 4px 8px; border: 1px solid rgba(244,241,234,0.4); border-radius: 2px;
+}
+.exam-cta .cta-arrow { font-family: var(--mono); transition: transform 0.15s; }
+.exam-cta:hover .cta-arrow { transform: translateX(3px); }
+
 @media (max-width: 768px) {
   .index-hero { padding: 80px 0 60px; }
   .chapter-card { grid-template-columns: 40px 1fr auto; gap: 16px; }
   .chapter-card .ch-title { font-size: 18px; }
   .info-grid { grid-template-columns: 1fr; gap: 32px; }
+  .exam-cta { font-size: 14px; padding: 14px 20px; }
 }
 </style>
 </head>
@@ -94,6 +119,11 @@
       <input type="text" id="site-search" placeholder="Søk i alle kapitler…" autocomplete="off">
       <div id="search-results"></div>
     </div>
+    <a href="eksamen/" class="exam-cta">
+      <span class="cta-icon">NY</span>
+      <span>Øvingseksamener — test deg selv før eksamen</span>
+      <span class="cta-arrow">&rarr;</span>
+    </a>
   </div>
 </header>
 
