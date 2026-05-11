@@ -42,6 +42,18 @@
     <p class="section-intro">SAST analyserer koden som tekst og struktur — uten å kjøre den — og søker etter kjente sårbarhetsmønstre.</p>
     <p class="lead">SAST-verktøy bygger en AST (Abstract Syntax Tree) og en CFG (Control Flow Graph) av koden, og kjører analyser over disse representasjonene. Taint tracking følger data fra brukerkontrollerte sources til farlige sinks. Dataflyt-analyse sporer hvordan variabler endres på tvers av funksjoner. Mønstre-analyse matcher kjente sårbarhetssignaturer.</p>
 
+    <h3>Ulike tilnærminger til statisk analyse</h3>
+    <p>SAST-verktøy bygger en intern modell av koden gjennom flere faser, og bruker så ulike analyser over modellen. De vanligste tilnærmingene:</p>
+    <ul>
+      <li><strong>Lexical analysis (pattern matching):</strong> deler kildekoden i tokens og bruker regex/mønstre for å fange opp kjente farlige konstruksjoner (f.eks. <code>MD5</code>, <code>shell=True</code>, <code>java.util.Random</code> i sikkerhetskontekst). Rask og enkel, men ser ingen kontekst — gir mange falske positiver.</li>
+      <li><strong>Syntactic analysis (AST-basert):</strong> bygger en Abstract Syntax Tree slik at verktøyet kan matche på strukturen i koden — ikke bare tekststrenger. Skiller f.eks. mellom <code>execute(query)</code> som metodekall og <code>execute</code> som identifikator i en kommentar.</li>
+      <li><strong>Semantic analysis:</strong> sjekker betydningen av tokens (typer, deklarasjoner, scope). Gjør at verktøyet vet at <code>name</code> er av typen <code>String</code> og kommer fra <code>HttpServletRequest</code> — nødvendig for å resonnere om sårbarheter på tvers av kall.</li>
+      <li><strong>Control-flow analysis:</strong> bygger control-flow graphs (CFG) som modellerer alle mulige eksekveringsstier gjennom if/else, løkker og exceptions — slik at analysen dekker alle grener.</li>
+      <li><strong>Data-flow analysis:</strong> sporer hvordan verdier i variabler endres på tvers av instruksjoner og prosedyrer (intra-procedural innen én metode, inter-procedural mellom metoder/klasser). Bygger på control-flow grafen.</li>
+      <li><strong>Taint analysis (sikkerhetsspesifikk dataflyt):</strong> en spesialisert dataflyt-analyse som markerer data fra utrygge <em>sources</em> (f.eks. <code>request.getParameter</code>) som "tainted", og rapporterer hvis tainted data når en farlig <em>sink</em> (f.eks. <code>Statement.execute</code>) uten å gå gjennom en <em>sanitization</em>-funksjon.</li>
+    </ul>
+    <p>Verktøyene kombinerer typisk flere tilnærminger: Semgrep er primært lexical/AST-basert (raskt, lett å skrive regler), mens CodeQL bygger semantisk modell + dataflyt (treigere, men langt mer presist). Mer avanserte teknikker som <em>symbolic execution</em> og <em>abstract interpretation</em> resonnerer over mulige verdier i alle eksekveringsstier — kraftig, men kostbart.</p>
+
     <figure class="fig-frame">
       <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif" font-size="12">
         <defs><marker id="saa" markerWidth="7" markerHeight="7" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#b04428"/></marker></defs>
