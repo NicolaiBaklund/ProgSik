@@ -529,22 +529,329 @@ return o.to_json()</pre>`,
   },
 
   // ============================================================
-  // TEMA 4 — Authorization (demo — flytt eller utvid senere)
+  // TEMA 3 — Cryptography
+  // ============================================================
+  {
+    id: "crypto-1",
+    topic: "Kryptografi",
+    verb: "Explain",
+    front: "Forskjellen mellom symmetrisk og asymmetrisk kryptering? Når brukes hva?",
+    back: `<p><strong>Symmetrisk</strong>: samme nøkkel krypterer og dekrypterer. Rask, men nøkkelutveksling er problemet.</p>
+    <ul>
+      <li>Algoritmer: AES (128/192/256), ChaCha20, 3DES (utdatert), DES (knekt).</li>
+      <li>Bruk: bulk-data — fildiskkryptering, TLS session traffic, VPN.</li>
+    </ul>
+    <p><strong>Asymmetrisk</strong>: nøkkelpar (public + private). Public deles, private holdes hemmelig. Tregt — typisk 1000× saktere enn symmetrisk.</p>
+    <ul>
+      <li>Algoritmer: RSA, ECC (Curve25519, P-256), ElGamal.</li>
+      <li>Bruk: nøkkelutveksling, digitale signaturer, sertifikater.</li>
+    </ul>
+    <p><strong>Hybrid</strong> (TLS, PGP): asymmetrisk til å utveksle en symmetrisk session-nøkkel, så symmetrisk for selve data.</p>`,
+    links: [{ href: "kap3/symmetrisk-krypto.html", label: "Kap 3 · Symmetrisk krypto" }, { href: "kap3/asymmetrisk-krypto.html", label: "Kap 3 · Asymmetrisk krypto" }]
+  },
+  {
+    id: "crypto-2",
+    topic: "Kryptografi",
+    verb: "Explain",
+    front: "Hvordan brukes public og private key — og hvorfor ikke kryptere store data med public key?",
+    back: `<p><strong>Konfidensialitet</strong>: krypter med <em>mottakerens public</em>, kun mottaker dekrypterer med sin private.</p>
+    <p><strong>Signatur/autentisitet</strong>: signer med <em>din private</em>, alle verifiserer med din public.</p>
+    <p><strong>Hvorfor ikke for store data</strong>:</p>
+    <ul>
+      <li>RSA-2048 er ~1000× tregere enn AES per byte.</li>
+      <li>RSA krypterer kun blokker mindre enn nøkkelstørrelsen (~245 bytes for 2048-bit med padding).</li>
+      <li>Løsning: hybrid — RSA krypterer en AES-nøkkel, AES krypterer dataen.</li>
+    </ul>`,
+    links: [{ href: "kap3/asymmetrisk-krypto.html", label: "Kap 3 · Asymmetrisk krypto" }]
+  },
+  {
+    id: "crypto-3",
+    topic: "Kryptografi",
+    verb: "Explain",
+    front: "Hvordan lager og verifiserer man en digital signatur?",
+    back: `<p><strong>Signering (avsender)</strong>:</p>
+    <ol>
+      <li>Hash dokumentet (SHA-256).</li>
+      <li>Krypter hashen med <em>privat</em> nøkkel → signatur.</li>
+      <li>Send dokument + signatur.</li>
+    </ol>
+    <p><strong>Verifisering (mottaker)</strong>:</p>
+    <ol>
+      <li>Hash mottatt dokument.</li>
+      <li>Dekrypter signatur med avsenders <em>public</em> → original-hash.</li>
+      <li>Sammenlign hashene. Match = ekte + uendret.</li>
+    </ol>
+    <p>Gir <strong>integritet</strong>, <strong>autentisitet</strong> og <strong>non-repudiation</strong>. Sikrer ikke konfidensialitet — dokument sendes i klartekst.</p>`,
+    links: [{ href: "kap3/asymmetrisk-krypto.html", label: "Kap 3 · Asymmetrisk krypto" }, { href: "kap3/hashing-mac.html", label: "Kap 3 · Hashing/MAC" }]
+  },
+  {
+    id: "crypto-4",
+    topic: "Kryptografi",
+    verb: "Explain",
+    front: "Hva er et X.509-sertifikat, og hvordan virker PKI med CA?",
+    back: `<p><strong>Sertifikat</strong>: dokument som binder en identitet (domene, person) til en public key, signert av en Certificate Authority.</p>
+    <p>Inneholder typisk:</p>
+    <ul>
+      <li>Subject (hvem sertifikatet tilhører — CN, SAN)</li>
+      <li>Public key</li>
+      <li>Issuer (CA)</li>
+      <li>Gyldighetsperiode</li>
+      <li>CA-signatur over alt det ovenfor</li>
+    </ul>
+    <p><strong>Tillitskjede</strong>: nettleseren har root-CA-ene innebygd. Server-sert → mellomliggende CA → root. Hvert ledd signerer det forrige. Brytes om noe ikke kjeder seg helt til en trusted root.</p>
+    <p><strong>Revocation</strong>: CRL (lister) eller OCSP (oppslag) for å trekke kompromitterte sertifikater.</p>`,
+    links: [{ href: "kap3/asymmetrisk-krypto.html", label: "Kap 3 · Asymmetrisk krypto" }]
+  },
+  {
+    id: "crypto-5",
+    topic: "Kryptografi",
+    verb: "Explain",
+    front: "Beskriv TLS 1.3-handshake. Hva oppnås?",
+    back: `<ol>
+      <li><strong>ClientHello</strong>: klient sender støttede cipher suites + key share (ephemeral ECDHE public).</li>
+      <li><strong>ServerHello</strong>: server velger cipher, sender sin key share, sertifikat, og <em>CertificateVerify</em> (signatur over handshake-meldingene → beviser eierskap til private).</li>
+      <li>Begge regner ut <strong>shared secret</strong> via ECDHE.</li>
+      <li>Derives session-nøkler. <strong>Finished</strong>-meldinger autentiserer hele handshaken.</li>
+      <li>Applikasjonsdata krypteres med AEAD (AES-GCM eller ChaCha20-Poly1305).</li>
+    </ol>
+    <p><strong>Oppnår</strong>: konfidensialitet, integritet, server-autentisering, <strong>forward secrecy</strong> (kompromittert privat nøkkel senere → kan ikke dekryptere gammel trafikk, fordi ECDHE-nøkler var ephemerale).</p>
+    <p>TLS 1.3 dropper RSA key exchange, statisk DH, MD5, SHA-1, CBC-modus — kun moderne primitiver.</p>`,
+    links: [{ href: "kap3/asymmetrisk-krypto.html", label: "Kap 3 · Asymmetrisk krypto" }]
+  },
+  {
+    id: "crypto-6",
+    topic: "Kryptografi",
+    verb: "Define",
+    front: "Hva sier Kerckhoffs' prinsipp, og hvorfor er det viktig?",
+    back: `<p><strong>Et kryptosystem skal være sikkert selv om alt utenom nøkkelen er offentlig kjent.</strong></p>
+    <p>Med andre ord: sikkerhet skal ligge i <em>nøkkelen</em>, ikke i hemmelig algoritme.</p>
+    <p><strong>Hvorfor</strong>:</p>
+    <ul>
+      <li>Hemmelige algoritmer lekker til slutt (reverse engineering, ansatte slutter).</li>
+      <li>Åpne algoritmer får offentlig kryptoanalyse — svakheter finnes før produksjonsbruk.</li>
+      <li>Nøkler kan rotereres; algoritmer kan ikke (lett).</li>
+    </ul>
+    <p><strong>"Security through obscurity"</strong> er anti-mønsteret. AES, RSA, SHA-256 er alle helt offentlige spesifikasjoner — det er nettopp derfor vi stoler på dem.</p>`,
+    links: [{ href: "kap3/index.html", label: "Kap 3 · Kryptografi (oversikt)" }]
+  },
+  {
+    id: "crypto-7",
+    topic: "Kryptografi",
+    verb: "Apply",
+    front: `Velg riktig primitiv for hvert scenario:<br>
+    <ol style="font-size:16px; margin-top:12px;">
+      <li>Lagre passord i database</li>
+      <li>Sikre filer på disk</li>
+      <li>Verifisere at en programvarepakke ikke er endret</li>
+      <li>Sende e-post slik at kun mottaker leser</li>
+      <li>Bevise at et dokument kommer fra deg</li>
+    </ol>`,
+    back: `<ol>
+      <li><strong>Argon2id</strong> / bcrypt — treg, saltet passordhash. <em>Ikke</em> SHA-256.</li>
+      <li><strong>AES-256-GCM</strong> — symmetrisk autentisert kryptering. Nøkkel utledet fra brukerpassord via PBKDF2/Argon2.</li>
+      <li><strong>SHA-256</strong> eller bedre — kryptografisk hash + sammenlign mot publisert verdi. Best: signert hash (Sigstore, GPG).</li>
+      <li><strong>Hybrid</strong>: mottakers RSA/ECC public krypterer en AES-sessionnøkkel; AES krypterer e-posten (PGP/S/MIME).</li>
+      <li><strong>Digital signatur</strong> — RSA-PSS eller Ed25519 over SHA-256 av dokumentet.</li>
+    </ol>`,
+    links: [{ href: "kap3/index.html", label: "Kap 3 · Kryptografi (oversikt)" }]
+  },
+  {
+    id: "crypto-8",
+    topic: "Kryptografi",
+    verb: "Explain",
+    front: "Hash vs MAC vs digital signatur — hva gir hver?",
+    back: `<table style="width:100%; font-size:15px; border-collapse:collapse;">
+      <tr style="background:#e8e3d6;"><th style="text-align:left; padding:6px; border:1px solid #c9c0ae;">Primitiv</th><th style="text-align:left; padding:6px; border:1px solid #c9c0ae;">Integritet</th><th style="text-align:left; padding:6px; border:1px solid #c9c0ae;">Autentisitet</th><th style="text-align:left; padding:6px; border:1px solid #c9c0ae;">Non-repudiation</th></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;">Hash</td><td style="padding:6px; border:1px solid #c9c0ae;">Ja</td><td style="padding:6px; border:1px solid #c9c0ae;">Nei</td><td style="padding:6px; border:1px solid #c9c0ae;">Nei</td></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;">MAC (HMAC)</td><td style="padding:6px; border:1px solid #c9c0ae;">Ja</td><td style="padding:6px; border:1px solid #c9c0ae;">Ja (delt nøkkel)</td><td style="padding:6px; border:1px solid #c9c0ae;">Nei</td></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;">Signatur</td><td style="padding:6px; border:1px solid #c9c0ae;">Ja</td><td style="padding:6px; border:1px solid #c9c0ae;">Ja (pub/priv)</td><td style="padding:6px; border:1px solid #c9c0ae;">Ja</td></tr>
+    </table>
+    <p style="margin-top:10px;"><strong>Hash</strong> — kun integritet hvis hashen formidles sikkert.</p>
+    <p><strong>MAC</strong> — krever delt hemmelighet. Begge parter kan lage MAC → ingen kan bevise hvem av dem som gjorde det.</p>
+    <p><strong>Signatur</strong> — kun den som har privat-nøkkelen kan signere → bevisbart i etterkant.</p>`,
+    links: [{ href: "kap3/hashing-mac.html", label: "Kap 3 · Hashing/MAC" }]
+  },
+
+  // ============================================================
+  // TEMA 4 — Authorization, Multi-Level Security, Authentication, Control hijacking
   // ============================================================
   {
     id: "authz-1",
     topic: "Autorisasjon",
     verb: "Explain",
-    front: "Forklar forskjellen mellom DAC og MAC. Gi ett eksempel på hver.",
-    back: `<p><strong>DAC</strong> (Discretionary): eier av ressurs bestemmer hvem som får tilgang. Fleksibelt, men feilutsatt.</p>
-    <p><strong>MAC</strong> (Mandatory): sentralisert — hvert subjekt og objekt får en tilgangsklasse fra policyen. Stivere, men sterkere garantier.</p>
+    front: "Forskjell på DAC og MAC. Eksempel på hver.",
+    back: `<p><strong>DAC</strong> (Discretionary): <em>eier</em> av ressursen bestemmer hvem som får tilgang. Fleksibelt, men feilutsatt — bruker kan dele feil.</p>
+    <p><strong>MAC</strong> (Mandatory): <em>sentral policy</em> — hvert subjekt og objekt får en tilgangsklasse (f.eks. Top Secret/Secret/Confidential/Unclassified). Bruker kan ikke overstyre.</p>
     <ul>
-      <li>DAC-eks: Linux-filsystem, Google Docs, Sharepoint.</li>
-      <li>MAC-eks: militære systemer, SELinux, Trusted Computing Base.</li>
-    </ul>`
+      <li><strong>DAC-eks</strong>: Linux <code>chmod</code>, Google Docs deling, SharePoint, de fleste webapplikasjoner.</li>
+      <li><strong>MAC-eks</strong>: militære systemer, SELinux/AppArmor, Trusted Computing Base, macOS sandboxing.</li>
+    </ul>
+    <p>DAC = fleksibilitet; MAC = sterke garantier mot lekkasje på bekostning av smidighet.</p>`,
+    links: [{ href: "kap4/tilgangskontroll.html", label: "Kap 4 · Tilgangskontroll" }]
+  },
+  {
+    id: "authz-2",
+    topic: "Autorisasjon",
+    verb: "Explain",
+    front: "RBAC vs ABAC — hvordan virker hver, fordeler og ulemper?",
+    back: `<p><strong>RBAC</strong> (Role-Based): tilgang gis til <em>roller</em>, brukere tilordnes roller. <code>user → role → permission</code>.</p>
+    <ul>
+      <li>+ Enkelt å administrere, lett å auditere.</li>
+      <li>− Rolle-eksplosjon i komplekse systemer (én rolle per finkornet variant).</li>
+      <li>− Tar ikke hensyn til kontekst (tid, sted, sak-eierskap).</li>
+    </ul>
+    <p><strong>ABAC</strong> (Attribute-Based): policy evaluerer <em>attributter</em> på subjekt, objekt, action, miljø. <code>allow if user.dept == doc.dept AND time in workhours</code>.</p>
+    <ul>
+      <li>+ Finkornet, dynamisk, kontekstbevisst.</li>
+      <li>+ Skalerer uten rolle-eksplosjon.</li>
+      <li>− Vanskelig å resonnere om policy (hvem har egentlig tilgang til X?).</li>
+      <li>− Krever PDP/PEP-infrastruktur (XACML, OPA).</li>
+    </ul>
+    <p>Praksis: hybrid — RBAC for grov tilgang, ABAC for kontekstuelle nyanser.</p>`,
+    links: [{ href: "kap4/tilgangskontroll.html", label: "Kap 4 · Tilgangskontroll" }]
+  },
+  {
+    id: "authz-3",
+    topic: "Autorisasjon",
+    verb: "Explain",
+    front: "Forklar Bell-LaPadula-modellen. Hva beskytter den?",
+    back: `<p>Bell-LaPadula (BLP) er en MAC-modell som beskytter <strong>konfidensialitet</strong> i multi-level systemer. Subjekter og objekter har klassifiseringsnivåer.</p>
+    <p><strong>To regler</strong>:</p>
+    <ul>
+      <li><strong>Simple Security Property — "No Read Up"</strong>: et subjekt på nivå L kan <em>ikke lese</em> objekter på høyere nivå.</li>
+      <li><strong>* (star) Property — "No Write Down"</strong>: et subjekt på nivå L kan <em>ikke skrive</em> til lavere nivå (ville lekke).</li>
+    </ul>
+    <p><strong>Tankesett</strong>: "read down, write up". En oberst leser sersjant-rapporter; sersjanten kan rapportere oppover, men ikke lese oberstens planer.</p>
+    <p>Eksempler: militære systemer, klassifiserte myndighetssystemer.</p>`,
+    links: [{ href: "kap4/tilgangskontroll.html", label: "Kap 4 · Tilgangskontroll" }]
+  },
+  {
+    id: "authz-4",
+    topic: "Autorisasjon",
+    verb: "Explain",
+    front: "Forklar Biba-modellen. Hvordan skiller den seg fra Bell-LaPadula?",
+    back: `<p>Biba beskytter <strong>integritet</strong> — speilbildet av BLP. Subjekter/objekter har integritetsnivåer.</p>
+    <p><strong>Regler</strong>:</p>
+    <ul>
+      <li><strong>Simple Integrity — "No Read Down"</strong>: høy-integritet subjekt skal ikke leses fra lav-integritet kilde (forurensning).</li>
+      <li><strong>* Integrity — "No Write Up"</strong>: lav-integritet subjekt kan ikke skrive til høy-integritet objekt.</li>
+    </ul>
+    <p><strong>Tankesett</strong>: "read up, write down". Motsatt av BLP.</p>
+    <p>Eksempel: en webapplikasjon (lav integritet) skal ikke kunne skrive til kjernekonfigurasjon (høy integritet).</p>
+    <p>BLP forhindrer at hemmeligheter lekker <em>ned</em>. Biba forhindrer at upålitelig data forurenser <em>oppover</em>.</p>`,
+    links: [{ href: "kap4/tilgangskontroll.html", label: "Kap 4 · Tilgangskontroll" }]
+  },
+  {
+    id: "authn-1",
+    topic: "Autentisering & SSO",
+    verb: "Explain",
+    front: "Hva er SSO? Fordeler og risikoer?",
+    back: `<p><strong>Single Sign-On</strong>: bruker logger inn én gang hos en Identity Provider (IdP), får tilgang til mange tjenester uten å autentisere på nytt.</p>
+    <p><strong>Fordeler</strong>:</p>
+    <ul>
+      <li>Færre passord → mindre gjenbruk, mindre phishing-flate.</li>
+      <li>Sentral MFA-håndhevelse.</li>
+      <li>Lett offboarding — deaktivér én konto, alt forsvinner.</li>
+      <li>Bedre brukeropplevelse.</li>
+    </ul>
+    <p><strong>Risikoer</strong>:</p>
+    <ul>
+      <li>IdP er single point of failure — kompromiss = alle tjenester kompromittert.</li>
+      <li>IdP-nedetid stenger alt.</li>
+      <li>Phishing kan rette seg mot SSO-portalen (én konto = "master key").</li>
+    </ul>
+    <p>Protokoller: SAML 2.0 (enterprise/SaaS), OAuth 2.0 + OpenID Connect (web/mobil).</p>`,
+    links: [{ href: "kap4/autentisering.html", label: "Kap 4 · Autentisering" }]
+  },
+  {
+    id: "authn-2",
+    topic: "Autentisering & SSO",
+    verb: "Explain",
+    front: "Beskriv en SAML 2.0 SSO-flyt.",
+    back: `<p>SAML = Security Assertion Markup Language. XML-basert. Brukes til enterprise SSO (Okta, Azure AD, ADFS).</p>
+    <p><strong>SP-initiated flow</strong>:</p>
+    <ol>
+      <li>Bruker går til <strong>Service Provider</strong> (f.eks. Workday).</li>
+      <li>SP ser ingen sesjon, redirecter til <strong>Identity Provider</strong> med en <em>AuthnRequest</em>.</li>
+      <li>IdP autentiserer bruker (passord + MFA).</li>
+      <li>IdP signerer en <strong>SAML Assertion</strong> med brukers identitet og attributter.</li>
+      <li>Assertion POST-es tilbake til SP (vanligvis via brukerens nettleser).</li>
+      <li>SP validerer signaturen mot IdP-sertifikatet og oppretter sesjon.</li>
+    </ol>
+    <p><strong>Tillit</strong>: SP og IdP har på forhånd utvekslet metadata (signeringssertifikater, endepunkter).</p>`,
+    links: [{ href: "kap4/autentisering.html", label: "Kap 4 · Autentisering" }]
+  },
+  {
+    id: "authn-3",
+    topic: "Autentisering & SSO",
+    verb: "Explain",
+    front: "Beskriv OAuth 2.0 Authorization Code flow (med PKCE).",
+    back: `<p>OAuth 2.0 = <strong>delegert autorisasjon</strong> — gir en klient tilgang til en ressurs på vegne av brukeren, uten å dele passord.</p>
+    <p><strong>Authorization Code Flow + PKCE</strong> (standard for SPA og mobil):</p>
+    <ol>
+      <li>Klient genererer <em>code_verifier</em> (tilfeldig) og <em>code_challenge</em> = SHA-256(verifier).</li>
+      <li>Klient redirecter bruker til Authorization Server med <code>code_challenge</code> + scopes.</li>
+      <li>Bruker autentiserer + samtykker.</li>
+      <li>AS redirecter tilbake med <strong>authorization code</strong> (engangs, kortlevd).</li>
+      <li>Klient bytter koden + <em>code_verifier</em> mot <strong>access token</strong> (+ refresh token) på AS sin token-endepunkt.</li>
+      <li>Klient sender access token til Resource Server: <code>Authorization: Bearer ...</code></li>
+    </ol>
+    <p><strong>PKCE</strong> forhindrer at en angriper som fanger opp koden kan bytte den uten verifier.</p>
+    <p><strong>NB</strong>: Implicit flow er deprecated. Bruk Authorization Code + PKCE alltid.</p>`,
+    links: [{ href: "kap4/autentisering.html", label: "Kap 4 · Autentisering" }, { href: "kap4/jwt.html", label: "Kap 4 · JWT" }]
+  },
+  {
+    id: "authn-4",
+    topic: "Autentisering & SSO",
+    verb: "Explain",
+    front: "OpenID Connect vs OAuth 2.0 — hva er forskjellen?",
+    back: `<p><strong>OAuth 2.0</strong>: autorisasjons-protokoll. Svarer "kan denne klienten gjøre X på vegne av brukeren?". Gir <em>access token</em> — sier ingenting om brukerens identitet.</p>
+    <p><strong>OpenID Connect (OIDC)</strong>: et autentiserings-lag <em>oppå</em> OAuth 2.0. Svarer "hvem er brukeren?". Returnerer i tillegg et <strong>ID token</strong> (signert JWT med <code>sub</code>, <code>iss</code>, <code>aud</code>, <code>exp</code>).</p>
+    <p><strong>Praktisk forskjell</strong>:</p>
+    <ul>
+      <li>"Logg inn med Google" → OIDC (du trenger å vite hvem brukeren er).</li>
+      <li>"Gi appen min tilgang til kalenderen din" → OAuth (du trenger en token, ikke identitet).</li>
+    </ul>
+    <p>Vanlig misforståelse: "vi gjør auth med OAuth". Strengt tatt feil — autentisering = OIDC.</p>`,
+    links: [{ href: "kap4/autentisering.html", label: "Kap 4 · Autentisering" }, { href: "kap4/jwt.html", label: "Kap 4 · JWT" }]
+  },
+  {
+    id: "control-1",
+    topic: "Control hijacking",
+    verb: "Explain",
+    front: "Forklar et stack-basert buffer overflow-angrep.",
+    back: `<p>Funksjoner i C/C++ legger lokale variabler på <strong>stacken</strong> sammen med <em>return address</em> — adressen CPU-en hopper til når funksjonen returnerer.</p>
+    <p><strong>Angrepet</strong>:</p>
+    <ol>
+      <li>Funksjon kopierer brukerinput inn i en buffer med fast størrelse uten å sjekke lengden (<code>strcpy</code>, <code>gets</code>, <code>sprintf</code>).</li>
+      <li>Angriper sender input lengre enn bufferen.</li>
+      <li>Overskrivingen går forbi bufferen og over <strong>return address</strong>.</li>
+      <li>Angriper plasserer adressen til egen shellcode (eller en eksisterende gadget) der.</li>
+      <li>Funksjonen returnerer → CPU hopper til angripers kode → arbitrær eksekvering.</li>
+    </ol>
+    <p>Klassisk eksempel: Morris worm (1988), Code Red, mange CVE-er i C-baserte servere.</p>`,
+    links: [{ href: "kap1/trusselbilde.html", label: "Kap 1 · Trusselbilde" }]
+  },
+  {
+    id: "control-2",
+    topic: "Control hijacking",
+    verb: "Explain",
+    front: "Hvilke mitigations finnes for buffer overflow? Hva gjør hver?",
+    back: `<ul>
+      <li><strong>Stack canaries</strong> — tilfeldig verdi plasseres mellom buffer og return address. Sjekkes før return; mismatch → abort. (GCC <code>-fstack-protector</code>.)</li>
+      <li><strong>DEP / NX-bit</strong> — marker stack/heap som <em>non-executable</em>. Selv om angriper skriver shellcode dit, kan den ikke kjøres. Omgås av ROP.</li>
+      <li><strong>ASLR</strong> — randomiserer adresser for stack, heap, libraries. Angriper vet ikke hvor hen skal hoppe.</li>
+      <li><strong>CFI (Control Flow Integrity)</strong> — verifiserer at hver indirekte hopp/return går til et lovlig mål.</li>
+      <li><strong>Safe languages</strong> — Rust, Go, Java, Python: ingen rå pointer-aritmetikk. Beste forsvar er ikke å skrive C.</li>
+      <li><strong>Safe libc-funksjoner</strong> — <code>strncpy</code>, <code>snprintf</code>, bounds-checking varianter.</li>
+    </ul>
+    <p>Defense in depth: alle disse kombineres i moderne OS-er, men ROP og JIT-spraying omgår fortsatt deler.</p>`,
+    links: [{ href: "kap1/kjerneprinsipper.html", label: "Kap 1 · Kjerneprinsipper" }]
   },
 
-  // ---- Tema 6: Risk management (Define-kort) ----
+  // ============================================================
+  // TEMA 6 — Risk management (demo — utvides senere)
+  // ============================================================
   {
     id: "rmf-1",
     topic: "Risikohåndtering",
