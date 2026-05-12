@@ -1385,6 +1385,298 @@ return o.to_json()</pre>`,
     <ul><li>Eksekver incident response-plan ved hendelser.</li></ul>`,
     links: [{ href: "kap6/sdl.html", label: "Kap 6 · SDL" }]
   },
+
+  // ============================================================
+  // TEMA 9 — Microservice security + Software supply chain
+  // ============================================================
+  {
+    id: "ms-1",
+    topic: "Mikrotjenester",
+    verb: "Explain",
+    front: "Hva er mikrotjenestearkitektur? Sammenligning med monolitt?",
+    back: `<p><strong>Mikrotjenester</strong>: arkitektur hvor applikasjonen brytes ned i mange små, uavhengige tjenester som kommuniserer via veldefinerte API-er (HTTP/REST, gRPC, meldingskø).</p>
+    <p><strong>Kjennetegn</strong>:</p>
+    <ul>
+      <li>Uavhengig deploybare — én tjeneste deployes uten å rulle hele systemet.</li>
+      <li>Eget data store per tjeneste — ingen delt database.</li>
+      <li>Eier hele stacken — fra DB til API, ett team per tjeneste.</li>
+      <li>Polyglot — ulike språk og rammeverk per tjeneste.</li>
+      <li>Skaler horisontalt og uavhengig.</li>
+    </ul>
+    <p><strong>Monolitt vs mikrotjeneste</strong>:</p>
+    <ul>
+      <li>Monolitt: ett deploy-artefakt, in-process funksjonskall, én DB. Enklere å starte, vanskeligere å skalere.</li>
+      <li>Mikrotjeneste: nettverkskall over alt → latenstid, partial failure, kompleks observability.</li>
+    </ul>
+    <p>Eksempler: Netflix, Amazon, Spotify — alle bygd på 100–1000+ tjenester.</p>`,
+    links: [{ href: "kap8/mikrotjenester.html", label: "Kap 8 · Mikrotjenester" }]
+  },
+  {
+    id: "ms-2",
+    topic: "Mikrotjenester",
+    verb: "Explain",
+    front: "Hvilke sikkerhetsutfordringer kommer med mikrotjenester?",
+    back: `<ul>
+      <li><strong>Større angrepsflate</strong> — hver tjeneste eksponerer API; flere endepunkter å beskytte.</li>
+      <li><strong>Øst-vest-trafikk</strong> — intern service-til-service-kall, ofte ukryptert og uautentisert i tradisjonell perimeter-modell. Klassisk "soft inside, hard outside" feiler.</li>
+      <li><strong>Identitet mellom tjenester</strong> — hvem ringer hvem? Hvordan propageres bruker-kontekst gjennom kjeder?</li>
+      <li><strong>Secrets management</strong> — hver tjeneste trenger DB-credentials, API-nøkler. Skalerer ikke med <code>.env</code>-filer.</li>
+      <li><strong>Distribuert logging</strong> — én forespørsel går gjennom 10 tjenester; hvordan korrelere?</li>
+      <li><strong>Inkonsistent sikkerhetsnivå</strong> — ett team glemmer rate limiting, hele systemet blir sårbart.</li>
+      <li><strong>Container/orchestration-angrep</strong> — Kubernetes API, container escape, supply chain via images.</li>
+      <li><strong>Service mesh som angrepsflate</strong> — sidecar/proxy-bugs kan kompromittere alt.</li>
+      <li><strong>Dataspredning</strong> — personopplysninger lekker mellom tjenester, GDPR-utfordring.</li>
+    </ul>`,
+    links: [{ href: "kap8/mikrotjenester.html", label: "Kap 8 · Mikrotjenester" }]
+  },
+  {
+    id: "ms-3",
+    topic: "Mikrotjenester",
+    verb: "Explain",
+    front: "Hvilke countermeasures finnes for mikrotjeneste-sikkerhet?",
+    back: `<ul>
+      <li><strong>Zero Trust</strong> — aldri stol på nettverket. Autentiser og autoriser hver request, selv internt.</li>
+      <li><strong>mTLS</strong> — mutual TLS mellom tjenester. Begge parter beviser identitet med sertifikater. Service mesh (Istio, Linkerd) automatiserer.</li>
+      <li><strong>OAuth 2.0 / JWT</strong> mellom tjenester — propager bruker-kontekst som signert token. Validér <code>iss</code>, <code>aud</code>, <code>exp</code>, signatur.</li>
+      <li><strong>SPIFFE / SPIRE</strong> — workload identity-standard, automatisk sertifikat-rotering.</li>
+      <li><strong>API Gateway</strong> — sentralt punkt for authn, rate limit, logging foran tjenestene.</li>
+      <li><strong>Secrets manager</strong> — HashiCorp Vault, AWS Secrets Manager, K8s sealed-secrets. Aldri secrets i kode eller env-filer i Git.</li>
+      <li><strong>Network policies</strong> — Kubernetes NetworkPolicy / Calico for å begrense hvilke pods kan snakke med hvilke.</li>
+      <li><strong>Sentralisert observability</strong> — distributed tracing (OpenTelemetry), korrelasjons-ID gjennom kall-kjeder.</li>
+      <li><strong>Container hardening</strong> — minimal base images (distroless, alpine), kjør som non-root, read-only filsystem.</li>
+      <li><strong>Image signing + admission control</strong> — kun signerte images får kjøre (cosign + Kyverno/OPA).</li>
+    </ul>`,
+    links: [{ href: "kap8/mikrotjenester.html", label: "Kap 8 · Mikrotjenester" }]
+  },
+  {
+    id: "ms-4",
+    topic: "Mikrotjenester",
+    verb: "Explain",
+    front: "Vanlige sikkerhetsmønstre for mikrotjenester?",
+    back: `<ul>
+      <li><strong>API Gateway</strong> — single entry point fra utsiden. Håndterer authn, rate limiting, logging, routing. Skjuler interne tjenester.</li>
+      <li><strong>Backend-for-Frontend (BFF)</strong> — én gateway per klient-type (web, mobil). Tilpasset aggregering, mindre data eksponert.</li>
+      <li><strong>Ambassador</strong> — proxy som håndterer cross-cutting concerns (TLS, retry, circuit breaker) utenfor applikasjonen.</li>
+      <li><strong>Sidecar</strong> — egen prosess deployert ved siden av hver tjeneste (samme pod). Service mesh proxy (Envoy) er klassisk sidecar.</li>
+      <li><strong>Service Mesh</strong> — Istio/Linkerd/Consul. Sidecars + control plane gir automatisk mTLS, policy, observability uten kodeendring.</li>
+      <li><strong>Circuit Breaker</strong> — stopp kall til feilende tjeneste, hindre kaskade-feil (motvirker DoS).</li>
+      <li><strong>Bulkhead</strong> — isolér ressurser per kallende tjeneste, så én ond aktør ikke spiser alt.</li>
+      <li><strong>Distroless / minimal base</strong> — minimal angrepsflate i container.</li>
+    </ul>`,
+    links: [{ href: "kap8/mikrotjenester.html", label: "Kap 8 · Mikrotjenester" }]
+  },
+  {
+    id: "sc-1",
+    topic: "Supply chain",
+    verb: "Explain",
+    front: "Hva er trusler i programvare-supply-chain? Konkrete eksempler?",
+    back: `<p>Supply chain = alt som ender opp i produktet ditt — kildekode, avhengigheter, build-pipeline, container-images, registries, signaturer.</p>
+    <p><strong>Hovedtrusler</strong>:</p>
+    <ul>
+      <li><strong>Malicious dependencies</strong> — ondsinnet pakke i npm/PyPI. <em>event-stream</em>, <em>colors.js</em> (sabotasje av egen pakke).</li>
+      <li><strong>Typosquatting</strong> — angriper publiserer <code>requests2</code> for å fange feilstavinger av <code>requests</code>.</li>
+      <li><strong>Dependency confusion</strong> — pakkemanager foretrekker høyere versjon fra public registry over intern; angriper publiserer <code>company-internal-lib v99.0.0</code> på npm.</li>
+      <li><strong>Compromised maintainer</strong> — angriper tar over konto, pusher malware. <em>ua-parser-js</em>, <em>node-ipc</em>.</li>
+      <li><strong>Build pipeline-kompromiss</strong> — angriper får CI til å bake inn bakdør. <em>SolarWinds SUNBURST</strong> (2020) — kompromittert build server, signert bakdør distribuert til 18 000 kunder.</li>
+      <li><strong>Compromised tooling</strong> — <em>xz-utils backdoor</em> (CVE-2024-3094) — vedlikeholder over 2 år, nesten i alle Linux-distroer.</li>
+      <li><strong>Slopsquatting</strong> — LLM-er hallusinerer pakkenavn; angripere publiserer dem.</li>
+      <li><strong>Update hijacking</strong> — angriper kompromitterer update-server, sender malware som ekte oppdatering.</li>
+    </ul>`,
+    links: [{ href: "kap8/supply-chain.html", label: "Kap 8 · Supply chain" }]
+  },
+  {
+    id: "sc-2",
+    topic: "Supply chain",
+    verb: "Explain",
+    front: "Countermeasures mot supply chain-angrep?",
+    back: `<ul>
+      <li><strong>Pinning</strong> — bruk eksakt versjon + hash (<code>package-lock.json</code>, <code>Pipfile.lock</code>, <code>go.sum</code>). Hindrer at oppdatert pakke automatisk slipper inn malware.</li>
+      <li><strong>Vendor / mirror</strong> — speil avhengigheter internt (Artifactory, Nexus). Tar deg vekk fra direkte avhengighet av offentlige registries.</li>
+      <li><strong>Reproducible builds</strong> — samme kildekode → samme binary. Tre forskjellige som bygger og får samme hash → høy tillit til at ingen har tuklet.</li>
+      <li><strong>Signering</strong> — Sigstore/cosign for container-images, Maven-signing, GPG for releases. Verifiser før kjøring.</li>
+      <li><strong>SLSA-nivåer</strong> — Supply-chain Levels for Software Artifacts. Nivå 1–4 med stigende krav (build provenance, hermetic builds, two-person review).</li>
+      <li><strong>Scoped tokens</strong> i CI — minst privilegium, kortlevde tokens, ikke long-lived secrets.</li>
+      <li><strong>Dependency scanning</strong> — Dependabot, Snyk, Renovate. Sjekker mot CVE-databaser, foreslår oppgraderinger.</li>
+      <li><strong>Allowlist registries</strong> — blokker direkte download fra npmjs.org i produksjon; kun fra intern proxy.</li>
+      <li><strong>Two-person review</strong> for kritiske endringer i build-skript / pipeline-config.</li>
+      <li><strong>Isolasjon</strong> — bygg i hermetic sandbox uten internett; deterministiske inputs.</li>
+    </ul>`,
+    links: [{ href: "kap8/supply-chain.html", label: "Kap 8 · Supply chain" }]
+  },
+  {
+    id: "sc-3",
+    topic: "Supply chain",
+    verb: "Explain",
+    front: "Hva er en SBOM? Hvorfor er det viktig?",
+    back: `<p><strong>SBOM</strong> = Software Bill of Materials. En strukturert liste over alle komponenter (open source og proprietære) som inngår i en programvare — som ingrediensliste på matvarer.</p>
+    <p><strong>Formater</strong>:</p>
+    <ul>
+      <li><strong>SPDX</strong> — Linux Foundation-standard, ISO 5962. Bredt brukt for lisens-sporing.</li>
+      <li><strong>CycloneDX</strong> — OWASP-standard, sikkerhetsfokusert. Støtter sårbarhetsmetadata, VEX.</li>
+      <li><strong>SWID Tags</strong> — ISO/IEC 19770-2, mest for asset management.</li>
+    </ul>
+    <p><strong>Hvorfor</strong>:</p>
+    <ul>
+      <li><strong>Sårbarhetsrespons</strong> — når Log4Shell dropper, vil du svare på "har vi log4j?" på minutter, ikke uker. Med SBOM: ett oppslag.</li>
+      <li><strong>Lisens-compliance</strong> — vet du om GPL-kode sniker seg inn?</li>
+      <li><strong>Regulatorisk krav</strong> — US Executive Order 14028 (2021) krever SBOM for offentlig software. EU CRA og NIS2 i samme retning.</li>
+      <li><strong>Transparens</strong> — kunder kan vurdere risiko selv.</li>
+    </ul>
+    <p><strong>Andre transparency-tech</strong>: Sigstore (signering + transparency log), in-toto (attestasjoner av build-steg), SLSA (provenance-metadata).</p>`,
+    links: [{ href: "kap8/supply-chain.html", label: "Kap 8 · Supply chain" }]
+  },
+
+  // ============================================================
+  // TEMA 10 — Data Privacy and GDPR
+  // ============================================================
+  {
+    id: "gdpr-1",
+    topic: "Personvern & GDPR",
+    verb: "Explain",
+    front: "Hva er grunnleggende i GDPR? Hvem dekker den, hvilke roller?",
+    back: `<p><strong>GDPR</strong> (General Data Protection Regulation, 2018): EU-forordning som regulerer behandling av personopplysninger. Gjelder i Norge gjennom Personopplysningsloven.</p>
+    <p><strong>Dekker</strong>:</p>
+    <ul>
+      <li>Alle organisasjoner som behandler personopplysninger om personer i EU/EØS, uansett hvor organisasjonen er.</li>
+      <li>Bøter inntil <strong>20 MEUR eller 4% av global omsetning</strong>, det høyeste.</li>
+    </ul>
+    <p><strong>Sentrale roller</strong>:</p>
+    <ul>
+      <li><strong>Data subject</strong> — den fysiske personen opplysningene gjelder.</li>
+      <li><strong>Controller (behandlingsansvarlig)</strong> — bestemmer formålet og midlene for behandlingen. Har hovedansvaret.</li>
+      <li><strong>Processor (databehandler)</strong> — behandler data <em>på vegne av</em> controller. Krever databehandleravtale (DPA).</li>
+      <li><strong>DPO (personvernombud)</strong> — uavhengig rådgiver, kreves for offentlige org og storskala behandling av sensitive data.</li>
+      <li><strong>Supervisory Authority</strong> — Datatilsynet i Norge.</li>
+    </ul>
+    <p><strong>"Personopplysninger"</strong> = enhver opplysning som kan knyttes til en identifisert/identifiserbar person. Inkluderer IP-adresse, cookie-ID, fingeravtrykk, lokasjonsdata.</p>`,
+    links: [{ href: "kap9/gdpr.html", label: "Kap 9 · GDPR" }]
+  },
+  {
+    id: "gdpr-2",
+    topic: "Personvern & GDPR",
+    verb: "Explain",
+    front: "Hvilke krav stiller GDPR til behandling av personopplysninger?",
+    back: `<p>GDPR krever et <strong>rettslig grunnlag</strong> (Artikkel 6) for all behandling. Seks alternativer:</p>
+    <ol>
+      <li><strong>Samtykke</strong> — fritt gitt, spesifikt, informert, utvetydig. Må kunne trekkes tilbake.</li>
+      <li><strong>Avtaleoppfyllelse</strong> — nødvendig for å levere tjenesten brukeren ba om.</li>
+      <li><strong>Rettslig forpliktelse</strong> — bokføringslov, AML.</li>
+      <li><strong>Vitale interesser</strong> — liv og helse.</li>
+      <li><strong>Allmenn interesse</strong> — offentlig myndighet, forskning.</li>
+      <li><strong>Berettiget interesse</strong> — etter avveining mot brukerens rettigheter.</li>
+    </ol>
+    <p><strong>Behandlingen må</strong>:</p>
+    <ul>
+      <li>Være <strong>formålsbestemt</strong> — definert klart formål før innsamling, kan ikke gjenbrukes til noe annet uten nytt grunnlag.</li>
+      <li><strong>Dataminimere</strong> — kun innsamle det som er nødvendig.</li>
+      <li><strong>Begrenset lagringstid</strong> — slett når formålet er oppnådd.</li>
+      <li><strong>Korrekt</strong> — hold dataene oppdaterte.</li>
+      <li><strong>Sikker</strong> — passende tekniske/organisatoriske tiltak (Artikkel 32).</li>
+    </ul>
+    <p>Spesielt for <strong>særlige kategorier</strong> (Artikkel 9): helse, biometri, religion, etnisitet, fagforening, seksuell legning — strengere regler, krever eksplisitt samtykke eller spesifikt lovgrunnlag.</p>`,
+    links: [{ href: "kap9/gdpr.html", label: "Kap 9 · GDPR" }]
+  },
+  {
+    id: "gdpr-3",
+    topic: "Personvern & GDPR",
+    verb: "Explain",
+    front: "Hva er kjernen i personvern-prinsippene (privacy by design + default)?",
+    back: `<p>Artikkel 5 lister syv prinsipper. Artikkel 25 krever <strong>Privacy by Design and by Default</strong>.</p>
+    <p><strong>Privacy by Design</strong>: integrer personvern i hele utviklingsprosessen, ikke som etterkontroll.</p>
+    <ul>
+      <li>Proaktiv, ikke reaktiv.</li>
+      <li>Personvern som default — strengeste innstillinger som standard.</li>
+      <li>Integrert i designet, ikke som lapp.</li>
+      <li>Full funksjonalitet — ikke null-sum med sikkerhet.</li>
+      <li>Sikkerhet hele livsløpet — fra innsamling til sletting.</li>
+      <li>Synlighet og åpenhet.</li>
+      <li>Respekt for brukerens personvern.</li>
+    </ul>
+    <p><strong>Privacy by Default</strong>: standard-innstillinger skal være de mest personvernvennlige.</p>
+    <ul>
+      <li>Profil er privat by default — bruker må aktivt åpne.</li>
+      <li>Bare nødvendige data samles inn — ikke "kanskje vi trenger fødselsdato senere".</li>
+      <li>Kortest mulig lagringstid som standard.</li>
+    </ul>
+    <p><strong>Andre prinsipper</strong>: lovlig/rettferdig/transparent, formålsbestemt, dataminimering, korrekthet, lagringsbegrensning, integritet/konfidensialitet, ansvarlighet (controller må kunne <em>bevise</em> compliance).</p>`,
+    links: [{ href: "kap9/gdpr.html", label: "Kap 9 · GDPR" }, { href: "kap9/privacy-engineering.html", label: "Kap 9 · Privacy engineering" }]
+  },
+  {
+    id: "gdpr-4",
+    topic: "Personvern & GDPR",
+    verb: "Explain",
+    front: "Hvilke rettigheter har den registrerte (data subject) under GDPR?",
+    back: `<p>Brukere kan utøve disse rettighetene mot enhver controller. Controller har normalt <strong>30 dager</strong> til å svare.</p>
+    <ul>
+      <li><strong>Innsyn (Art. 15)</strong> — be om kopi av all data om seg selv + formålet, mottakerne, lagringstid.</li>
+      <li><strong>Retting (Art. 16)</strong> — korriger feilaktige opplysninger.</li>
+      <li><strong>Sletting / "right to be forgotten" (Art. 17)</strong> — slett når formålet er oppnådd, samtykke trukket, eller behandlingen ulovlig.</li>
+      <li><strong>Begrensning (Art. 18)</strong> — frys behandlingen midlertidig under tvist.</li>
+      <li><strong>Dataportabilitet (Art. 20)</strong> — få utlevert dataene i maskinlesbart format, overfør til annen tjeneste.</li>
+      <li><strong>Innsigelse (Art. 21)</strong> — protestere mot behandling basert på berettiget interesse eller direkte markedsføring.</li>
+      <li><strong>Automatisert beslutningstaking (Art. 22)</strong> — rett til å ikke være underlagt rene automatiserte beslutninger med rettsvirkning (inkl. profilering).</li>
+    </ul>
+    <p><strong>Implikasjon for utviklere</strong>: systemet må kunne <em>finne</em>, <em>eksportere</em> og <em>slette</em> all data om en gitt person — på tvers av tjenester, backups, logger.</p>`,
+    links: [{ href: "kap9/gdpr.html", label: "Kap 9 · GDPR" }]
+  },
+  {
+    id: "gdpr-5",
+    topic: "Personvern & GDPR",
+    verb: "Explain",
+    front: "Personvern-aktiviteter og roller gjennom produktutvikling?",
+    back: `<p><strong>Idé / krav-fase</strong>:</p>
+    <ul>
+      <li>Definer formål med databehandling.</li>
+      <li>Fastsett rettslig grunnlag (Art. 6).</li>
+      <li>Identifiser om særlige kategorier (Art. 9) er involvert.</li>
+      <li>Vurder behov for DPIA (Data Protection Impact Assessment).</li>
+    </ul>
+    <p><strong>Design-fase</strong>:</p>
+    <ul>
+      <li>Privacy by Design — minimering, pseudonymisering, kryptering.</li>
+      <li>Datakart (data flow diagram med personopplysninger markert).</li>
+      <li>Threat modeling med personvern-trusler (LINDDUN — Linkability, Identifiability, Non-repudiation, Detectability, Disclosure, Unawareness, Non-compliance).</li>
+    </ul>
+    <p><strong>Implementasjon</strong>:</p>
+    <ul>
+      <li>Implementer brukerrettigheter (innsyn, sletting, eksport).</li>
+      <li>Tekniske tiltak — kryptering, tilgangskontroll, logging.</li>
+      <li>Databehandleravtaler med tredjeparter.</li>
+    </ul>
+    <p><strong>Drift</strong>:</p>
+    <ul>
+      <li>Behandlingsoversikt (Art. 30) — register over alle behandlingsaktiviteter.</li>
+      <li>Incident response: 72-timers brudd-melding til Datatilsynet (Art. 33).</li>
+      <li>Periodiske revisjoner.</li>
+    </ul>
+    <p><strong>Roller</strong>: Product Owner definerer formål → Arkitekt designer privacy by design → Utvikler implementerer kontroller → DPO reviewer og rådgir → Controller-ledelsen tar formelle beslutninger.</p>`,
+    links: [{ href: "kap9/privacy-engineering.html", label: "Kap 9 · Privacy engineering" }]
+  },
+  {
+    id: "gdpr-6",
+    topic: "Personvern & GDPR",
+    verb: "Understand",
+    front: "Hva er en DPIA? Når kreves den, hva skal inngå?",
+    back: `<p><strong>DPIA</strong> (Data Protection Impact Assessment, Art. 35): strukturert vurdering av personvernrisiko ved en planlagt behandling. Ligner sikkerhets-risikoanalyse, men fokus på <em>påvirkning på den registrerte</em>.</p>
+    <p><strong>Når kreves DPIA</strong> — alltid når "høy risiko for fysiske personers rettigheter og friheter". Typisk:</p>
+    <ul>
+      <li>Storskala behandling av særlige kategorier (helse, biometri).</li>
+      <li>Systematisk profilering med rettslige konsekvenser.</li>
+      <li>Systematisk monitorering av offentlige områder (kamera).</li>
+      <li>Ny teknologi (AI, biometri).</li>
+      <li>Datatilsynet publiserer egne lister over behandlinger som krever DPIA.</li>
+    </ul>
+    <p><strong>Skal inneholde (minimum)</strong>:</p>
+    <ol>
+      <li>Systematisk beskrivelse av behandlingen + formålet.</li>
+      <li>Vurdering av nødvendighet og proporsjonalitet.</li>
+      <li>Vurdering av risiko for rettigheter og friheter.</li>
+      <li>Planlagte tiltak for å håndtere risikoen.</li>
+    </ol>
+    <p><strong>Hvis</strong> DPIA-en viser uakseptabel risiko som ikke kan mitigeres → forhåndskonsultasjon med Datatilsynet (Art. 36) før behandlingen starter.</p>
+    <p>DPIA er en <em>levende dokument</em> — oppdateres ved vesentlige endringer i behandlingen.</p>`,
+    links: [{ href: "kap9/privacy-engineering.html", label: "Kap 9 · Privacy engineering" }, { href: "kap9/gdpr.html", label: "Kap 9 · GDPR" }]
+  },
 ];
 
 // ============================================================
