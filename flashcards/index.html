@@ -40,23 +40,21 @@
 }
 .fc-status .score { color: var(--rust); }
 
-.fc-card-wrap { perspective: 1400px; margin: 0 auto; max-width: 720px; }
+.fc-card-wrap { margin: 0 auto; max-width: 720px; }
 .fc-card {
   position: relative; width: 100%; min-height: 360px;
-  display: grid;
-  transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
   cursor: pointer;
 }
-.fc-card.flipped { transform: rotateY(180deg); }
 .fc-face {
-  grid-area: 1 / 1;
-  backface-visibility: hidden;
   background: var(--paper); border: 1px solid var(--line);
   border-radius: 4px; padding: 38px 42px;
   box-shadow: 0 6px 20px rgba(26,22,18,0.08);
   display: flex; flex-direction: column;
+  transition: opacity 0.25s ease;
 }
-.fc-face.back { transform: rotateY(180deg); background: #faf6ee; }
+.fc-face.back { background: #faf6ee; display: none; }
+.fc-card.flipped .fc-face.front { display: none; }
+.fc-card.flipped .fc-face.back { display: flex; }
 .fc-face .face-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-ghost); margin-bottom: 12px; }
 .fc-face .topic-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rust); margin-bottom: 6px; }
 .fc-face .verb-tag {
@@ -70,8 +68,8 @@
 .verb-find       { background: rgba(176,68,40,0.12); color: var(--rust);  border: 1px solid rgba(176,68,40,0.3); }
 .verb-define     { background: rgba(107,98,87,0.14); color: var(--ink-soft); border: 1px solid rgba(107,98,87,0.3); }
 
-.fc-face .question { font-family: var(--serif); font-size: 24px; line-height: 1.4; color: var(--ink); flex: 1; }
-.fc-face .answer { font-family: var(--serif); font-size: 17px; line-height: 1.6; color: var(--ink-soft); flex: 1; min-height: 0; }
+.fc-face .question { font-family: var(--serif); font-size: 24px; line-height: 1.4; color: var(--ink); flex: 1; min-height: 0; overflow: visible; }
+.fc-face .answer { font-family: var(--serif); font-size: 17px; line-height: 1.6; color: var(--ink-soft); flex: 1; min-height: 0; overflow: visible; }
 .fc-face .answer ul { margin: 8px 0 8px 18px; }
 .fc-face .answer li { margin-bottom: 4px; }
 .fc-face .answer code { font-family: var(--mono); font-size: 14px; background: var(--paper-dark); padding: 1px 5px; border-radius: 2px; }
