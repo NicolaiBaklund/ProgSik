@@ -74,19 +74,21 @@
 .fc-face .answer li { margin-bottom: 4px; }
 .fc-face .answer code { font-family: var(--mono); font-size: 14px; background: var(--paper-dark); padding: 1px 5px; border-radius: 2px; }
 .fc-face .answer pre {
-  background: var(--paper-dark); padding: 10px 12px; border-radius: 3px;
+  background: var(--paper-dark); color: var(--ink); padding: 10px 12px; border-radius: 3px;
   font-family: var(--mono); font-size: 13px; line-height: 1.5;
   overflow-x: auto; white-space: pre; margin: 10px 0;
   border: 1px solid var(--line-soft);
 }
-.fc-face .answer pre code { background: transparent; padding: 0; font-size: inherit; }
+.fc-face .answer pre code { background: transparent; color: inherit; padding: 0; font-size: inherit; }
 .fc-face .question code { font-family: var(--mono); font-size: 14px; background: var(--paper-dark); padding: 1px 5px; border-radius: 2px; }
 .fc-face .question pre {
-  background: var(--paper-dark); padding: 10px 12px; border-radius: 3px;
+  background: var(--paper-dark); color: var(--ink); padding: 10px 12px; border-radius: 3px;
   font-family: var(--mono); font-size: 13px; line-height: 1.5;
   overflow-x: auto; white-space: pre; margin: 10px 0;
   border: 1px solid var(--line-soft);
 }
+.fc-face .question pre code,
+.fc-face .question code { color: inherit; }
 .fc-face .hint { font-family: var(--sans); font-size: 11px; color: var(--ink-ghost); margin-top: 14px; text-align: center; letter-spacing: 0.04em; }
 .fc-face .read-more { margin-top: 14px; padding-top: 12px; border-top: 1px dotted var(--line); font-family: var(--sans); font-size: 12px; }
 .fc-face .read-more a { color: var(--rust); text-decoration: none; border-bottom: 1px solid rgba(176,68,40,0.3); }
