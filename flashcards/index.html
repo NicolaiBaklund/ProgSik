@@ -1176,6 +1176,215 @@ return o.to_json()</pre>`,
     <p>Hvert krav bør spores til både en trussel (hvorfor) og en test (hvordan vet vi at det virker).</p>`,
     links: [{ href: "kap6/sdl.html", label: "Kap 6 · SDL" }]
   },
+
+  // ============================================================
+  // TEMA 7 — Secure coding with LLMs
+  // ============================================================
+  {
+    id: "llm-1",
+    topic: "Sikker koding med LLM",
+    verb: "Explain",
+    front: "Hva kan AI-kodeassistenter (Copilot, Cursor, Claude Code) faktisk gjøre?",
+    back: `<p>Generelle kapabiliteter:</p>
+    <ul>
+      <li><strong>Code completion</strong> — fullfør linje eller funksjon basert på kontekst.</li>
+      <li><strong>Code generation fra spec</strong> — naturlig språk → kode ("lag en endpoint som returnerer brukere med paginering").</li>
+      <li><strong>Refactoring</strong> — endre navn, ekstraher funksjon, konverter mellom mønstre/språk.</li>
+      <li><strong>Test-generering</strong> — unit tests for eksisterende funksjon, edge cases.</li>
+      <li><strong>Dokumentasjon</strong> — docstrings, README, kommentarer.</li>
+      <li><strong>Forklaring</strong> — "hva gjør denne koden?", code review.</li>
+      <li><strong>Bug-finding</strong> — peke på sannsynlige feil, foreslå fiks.</li>
+      <li><strong>Agentic tasks</strong> — kjøre tester, gjøre commits, navigere filsystem (Claude Code, Cursor agent mode).</li>
+    </ul>
+    <p>Underliggende modeller: GPT-4/5, Claude Opus/Sonnet, Gemini, CodeLlama, DeepSeek-Coder.</p>`,
+    links: [{ href: "kap7/ai-utvikling.html", label: "Kap 7 · AI-utvikling" }]
+  },
+  {
+    id: "llm-2",
+    topic: "Sikker koding med LLM",
+    verb: "Explain",
+    front: "Hvilke fordeler og risikoer har AI-kodeassistenter for utviklere?",
+    back: `<p><strong>Fordeler</strong>:</p>
+    <ul>
+      <li>Produktivitetsboost — GitHub-studie ~55% raskere på enkelte oppgaver.</li>
+      <li>Lavere barriere for nye språk/rammeverk.</li>
+      <li>Boilerplate-kode skrives nesten gratis.</li>
+      <li>Test-generering oppmuntrer til mer testing.</li>
+      <li>"Rubber duck" som svarer — kan forklare ukjent kode.</li>
+    </ul>
+    <p><strong>Risikoer</strong>:</p>
+    <ul>
+      <li><strong>Sårbar kode</strong> — Stanford-studie: utviklere med assistent skrev <em>flere</em> sikkerhetsfeil, og var mer overbeviste om at koden var trygg.</li>
+      <li><strong>Lisens-forurensning</strong> — kan reprodusere GPL-kode ordrett.</li>
+      <li><strong>Secret leakage</strong> — kontekst sendt til skytjenesten; firmakode/secrets kan havne i loggene deres.</li>
+      <li><strong>Hallusinerte avhengigheter</strong> (slopsquatting) — LLM foreslår pakkenavn som ikke finnes; angriper publiserer det navnet med malware.</li>
+      <li><strong>Skill atrofi</strong> — junior-utviklere lærer ikke fundamentene.</li>
+      <li><strong>Over-tillit</strong> — folk reviewer mindre nøye når koden ser sikker ut.</li>
+    </ul>`,
+    links: [{ href: "kap7/ai-utvikling.html", label: "Kap 7 · AI-utvikling" }]
+  },
+  {
+    id: "llm-3",
+    topic: "Sikker koding med LLM",
+    verb: "Explain",
+    front: "Hvorfor foreslår LLM-er sårbare kodepatterns?",
+    back: `<p><strong>1. Treningsdata er forurenset</strong>:</p>
+    <ul>
+      <li>Trent på offentlig kode (GitHub, Stack Overflow) — som inneholder masse SQLi, XSS, hardkodede secrets.</li>
+      <li>Gamle tutorials med <code>mysql_query("SELECT * WHERE id=" + id)</code> har samme vekt som moderne sikre eksempler.</li>
+      <li>Stack Overflow-svar fra 2012 er overrepresenterte fordi de har høyest opvotes — men er ikke nødvendigvis riktige i dag.</li>
+    </ul>
+    <p><strong>2. Mønstermatch uten forståelse</strong>:</p>
+    <ul>
+      <li>Modell ser "fil-håndtering" → genererer fil-API uten path-traversal-sjekk.</li>
+      <li>Ser "request.args" → bruker det direkte i SQL fordi det ofte ble gjort sånn i treningsdata.</li>
+    </ul>
+    <p><strong>3. Kontekstløshet</strong>:</p>
+    <ul>
+      <li>Modell vet ikke at endpointet eksponeres for internett, eller at brukeren ikke er innlogget.</li>
+      <li>Mangler hele trusselmodellen.</li>
+    </ul>
+    <p><strong>4. RLHF optimerer for "ser ut til å fungere"</strong>:</p>
+    <ul>
+      <li>Tilbakemelding gis ofte på om koden kompilerer/kjører — ikke på om den er sikker.</li>
+      <li>Sikre alternativer er ofte mer verbose → kan se "mindre elegante" ut.</li>
+    </ul>`,
+    links: [{ href: "kap7/ai-utvikling.html", label: "Kap 7 · AI-utvikling" }]
+  },
+  {
+    id: "llm-4",
+    topic: "Sikker koding med LLM",
+    verb: "Explain",
+    front: "Gode utviklerpraksiser for å håndtere sårbar LLM-generert kode?",
+    back: `<p><strong>Forutsetninger</strong>:</p>
+    <ul>
+      <li>Behandle LLM-output som forslag fra en junior — alltid review.</li>
+      <li>Anta at koden kan være sårbar, og let etter det aktivt.</li>
+    </ul>
+    <p><strong>Konkret praksis</strong>:</p>
+    <ul>
+      <li><strong>Code review</strong> — peer review av AI-generert kode på lik linje med menneskelig.</li>
+      <li><strong>SAST i CI/CD</strong> — Semgrep, Snyk Code, CodeQL fanger common patterns automatisk.</li>
+      <li><strong>Test for sikkerhet</strong> — ikke bare "fungerer det", men "feiler det trygt"; abuse cases.</li>
+      <li><strong>Verifiser pakkenavn</strong> — sjekk at <em>alle</em> imports faktisk eksisterer på registry. Bruk lockfiles.</li>
+      <li><strong>Skeptisk til crypto / auth / sessions</strong> — der LLM-er oftest bommer. Bruk etablerte biblioteker, ikke roll-your-own.</li>
+      <li><strong>Aldri lim secrets inn i prompts</strong> — bruk env vars/secrets manager.</li>
+      <li><strong>Spør modellen om sikkerhet</strong> — "review din egen kode for OWASP Top 10" gir ofte bedre resultat enn første utkast.</li>
+      <li><strong>Threat model først, kode etter</strong> — LLM kan ikke vite hvilke trusler som gjelder ditt system.</li>
+      <li><strong>Vær eier av designet</strong> — la modellen fylle inn detaljer, ikke ta arkitekturvalg.</li>
+    </ul>`,
+    links: [{ href: "kap7/ai-utvikling.html", label: "Kap 7 · AI-utvikling" }, { href: "kap7/llm-forsvar.html", label: "Kap 7 · LLM-forsvar" }]
+  },
+
+  // ============================================================
+  // TEMA 8 — Secure Development Activities and lifecycles
+  // ============================================================
+  {
+    id: "sdl-1",
+    topic: "Secure Development Lifecycle",
+    verb: "Explain",
+    front: "Forskjell mellom prescriptive og descriptive SDL-modeller?",
+    back: `<p><strong>Prescriptive</strong> ("dette skal du gjøre"): forskriver konkrete aktiviteter, faser og krav.</p>
+    <ul>
+      <li>Hva: gir oppskrift — gjør X i kravfasen, Y i designfasen, Z før release.</li>
+      <li>Eksempler: <strong>Microsoft SDL</strong> (12 praksiser), <strong>OWASP SAMM</strong> (15 sikkerhetspraksiser i 5 forretningsfunksjoner), <strong>BSI IT-Grundschutz</strong>.</li>
+      <li>+ Klar at-leveranse-liste; lett å auditere.</li>
+      <li>− Kan bli check-box-sikkerhet hvis ikke forstått.</li>
+      <li>− Stivt — passer ikke alle organisasjoner like godt.</li>
+    </ul>
+    <p><strong>Descriptive</strong> ("dette gjør de andre"): observerer og beskriver hva ledende organisasjoner faktisk gjør.</p>
+    <ul>
+      <li>Hva: empirisk, basert på datainnsamling fra mange firmaer.</li>
+      <li>Eksempler: <strong>BSIMM</strong> (Building Security In Maturity Model) — gjentas årlig over 100+ firmaer.</li>
+      <li>+ Realistisk speil av bransjen; benchmarking mot peer-firmaer.</li>
+      <li>+ Reflekterer hva som faktisk fungerer.</li>
+      <li>− Sier ikke <em>hva</em> du burde gjøre, kun hva andre gjør.</li>
+      <li>− Kan reprodusere bransjens vaner — ikke nødvendigvis best practice.</li>
+    </ul>
+    <p>Praksis: bruk SAMM/SDL til å bygge program, BSIMM til å sammenligne deg med konkurrenter.</p>`,
+    links: [{ href: "kap6/sdl.html", label: "Kap 6 · SDL" }]
+  },
+  {
+    id: "sdl-2",
+    topic: "Secure Development Lifecycle",
+    verb: "Explain",
+    front: "Hva er McGraw's syv touchpoints for software security?",
+    back: `<p>Gary McGraw foreslo syv konkrete sikkerhetsaktiviteter som "krysser" hver fase av utviklingsprosessen — rangert etter effektivitet:</p>
+    <ol>
+      <li><strong>Code review (with tools)</strong> — SAST på kode for å finne implementasjonsfeil (bugs).</li>
+      <li><strong>Architectural risk analysis</strong> — finn designfeil (flaws) gjennom trusselmodellering og review.</li>
+      <li><strong>Penetration testing</strong> — angripe systemet etter at det er i nær-prod-tilstand.</li>
+      <li><strong>Risk-based security tests</strong> — testtilfeller styrt av trusselmodell og risikoanalyse, ikke bare funksjonelle tester.</li>
+      <li><strong>Abuse cases</strong> — modellér hvordan systemet misbrukes (motpart av use cases).</li>
+      <li><strong>Security requirements</strong> — definer testbare sikkerhetskrav tidlig i prosjektet.</li>
+      <li><strong>Security operations</strong> — overvåking, incident response, sårbarhetshåndtering etter deploy.</li>
+    </ol>
+    <p>Nummerering 1–7 er McGraws prioritering basert på "bang for the buck". Halvparten av sikkerhetsfeil er <strong>flaws</strong> (designfeil), så <em>arkitekturrisikoanalyse</em> er like viktig som <em>code review</em>.</p>`,
+    links: [{ href: "kap6/sdl.html", label: "Kap 6 · SDL" }]
+  },
+  {
+    id: "sdl-3",
+    topic: "Secure Development Lifecycle",
+    verb: "Explain",
+    front: "Når passer prescriptive vs descriptive modeller — hvilke scenarier?",
+    back: `<p><strong>Prescriptive (SDL, SAMM) passer når</strong>:</p>
+    <ul>
+      <li>Organisasjonen bygger sikkerhetsprogram <em>fra bunnen av</em> og trenger oppskrift.</li>
+      <li>Compliance-krav (PCI-DSS, ISO 27001) krever spesifikke kontroller.</li>
+      <li>Liten/medium bedrift uten egen sikkerhetsavdeling — trenger struktur.</li>
+      <li>Auditorer skal verifisere — checkliste er enklere å gå gjennom.</li>
+      <li>Regulert industri (finans, helse, offentlig).</li>
+    </ul>
+    <p><strong>Descriptive (BSIMM) passer når</strong>:</p>
+    <ul>
+      <li>Modent sikkerhetsprogram skal benchmarkes mot peer-bedrifter.</li>
+      <li>Trenger argumentasjon mot ledelse: "12 av 15 konkurrenter gjør X — vi gjør ikke."</li>
+      <li>Vil identifisere "blinde flekker" — aktiviteter andre gjør, men du ikke.</li>
+      <li>Stor virksomhet hvor SDL-listene er for generiske.</li>
+    </ul>
+    <p><strong>Hybrid</strong> er normalen: SAMM som rammeverk for hva som skal gjøres, BSIMM som benchmark for å se hvor langt du er kommet sammenlignet med bransjen. Microsoft SDL er fortsatt referansen for utvikleraktiviteter.</p>`,
+    links: [{ href: "kap6/sdl.html", label: "Kap 6 · SDL" }]
+  },
+  {
+    id: "sdl-4",
+    topic: "Secure Development Lifecycle",
+    verb: "Explain",
+    front: "Hva er hovedaktivitetene i Microsoft SDL?",
+    back: `<p>Microsoft SDL definerer 12 praksiser fordelt på utviklingsfasene:</p>
+    <p><strong>Training</strong>:</p>
+    <ul><li>Core security training for alle utviklere.</li></ul>
+    <p><strong>Requirements</strong>:</p>
+    <ul>
+      <li>Definer sikkerhets- og personvernkrav.</li>
+      <li>Lag kvalitetsgater / bug bars (hva slipper gjennom).</li>
+      <li>Risikoanalyse av personvern (privacy impact assessment).</li>
+    </ul>
+    <p><strong>Design</strong>:</p>
+    <ul>
+      <li>Etabler designkrav (kryptostandarder, attack surface analysis).</li>
+      <li><strong>Threat modeling</strong> (kjerne-aktivitet — DFD + STRIDE).</li>
+    </ul>
+    <p><strong>Implementation</strong>:</p>
+    <ul>
+      <li>Bruk godkjente verktøy (kompilatorflagg, linkere).</li>
+      <li>Deprecate utrygge funksjoner (<code>strcpy</code> etc).</li>
+      <li>Statisk analyse (SAST).</li>
+    </ul>
+    <p><strong>Verification</strong>:</p>
+    <ul>
+      <li>Dynamisk analyse (DAST), fuzz testing.</li>
+      <li>Attack surface review før release.</li>
+    </ul>
+    <p><strong>Release</strong>:</p>
+    <ul>
+      <li>Incident response plan.</li>
+      <li>Final security review.</li>
+      <li>Sertifiser og arkiver release.</li>
+    </ul>
+    <p><strong>Response</strong>:</p>
+    <ul><li>Eksekver incident response-plan ved hendelser.</li></ul>`,
+    links: [{ href: "kap6/sdl.html", label: "Kap 6 · SDL" }]
+  },
 ];
 
 // ============================================================
