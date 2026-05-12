@@ -74,6 +74,10 @@
 .fc-face .answer li { margin-bottom: 4px; }
 .fc-face .answer code { font-family: var(--mono); font-size: 14px; background: var(--paper-dark); padding: 1px 5px; border-radius: 2px; }
 .fc-face .hint { font-family: var(--sans); font-size: 11px; color: var(--ink-ghost); margin-top: 14px; text-align: center; letter-spacing: 0.04em; }
+.fc-face .read-more { margin-top: 14px; padding-top: 12px; border-top: 1px dotted var(--line); font-family: var(--sans); font-size: 12px; }
+.fc-face .read-more a { color: var(--rust); text-decoration: none; border-bottom: 1px solid rgba(176,68,40,0.3); }
+.fc-face .read-more a:hover { border-bottom-color: var(--rust); }
+.fc-face .read-more .rm-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-ghost); margin-right: 8px; }
 
 /* Controls */
 .fc-controls { display: flex; gap: 10px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
@@ -154,6 +158,7 @@
         <div class="fc-face back">
           <div class="face-label">Svar</div>
           <div class="answer" id="back-answer"></div>
+          <div class="read-more" id="back-readmore" style="display:none;"></div>
           <div class="hint">Hvordan gikk det?</div>
         </div>
       </div>
@@ -189,7 +194,9 @@
 //   back: HTML tillatt (<ul><li><code>...)
 // ============================================================
 const CARDS = [
-  // ---- Tema 1: Security concepts and principles ----
+  // ============================================================
+  // TEMA 1 — Security concepts and principles
+  // ============================================================
   {
     id: "sec-1",
     topic: "Sikkerhetsprinsipper",
@@ -197,13 +204,333 @@ const CARDS = [
     front: "Hva er CIA-triaden, og hva betyr hvert element?",
     back: `<ul>
       <li><strong>Confidentiality</strong> — kun autoriserte ser data (kryptering, tilgangskontroll).</li>
-      <li><strong>Integrity</strong> — data ikke endret uautorisert (hashing, signaturer).</li>
-      <li><strong>Availability</strong> — systemet er tilgjengelig når det trengs (redundans, DoS-forsvar).</li>
+      <li><strong>Integrity</strong> — data ikke endret uautorisert (hashing, signaturer, MAC).</li>
+      <li><strong>Availability</strong> — systemet tilgjengelig når det trengs (redundans, DoS-forsvar).</li>
     </ul>
-    <p>Ofte utvidet med <em>Authenticity</em> og <em>Non-repudiation</em>.</p>`
+    <p>Ofte utvidet med <em>Authenticity</em> (avsender er den som påstås) og <em>Non-repudiation</em> (kan ikke benekte handling).</p>`,
+    links: [{ href: "kap1/cia-triaden.html", label: "Kap 1 · CIA-triaden" }]
+  },
+  {
+    id: "sec-2",
+    topic: "Sikkerhetsprinsipper",
+    verb: "Understand",
+    front: "Hva er forskjellen på passive og aktive angrep? Gi eksempler.",
+    back: `<p><strong>Passive</strong>: angriper observerer uten å endre. Bryter konfidensialitet. Vanskelig å oppdage.</p>
+    <ul>
+      <li>Eavesdropping, trafikkanalyse, sniffing, shoulder surfing.</li>
+    </ul>
+    <p><strong>Aktive</strong>: angriper modifiserer trafikk eller system. Bryter integritet/availability.</p>
+    <ul>
+      <li>MITM, replay, spoofing, injection, DoS/DDoS, tampering.</li>
+    </ul>`,
+    links: [{ href: "kap1/trusselbilde.html", label: "Kap 1 · Trusselbilde" }]
+  },
+  {
+    id: "sec-3",
+    topic: "Sikkerhetsprinsipper",
+    verb: "Understand",
+    front: "Forklar disse angrepsbegrepene: spoofing, MITM, replay, social engineering.",
+    back: `<ul>
+      <li><strong>Spoofing</strong> — utgir seg for å være noen andre (IP, e-post, ARP, DNS).</li>
+      <li><strong>MITM</strong> — angriper sitter mellom to parter, leser/endrer trafikk. Forsvar: TLS + sertifikatvalidering.</li>
+      <li><strong>Replay</strong> — sender tidligere fanget gyldig melding på nytt. Forsvar: nonce, timestamp, sekvensnummer.</li>
+      <li><strong>Social engineering</strong> — manipulerer mennesket, ikke maskinen (phishing, pretexting, vishing).</li>
+    </ul>`,
+    links: [{ href: "kap1/trusselbilde.html", label: "Kap 1 · Trusselbilde" }]
+  },
+  {
+    id: "sec-4",
+    topic: "Sikkerhetsprinsipper",
+    verb: "Apply",
+    front: "Nevn og forklar minst fem Saltzer & Schroeder-designprinsipper.",
+    back: `<ul>
+      <li><strong>Least privilege</strong> — minst nødvendig tilgang for å gjøre jobben.</li>
+      <li><strong>Fail-safe defaults</strong> — nekt som standard, gi tilgang eksplisitt.</li>
+      <li><strong>Economy of mechanism</strong> — hold designet enkelt og lite.</li>
+      <li><strong>Complete mediation</strong> — sjekk tilgang ved hver forespørsel, ikke cache uten omtanke.</li>
+      <li><strong>Open design</strong> — sikkerhet skal ikke avhenge av hemmelig design (Kerckhoffs).</li>
+      <li><strong>Separation of privilege</strong> — krev flere betingelser (4-eyes, MFA).</li>
+      <li><strong>Least common mechanism</strong> — del minst mulig mellom brukere.</li>
+      <li><strong>Psychological acceptability</strong> — sikkerhet må være brukbar, ellers omgås.</li>
+    </ul>`,
+    links: [{ href: "kap1/kjerneprinsipper.html", label: "Kap 1 · Kjerneprinsipper" }]
+  },
+  {
+    id: "sec-5",
+    topic: "Sikkerhetsprinsipper",
+    verb: "Apply",
+    front: "Hva er defense in depth? Gi eksempel fra en webapp.",
+    back: `<p>Flere uavhengige lag av forsvar — hvis ett feiler, fanger neste opp. Ingen single point of failure i sikkerhetsmodellen.</p>
+    <p><strong>Webapp-eksempel</strong>:</p>
+    <ul>
+      <li>WAF foran reverse proxy</li>
+      <li>TLS overalt + HSTS</li>
+      <li>Input-validering i frontend <em>og</em> backend</li>
+      <li>Parameteriserte queries i DB-lag</li>
+      <li>Least-privilege DB-bruker</li>
+      <li>Logging + alerting</li>
+      <li>Patching + segmentering av nettverk</li>
+    </ul>`,
+    links: [{ href: "kap1/kjerneprinsipper.html", label: "Kap 1 · Kjerneprinsipper" }]
   },
 
-  // ---- Tema 4: Authorization (eksempel-kort fra ppt 13 side 14) ----
+  // ============================================================
+  // TEMA 2 — OWASP Top 10
+  // ============================================================
+  {
+    id: "owasp-1",
+    topic: "OWASP Top 10",
+    verb: "Understand",
+    front: "List opp OWASP Top 10 (2021) — alle ti kategorier.",
+    back: `<ol>
+      <li><strong>A01</strong> Broken Access Control</li>
+      <li><strong>A02</strong> Cryptographic Failures</li>
+      <li><strong>A03</strong> Injection (inkl. XSS)</li>
+      <li><strong>A04</strong> Insecure Design</li>
+      <li><strong>A05</strong> Security Misconfiguration</li>
+      <li><strong>A06</strong> Vulnerable and Outdated Components</li>
+      <li><strong>A07</strong> Identification and Authentication Failures</li>
+      <li><strong>A08</strong> Software and Data Integrity Failures</li>
+      <li><strong>A09</strong> Security Logging and Monitoring Failures</li>
+      <li><strong>A10</strong> Server-Side Request Forgery (SSRF)</li>
+    </ol>`,
+    links: [{ href: "kap2/index.html", label: "Kap 2 · OWASP Top 10 (oversikt)" }]
+  },
+  {
+    id: "owasp-2",
+    topic: "OWASP Top 10",
+    verb: "Understand",
+    front: "Hva er Broken Access Control (A01)? Eksempler + forsvar.",
+    back: `<p>Bruker får tilgang utenfor det autorisasjon tillater — manglende eller feil håndhevelse.</p>
+    <p><strong>Eksempler</strong>:</p>
+    <ul>
+      <li>IDOR — endre <code>/order/123</code> til <code>/order/124</code></li>
+      <li>Manglende sjekk av roller på admin-endepunkt</li>
+      <li>Force browsing til skjulte URL-er</li>
+      <li>JWT med <code>alg=none</code> akseptert</li>
+      <li>CORS satt til <code>*</code></li>
+    </ul>
+    <p><strong>Forsvar</strong>: deny-by-default, sentralisert tilgangskontroll, sjekk eierskap på objekter, logg og rate-limit feilede forsøk.</p>`,
+    links: [{ href: "kap2/authn-autorisasjonsfeil.html", label: "Kap 2 · Authn/Autorisasjonsfeil" }]
+  },
+  {
+    id: "owasp-3",
+    topic: "OWASP Top 10",
+    verb: "Understand",
+    front: "Forklar Injection (A03). Hovedtyper + forsvar.",
+    back: `<p>Ufiltrert brukerdata tolkes som kommando i tolker.</p>
+    <ul>
+      <li><strong>SQLi</strong> — <code>"SELECT * FROM u WHERE id=" + input</code></li>
+      <li><strong>OS command</strong> — <code>os.system("ping " + host)</code></li>
+      <li><strong>LDAP / XPath / NoSQL injection</strong></li>
+      <li><strong>XSS</strong> — injection av HTML/JS i nettleseren (er nå i A03)</li>
+    </ul>
+    <p><strong>Forsvar</strong>:</p>
+    <ul>
+      <li>Parameteriserte queries / prepared statements</li>
+      <li>ORM med bind-parametre</li>
+      <li>Escape ved output (kontekst-spesifikt)</li>
+      <li>Allowlist-validering</li>
+      <li>Minst-privilegert DB-bruker</li>
+    </ul>`,
+    links: [{ href: "kap2/injection.html", label: "Kap 2 · Injection" }, { href: "kap2/xss-csrf.html", label: "Kap 2 · XSS/CSRF" }]
+  },
+  {
+    id: "owasp-4",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten? Fiks den.<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    @app.route('/user')<br>
+    def user():<br>
+    &nbsp;&nbsp;uid = request.args.get('id')<br>
+    &nbsp;&nbsp;q = f"SELECT * FROM users WHERE id={uid}"<br>
+    &nbsp;&nbsp;return db.execute(q).fetchone()
+    </code>`,
+    back: `<p><strong>SQL injection</strong> via streng-interpolasjon. <code>?id=1 OR 1=1</code> lekker hele tabellen; <code>?id=1; DROP TABLE users--</code> kan slette.</p>
+    <p><strong>Fiks</strong> — bruk parameteriserte queries:</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">q = "SELECT * FROM users WHERE id = ?"
+return db.execute(q, (uid,)).fetchone()</pre>
+    <p>Valider også at <code>uid</code> er int. Ikke bygg SQL med <code>f"..."</code> eller <code>+</code>.</p>`,
+    links: [{ href: "kap2/injection.html", label: "Kap 2 · Injection" }]
+  },
+  {
+    id: "owasp-5",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    @app.route('/search')<br>
+    def search():<br>
+    &nbsp;&nbsp;q = request.args.get('q')<br>
+    &nbsp;&nbsp;return f"&lt;h1&gt;Treff for {q}&lt;/h1&gt;"
+    </code>`,
+    back: `<p><strong>Reflektert XSS</strong>. <code>?q=&lt;script&gt;alert(1)&lt;/script&gt;</code> kjører i offerets nettleser.</p>
+    <p><strong>Fiks</strong>:</p>
+    <ul>
+      <li>Bruk template-engine med auto-escape (Jinja2 <code>{{ q }}</code>)</li>
+      <li>Eller eksplisitt: <code>html.escape(q)</code></li>
+      <li>Content Security Policy som forsvarsdypde</li>
+      <li>Aldri <code>|safe</code> / <code>mark_safe</code> på brukerinput</li>
+    </ul>`,
+    links: [{ href: "kap2/xss-csrf.html", label: "Kap 2 · XSS/CSRF" }]
+  },
+  {
+    id: "owasp-6",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    @app.route('/download')<br>
+    def download():<br>
+    &nbsp;&nbsp;name = request.args.get('file')<br>
+    &nbsp;&nbsp;return open(f"/var/files/{name}").read()
+    </code>`,
+    back: `<p><strong>Path traversal</strong>. <code>?file=../../etc/passwd</code> leser systemfiler.</p>
+    <p><strong>Fiks</strong>:</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">import os
+base = "/var/files"
+path = os.path.realpath(os.path.join(base, name))
+if not path.startswith(base + os.sep):
+    abort(403)
+return open(path).read()</pre>
+    <p>Bedre: bruk en hvitliste over tillatte filnavn eller intern ID → mapping.</p>`,
+    links: [{ href: "kap2/konfig-krypto-ssrf.html", label: "Kap 2 · Konfig/Krypto/SSRF" }]
+  },
+  {
+    id: "owasp-7",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    @app.route('/order/&lt;int:oid&gt;')<br>
+    @login_required<br>
+    def order(oid):<br>
+    &nbsp;&nbsp;return Order.query.get(oid).to_json()
+    </code>`,
+    back: `<p><strong>IDOR</strong> (A01 Broken Access Control). Bruker er innlogget, men eierskap til ordren sjekkes ikke. Alle innloggede kan lese alles ordrer.</p>
+    <p><strong>Fiks</strong>:</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">o = Order.query.get_or_404(oid)
+if o.user_id != current_user.id:
+    abort(403)
+return o.to_json()</pre>`,
+    links: [{ href: "kap2/authn-autorisasjonsfeil.html", label: "Kap 2 · Authn/Autorisasjonsfeil" }]
+  },
+  {
+    id: "owasp-8",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    API_KEY = "sk-prod-9f2a8b..."<br>
+    password = md5(user_password)<br>
+    cipher = DES.new(b"12345678", DES.MODE_ECB)
+    </code>`,
+    back: `<p><strong>Cryptographic Failures (A02)</strong>:</p>
+    <ul>
+      <li>Hardkodet secret i kildekoden — hører i secrets manager / env</li>
+      <li><code>MD5</code> for passord — kollisjonssvak, ingen salt, for raskt. Bruk bcrypt/argon2/scrypt.</li>
+      <li>DES — 56-bit nøkkel, knekt for lengst. Bruk AES-256.</li>
+      <li>ECB-modus — lekker mønster. Bruk GCM (autentisert) eller CBC med MAC.</li>
+    </ul>`,
+    links: [{ href: "kap2/konfig-krypto-ssrf.html", label: "Kap 2 · Konfig/Krypto/SSRF" }, { href: "kap3/symmetrisk-krypto.html", label: "Kap 3 · Symmetrisk krypto" }]
+  },
+  {
+    id: "owasp-9",
+    topic: "OWASP Top 10",
+    verb: "Understand",
+    front: "Hva er SSRF (A10)? Hvordan utnyttes det og hvordan forsvares?",
+    back: `<p><strong>Server-Side Request Forgery</strong> — angriper får serveren til å hente URL angriper kontrollerer. Server stoler på sin egen IP.</p>
+    <p><strong>Utnyttelse</strong>:</p>
+    <ul>
+      <li>Hent cloud metadata: <code>http://169.254.169.254/latest/meta-data/</code> (AWS IMDSv1) — stjeler credentials</li>
+      <li>Scan intern infrastruktur</li>
+      <li>Bypass firewall via serveren</li>
+    </ul>
+    <p><strong>Forsvar</strong>: hvitliste destinasjoner, blokker private IP-ranges (RFC1918, 127.0.0.0/8, 169.254/16), valider URL etter DNS-resolve, bruk IMDSv2 i AWS.</p>`,
+    links: [{ href: "kap2/konfig-krypto-ssrf.html", label: "Kap 2 · Konfig/Krypto/SSRF" }]
+  },
+  {
+    id: "owasp-10",
+    topic: "OWASP Top 10",
+    verb: "Explain",
+    front: "Hvordan lagres passord sikkert? Hvorfor ikke SHA-256?",
+    back: `<p>Bruk en <strong>treg, salted, adaptiv</strong> hash designet for passord:</p>
+    <ul>
+      <li><strong>Argon2id</strong> (anbefalt nå)</li>
+      <li><strong>bcrypt</strong> (workfactor 12+)</li>
+      <li><strong>scrypt</strong></li>
+      <li><strong>PBKDF2</strong> (FIPS-godkjent fallback)</li>
+    </ul>
+    <p>SHA-256 er for raskt — GPU/ASIC gjør milliarder per sekund. Også: ingen innebygd salt → rainbow tables knuser usaltede hashes.</p>
+    <p><strong>Unikt salt per bruker</strong> hindrer at samme passord får samme hash. <strong>Pepper</strong> (server-side secret) er ekstra lag.</p>`,
+    links: [{ href: "kap2/authn-autorisasjonsfeil.html", label: "Kap 2 · Authn/Autorisasjonsfeil" }, { href: "kap3/hashing-mac.html", label: "Kap 3 · Hashing/MAC" }]
+  },
+  {
+    id: "owasp-11",
+    topic: "OWASP Top 10",
+    verb: "Explain",
+    front: "Forklar autentiseringsfaktorer + hva MFA og FIDO2 gir.",
+    back: `<p><strong>Tre faktorer</strong>:</p>
+    <ul>
+      <li><strong>Noe du vet</strong> — passord, PIN</li>
+      <li><strong>Noe du har</strong> — telefon, sikkerhetsnøkkel, smartkort</li>
+      <li><strong>Noe du er</strong> — fingeravtrykk, ansikt, iris</li>
+    </ul>
+    <p><strong>MFA</strong> = minst to <em>ulike</em> faktorer. Stopper credential stuffing og phishing av rene passord.</p>
+    <p><strong>FIDO2 / WebAuthn</strong> — public-key auth bundet til opprinnelses-domene. <strong>Phishing-resistent</strong> fordi nøkkelen ikke signerer for feil domene. Erstatter SMS-OTP (SIM-swap-svak) og TOTP (kan phishes).</p>`,
+    links: [{ href: "kap2/authn-autorisasjonsfeil.html", label: "Kap 2 · Authn/Autorisasjonsfeil" }, { href: "kap4/autentisering.html", label: "Kap 4 · Autentisering" }]
+  },
+  {
+    id: "owasp-12",
+    topic: "OWASP Top 10",
+    verb: "Explain",
+    front: "Hva er CAPTCHA designet for? Hovedsvakheter?",
+    back: `<p><strong>Mål</strong>: skille menneske fra automatisert bot — bremse credential stuffing, scraping, spam-registrering.</p>
+    <p><strong>Svakheter</strong>:</p>
+    <ul>
+      <li>OCR + ML knekker tekst-CAPTCHA</li>
+      <li>CAPTCHA-farms — billig menneskelig løsning ($1/1000)</li>
+      <li>Tilgjengelighet — utelukker brukere med funksjonsnedsettelse</li>
+      <li>reCAPTCHA v3 = sporing, personvern-problem</li>
+    </ul>
+    <p>Bedre forsvar i kombinasjon: rate-limit, device fingerprint, risk scoring, MFA.</p>`,
+    links: [{ href: "kap2/authn-autorisasjonsfeil.html", label: "Kap 2 · Authn/Autorisasjonsfeil" }]
+  },
+  {
+    id: "owasp-13",
+    topic: "OWASP Top 10",
+    verb: "Explain",
+    front: "Hvilke cookie-attributter sikrer session-cookies? Hva gjør hver?",
+    back: `<ul>
+      <li><strong>HttpOnly</strong> — JavaScript får ikke lese. Stopper XSS fra å stjele cookien.</li>
+      <li><strong>Secure</strong> — sendes kun over HTTPS. Hindrer sniffing.</li>
+      <li><strong>SameSite=Lax / Strict</strong> — cookien følger ikke cross-site requests. Mitigerer CSRF.</li>
+      <li><strong>__Host-</strong> prefix — krever Secure + Path=/ + ingen Domain. Hardere binding.</li>
+      <li><strong>Max-Age / Expires</strong> — kort levetid + rotér ved login</li>
+    </ul>
+    <p>Også: regenerer session-ID ved login (motvirker fixation), invalider serverside ved logout.</p>`,
+    links: [{ href: "kap2/authn-autorisasjonsfeil.html", label: "Kap 2 · Authn/Autorisasjonsfeil" }, { href: "kap2/xss-csrf.html", label: "Kap 2 · XSS/CSRF" }]
+  },
+  {
+    id: "owasp-14",
+    topic: "OWASP Top 10",
+    verb: "Explain",
+    front: "Hva er clickjacking? Hvordan forsvares mot det?",
+    back: `<p>Angriper laster offer-siden i en gjennomsiktig <code>&lt;iframe&gt;</code> over sin egen UI. Bruker tror han klikker på fake-knapp, men klikker faktisk i offer-siden (f.eks. "Slett konto").</p>
+    <p><strong>Forsvar</strong>:</p>
+    <ul>
+      <li><strong>CSP <code>frame-ancestors 'none'</code></strong> — moderne, anbefalt</li>
+      <li><strong>X-Frame-Options: DENY</strong> eller <code>SAMEORIGIN</code> — legacy</li>
+      <li><strong>Frame-busting JS</strong> — sjekk at <code>window.top === window.self</code> (defense in depth)</li>
+      <li>SameSite-cookies — handlinger krever auth som ikke følger med iframe</li>
+    </ul>`,
+    links: [{ href: "kap2/xss-csrf.html", label: "Kap 2 · XSS/CSRF (clickjacking)" }]
+  },
+
+  // ============================================================
+  // TEMA 4 — Authorization (demo — flytt eller utvid senere)
+  // ============================================================
   {
     id: "authz-1",
     topic: "Autorisasjon",
@@ -346,8 +673,16 @@ function render() {
     const vtag = document.getElementById('front-verb');
     vtag.textContent = card.verb;
     vtag.className = 'verb-tag verb-' + card.verb.toLowerCase();
-    document.getElementById('front-question').textContent = card.front;
+    document.getElementById('front-question').innerHTML = card.front;
     document.getElementById('back-answer').innerHTML = card.back;
+    const rm = document.getElementById('back-readmore');
+    if (card.links && card.links.length) {
+      const html = card.links.map(l => `<a href="../${l.href}">${l.label}</a>`).join(' · ');
+      rm.innerHTML = `<span class="rm-label">Les mer</span>${html}`;
+      rm.style.display = 'block';
+    } else {
+      rm.style.display = 'none';
+    }
     document.getElementById('progress').textContent = `Kort ${state.index + 1} / ${total}`;
   }
 
@@ -361,7 +696,10 @@ function render() {
 }
 
 // Event binding
-document.getElementById('card').addEventListener('click', flip);
+document.getElementById('card').addEventListener('click', (e) => {
+  if (e.target.tagName === 'A') return;  // klikk på link skal ikke snu kortet
+  flip();
+});
 document.getElementById('btn-prev').onclick = prevCard;
 document.getElementById('btn-next').onclick = nextCard;
 document.getElementById('btn-correct').onclick = () => mark('correct');
