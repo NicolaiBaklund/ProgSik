@@ -104,6 +104,40 @@
   font-family: var(--serif); font-style: italic; color: var(--ink-faded);
 }
 
+.fc-notes { margin-top: 36px; max-width: 720px; margin-left: auto; margin-right: auto; }
+.fc-notes-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 10px;
+}
+.fc-notes-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-ghost);
+}
+.fc-notes-status {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
+  color: var(--green); opacity: 0; transition: opacity 0.2s;
+}
+.fc-notes-status.visible { opacity: 1; }
+.fc-notes textarea {
+  width: 100%; min-height: 160px; resize: vertical;
+  font-family: var(--serif); font-size: 16px; line-height: 1.6;
+  padding: 16px 18px; color: var(--ink);
+  background: #faf6ee; border: 1px solid var(--line); border-radius: 4px;
+  outline: none;
+  box-shadow: inset 0 1px 3px rgba(26,22,18,0.04);
+}
+.fc-notes textarea:focus { border-color: var(--rust); box-shadow: 0 0 0 3px rgba(176,68,40,0.12); }
+.fc-notes textarea::placeholder { color: var(--ink-ghost); font-style: italic; }
+.fc-notes-meta {
+  font-family: var(--sans); font-size: 11px; color: var(--ink-ghost);
+  margin-top: 6px; display: flex; justify-content: space-between;
+}
+.fc-notes-meta button {
+  font-family: var(--sans); font-size: 11px; background: none; border: none;
+  color: var(--ink-ghost); cursor: pointer; padding: 0; text-decoration: underline;
+}
+.fc-notes-meta button:hover { color: var(--rust); }
+
 @media (max-width: 700px) {
   .fc-face { padding: 28px 24px; }
   .fc-face .question { font-size: 19px; }
@@ -175,6 +209,22 @@
     </div>
     <div class="fc-keyhint">
       <kbd>Space</kbd> snu · <kbd>&larr;</kbd>/<kbd>&rarr;</kbd> bytt · <kbd>R</kbd> riktig · <kbd>F</kbd> feil · <kbd>S</kbd> bland
+    </div>
+
+    <div class="fc-notes">
+      <div class="fc-notes-header">
+        <span class="fc-notes-label">Notater for dette kortet</span>
+        <span class="fc-notes-status" id="notes-status">Lagret</span>
+      </div>
+      <textarea id="notes-area" placeholder="Skriv ned tanker, egne eksempler, ting du må huske, lenker til pensum… Lagres automatisk per kort."></textarea>
+      <div class="fc-notes-meta">
+        <span id="notes-count">0 tegn</span>
+        <span>
+          <button id="notes-clear">Tøm dette notatet</button>
+          &nbsp;·&nbsp;
+          <button id="notes-clear-all"><span id="notes-total">0</span> notater totalt — slett alle</button>
+        </span>
+      </div>
     </div>
   </div>
 </main>
@@ -1897,12 +1947,14 @@ return greeting                   # render → SINK
 // APP LOGIC
 // ============================================================
 const STORAGE_KEY = 'tdt4237_flashcards_v1';
+const NOTES_KEY = 'tdt4237_flashcards_notes_v1';
 
 const state = {
   filteredCards: [],
   index: 0,
   flipped: false,
   results: loadResults(),  // { cardId: 'correct' | 'wrong' | 'skip' }
+  notes: loadNotes(),       // { cardId: "fritekst" }
   topicFilter: 'all',
   verbFilter: 'all',
 };
@@ -1913,6 +1965,13 @@ function loadResults() {
 }
 function saveResults() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.results));
+}
+function loadNotes() {
+  try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveNotes() {
+  localStorage.setItem(NOTES_KEY, JSON.stringify(state.notes));
 }
 
 function buildTopicFilters() {
@@ -2026,6 +2085,39 @@ function render() {
     else if (r === 'wrong') wrong++;
   });
   document.getElementById('score').textContent = `Riktig: ${correct} · Feil: ${wrong}`;
+
+  // Notes for current card
+  const notesArea = document.getElementById('notes-area');
+  const notesCount = document.getElementById('notes-count');
+  if (card) {
+    notesArea.value = state.notes[card.id] || '';
+    notesArea.disabled = false;
+    notesArea.placeholder = "Skriv ned tanker, egne eksempler, ting du må huske, lenker til pensum… Lagres automatisk per kort.";
+  } else {
+    notesArea.value = '';
+    notesArea.disabled = true;
+    notesArea.placeholder = "Ingen kort valgt.";
+  }
+  notesCount.textContent = `${notesArea.value.length} tegn`;
+  const totalNotes = Object.values(state.notes).filter(t => t && t.trim().length > 0).length;
+  document.getElementById('notes-total').textContent = totalNotes;
+}
+
+let notesSaveTimer;
+function onNotesInput() {
+  const card = state.filteredCards[state.index];
+  if (!card) return;
+  const text = document.getElementById('notes-area').value;
+  state.notes[card.id] = text;
+  document.getElementById('notes-count').textContent = `${text.length} tegn`;
+
+  clearTimeout(notesSaveTimer);
+  notesSaveTimer = setTimeout(() => {
+    saveNotes();
+    const status = document.getElementById('notes-status');
+    status.classList.add('visible');
+    setTimeout(() => status.classList.remove('visible'), 1200);
+  }, 300);
 }
 
 // Event binding
@@ -2040,9 +2132,29 @@ document.getElementById('btn-wrong').onclick = () => mark('wrong');
 document.getElementById('btn-skip').onclick = () => mark('skip');
 document.getElementById('btn-shuffle').onclick = shuffle;
 document.getElementById('btn-reset').onclick = () => {
-  if (confirm('Nullstill all progresjon?')) {
+  if (confirm('Nullstill all progresjon (riktig/feil-status)? Notater beholdes.')) {
     state.results = {};
     saveResults();
+    render();
+  }
+};
+
+document.getElementById('notes-area').addEventListener('input', onNotesInput);
+document.getElementById('notes-clear').onclick = () => {
+  const card = state.filteredCards[state.index];
+  if (!card) return;
+  if (confirm('Tøm notatet for dette kortet?')) {
+    delete state.notes[card.id];
+    saveNotes();
+    render();
+  }
+};
+document.getElementById('notes-clear-all').onclick = () => {
+  const total = Object.values(state.notes).filter(t => t && t.trim().length > 0).length;
+  if (total === 0) { alert('Ingen notater å slette.'); return; }
+  if (confirm(`Slette ALLE ${total} notater permanent? Dette kan ikke angres.`)) {
+    state.notes = {};
+    saveNotes();
     render();
   }
 };
