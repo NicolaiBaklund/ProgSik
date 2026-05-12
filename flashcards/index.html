@@ -850,20 +850,331 @@ return o.to_json()</pre>`,
   },
 
   // ============================================================
-  // TEMA 6 — Risk management (demo — utvides senere)
+  // TEMA 5 — Threat modeling and STRIDE
+  // ============================================================
+  {
+    id: "tm-1",
+    topic: "Threat modeling",
+    verb: "Explain",
+    front: "Hva er threat modeling? Hvorfor gjøre det?",
+    back: `<p>Strukturert prosess for å identifisere, analysere og prioritere trusler mot et system — <em>før</em> angriperne finner dem.</p>
+    <p><strong>Hovedspørsmål</strong> (Shostack):</p>
+    <ol>
+      <li>Hva bygger vi? (system, dataflyt, trust boundaries)</li>
+      <li>Hva kan gå galt? (trusler)</li>
+      <li>Hva gjør vi med det? (mitigations)</li>
+      <li>Gjorde vi en god jobb? (validering, iterer)</li>
+    </ol>
+    <p><strong>Hvorfor</strong>:</p>
+    <ul>
+      <li>Billigere å fikse i design-fasen enn etter deploy (100× regel).</li>
+      <li>Tvinger team til å tenke som angriper.</li>
+      <li>Skaper sporbar dokumentasjon for sikkerhetsvalg.</li>
+      <li>Fanger arkitekturfeil som SAST/DAST aldri ser.</li>
+    </ul>`,
+    links: [{ href: "kap5/metodikk.html", label: "Kap 5 · Metodikk" }, { href: "kap5/index.html", label: "Kap 5 · Threat modeling" }]
+  },
+  {
+    id: "tm-2",
+    topic: "Threat modeling",
+    verb: "Explain",
+    front: "Forskjell mellom attacker-centric, software-centric og asset-centric threat modeling?",
+    back: `<p><strong>Attacker-centric</strong>: start fra angriperen. Hvem vil angripe oss, motivasjon, kapasitet, ressurser?</p>
+    <ul>
+      <li>Verktøy: persona-modellering, threat actor profiles, attack trees.</li>
+      <li>Sterk på: prioritering basert på realistiske trusselaktører.</li>
+      <li>Svak på: kan miste tekniske detaljer.</li>
+    </ul>
+    <p><strong>Software-centric</strong> (design-centric): start fra systemet. Tegn DFD, identifiser trust boundaries, finn trusler mot hvert element.</p>
+    <ul>
+      <li>Verktøy: DFD + STRIDE, Microsoft Threat Modeling Tool.</li>
+      <li>Sterk på: konkret, knyttet til kode/komponenter.</li>
+      <li>Svak på: kan overse business-impact.</li>
+    </ul>
+    <p><strong>Asset-centric</strong>: start fra det som er verdt å beskytte. Hva er kronjuvelene? (kundedata, IP, penger)</p>
+    <ul>
+      <li>Sterk på: business-alignment, prioritering ut fra konsekvens.</li>
+      <li>Svak på: kan overse trusler mot mindre åpenbare assets.</li>
+    </ul>`,
+    links: [{ href: "kap5/metodikk.html", label: "Kap 5 · Metodikk" }]
+  },
+  {
+    id: "tm-3",
+    topic: "Threat modeling",
+    verb: "Apply",
+    front: "Hva er en misuse case? Hvordan brukes den?",
+    back: `<p><strong>Misuse case</strong> = "negativ" use case. Beskriver hvordan en <em>misaktor</em> (angriper) misbruker systemet.</p>
+    <p>Tegnes som UML use case diagram, men ondsinnede aktører og handlinger er fargelagt (typisk svart).</p>
+    <p><strong>Relasjoner</strong>:</p>
+    <ul>
+      <li><code>threatens</code>: misuse case truer en normal use case.</li>
+      <li><code>mitigates</code>: en sikkerhets-use-case demper et misuse case.</li>
+    </ul>
+    <p><strong>Eksempel — nettbank</strong>:</p>
+    <ul>
+      <li>Use case: "Overfør penger" (utført av Kunde).</li>
+      <li>Misuse case: "Stjel session" (utført av Angriper) — threatens "Overfør penger".</li>
+      <li>Mitigation: "Kreve MFA på transaksjon &gt; 5000 kr" — mitigates misuse case.</li>
+    </ul>
+    <p>Bra for å snakke om sikkerhet med ikke-tekniske stakeholders.</p>`,
+    links: [{ href: "kap5/metodikk.html", label: "Kap 5 · Metodikk" }]
+  },
+  {
+    id: "tm-4",
+    topic: "Threat modeling",
+    verb: "Apply",
+    front: "Hva er et attack tree? Hvordan bygges det?",
+    back: `<p>Hierarkisk trestruktur som dekomponerer et angrepsmål i delmål og konkrete angrep.</p>
+    <p><strong>Struktur</strong>:</p>
+    <ul>
+      <li><strong>Rot</strong>: angriperens overordnede mål ("Få administratortilgang").</li>
+      <li><strong>Greiner</strong>: delmål eller måter å oppnå målet på.</li>
+      <li><strong>Løvnoder</strong>: konkrete angrep.</li>
+    </ul>
+    <p><strong>OR / AND</strong>:</p>
+    <ul>
+      <li><strong>OR-node</strong> (default): én av barna er nok.</li>
+      <li><strong>AND-node</strong>: alle barn må oppfylles.</li>
+    </ul>
+    <p><strong>Annotering</strong>: hver node får attributter — kostnad, sannsynlighet, kreves spesialutstyr (P/I = Possible/Impossible). Verdier propageres oppover: AND-node tar sum/produkt, OR-node tar minimum.</p>
+    <p>Eksempel — "Få admin-tilgang":</p>
+    <ul>
+      <li>OR → "Phish admin" (low cost, medium prob) </li>
+      <li>OR → "Exploit RCE" (high cost, low prob)</li>
+      <li>OR → AND ["Brute force VPN" + "Bypass MFA"]</li>
+    </ul>`,
+    links: [{ href: "kap5/metodikk.html", label: "Kap 5 · Metodikk" }]
+  },
+  {
+    id: "tm-5",
+    topic: "Threat modeling",
+    verb: "Apply",
+    front: "Hva er et bow-tie-diagram? Hva brukes det til?",
+    back: `<p>Risikoanalyse-diagram fra safety-engineering (offshore, prosessindustri), nå brukt i sikkerhet. Ligner en sløyfe (bow tie).</p>
+    <p><strong>Struktur</strong>:</p>
+    <ul>
+      <li><strong>Senter</strong>: <em>top event</em> — den uønskede hendelsen (f.eks. "Kundedatabase lekket").</li>
+      <li><strong>Venstre side</strong>: <em>trusler/årsaker</em> som kan utløse hendelsen → <em>preventive barriers</em> som stopper dem.</li>
+      <li><strong>Høyre side</strong>: <em>konsekvenser</em> hvis hendelsen inntreffer → <em>reactive barriers</em> (mitigerende kontroller) som reduserer skaden.</li>
+    </ul>
+    <p>Visualiserer både <strong>forebyggende</strong> og <strong>responderende</strong> kontroller i ett bilde. Brukes til å forklare risiko til ledelse og sikre at man ikke bare forebygger, men også er forberedt på respons.</p>`,
+    links: [{ href: "kap5/metodikk.html", label: "Kap 5 · Metodikk" }]
+  },
+  {
+    id: "tm-6",
+    topic: "Threat modeling",
+    verb: "Apply",
+    front: "Hva er en Data Flow Diagram (DFD)? Hvilke elementer brukes?",
+    back: `<p>Visualiserer hvordan data flyter gjennom systemet. Grunnlaget for software-centric threat modeling med STRIDE.</p>
+    <p><strong>Fire kjerneelementer</strong>:</p>
+    <ul>
+      <li><strong>External entity</strong> (rektangel) — bruker eller eksternt system, utenfor vår kontroll.</li>
+      <li><strong>Process</strong> (sirkel) — kode som behandler data (webserver, lambda, mikrotjeneste).</li>
+      <li><strong>Data store</strong> (to parallelle linjer) — database, fil, kø.</li>
+      <li><strong>Data flow</strong> (pil) — hvordan data beveger seg, ofte annotert med protokoll/format.</li>
+    </ul>
+    <p><strong>Trust boundary</strong> (stiplet linje): hvor tillitsnivået endres — DMZ-grense, prosess-grense, autentiserings-sjekkpunkt. Trusler oppstår når data krysser disse.</p>
+    <p>Tegn DFD på flere nivåer: Level 0 (kontekst), Level 1 (hovedprosesser), Level 2 (detaljer for kritiske komponenter).</p>`,
+    links: [{ href: "kap5/metodikk.html", label: "Kap 5 · Metodikk" }]
+  },
+  {
+    id: "stride-1",
+    topic: "STRIDE",
+    verb: "Explain",
+    front: "Hva står STRIDE for? Hvilken sikkerhetsegenskap brytes av hver kategori?",
+    back: `<table style="width:100%; font-size:14px; border-collapse:collapse;">
+      <tr style="background:#e8e3d6;"><th style="text-align:left; padding:6px; border:1px solid #c9c0ae;">Kategori</th><th style="text-align:left; padding:6px; border:1px solid #c9c0ae;">Bryter</th></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;"><strong>S</strong>poofing</td><td style="padding:6px; border:1px solid #c9c0ae;">Authentication</td></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;"><strong>T</strong>ampering</td><td style="padding:6px; border:1px solid #c9c0ae;">Integrity</td></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;"><strong>R</strong>epudiation</td><td style="padding:6px; border:1px solid #c9c0ae;">Non-repudiation</td></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;"><strong>I</strong>nformation disclosure</td><td style="padding:6px; border:1px solid #c9c0ae;">Confidentiality</td></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;"><strong>D</strong>enial of service</td><td style="padding:6px; border:1px solid #c9c0ae;">Availability</td></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;"><strong>E</strong>levation of privilege</td><td style="padding:6px; border:1px solid #c9c0ae;">Authorization</td></tr>
+    </table>
+    <p style="margin-top:10px;">Utviklet av Microsoft for SDL. Gir et sjekkbart rammeverk — for hvert DFD-element, gå gjennom alle seks og spør "kan dette skje her?"</p>`,
+    links: [{ href: "kap5/stride.html", label: "Kap 5 · STRIDE" }]
+  },
+  {
+    id: "stride-2",
+    topic: "STRIDE",
+    verb: "Apply",
+    front: "Hvilke STRIDE-kategorier gjelder for hvilke DFD-elementer?",
+    back: `<table style="width:100%; font-size:14px; border-collapse:collapse;">
+      <tr style="background:#e8e3d6;"><th style="padding:6px; border:1px solid #c9c0ae;">Element</th><th style="padding:6px; border:1px solid #c9c0ae;">S</th><th style="padding:6px; border:1px solid #c9c0ae;">T</th><th style="padding:6px; border:1px solid #c9c0ae;">R</th><th style="padding:6px; border:1px solid #c9c0ae;">I</th><th style="padding:6px; border:1px solid #c9c0ae;">D</th><th style="padding:6px; border:1px solid #c9c0ae;">E</th></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;">External entity</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td></td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td></td><td></td><td></td></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;">Process</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;">Data store</td><td></td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td></td></tr>
+      <tr><td style="padding:6px; border:1px solid #c9c0ae;">Data flow</td><td></td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td></td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td style="padding:6px; border:1px solid #c9c0ae;">✓</td><td></td></tr>
+    </table>
+    <p style="margin-top:10px;"><strong>Process</strong> er sårbar for alle seks (mest kompleks). <strong>External entity</strong> kan kun spoofes eller benekte handlinger. <strong>Data flows</strong> kan tukles med, sniffes eller stoppes. <strong>Data stores</strong> har ikke E (privilege-systemet er andre steder).</p>`,
+    links: [{ href: "kap5/stride.html", label: "Kap 5 · STRIDE" }]
+  },
+  {
+    id: "stride-3",
+    topic: "STRIDE",
+    verb: "Apply",
+    front: `Apply STRIDE: chat-app har klient → webserver → meldings-DB. Hvilke trusler i hver kategori?`,
+    back: `<p><strong>S — Spoofing</strong>:</p>
+    <ul><li>Angriper utgir seg for å være en annen bruker (stjålet session, svak auth).</li><li>Falsk server (mangler TLS-sertifikat-validering).</li></ul>
+    <p><strong>T — Tampering</strong>:</p>
+    <ul><li>MITM endrer meldinger i transit (mangler TLS).</li><li>SQL injection endrer DB-rader.</li><li>Klient modifiserer meldings-ID for å redigere andres meldinger.</li></ul>
+    <p><strong>R — Repudiation</strong>:</p>
+    <ul><li>Bruker hevder "jeg sendte aldri denne meldingen" (manglende logging/signering).</li></ul>
+    <p><strong>I — Information disclosure</strong>:</p>
+    <ul><li>Meldinger lekker via API uten authz-sjekk (IDOR).</li><li>Logger inneholder meldingsinnhold.</li><li>DB-backup lagt på offentlig S3.</li></ul>
+    <p><strong>D — Denial of service</strong>:</p>
+    <ul><li>Spam av meldinger fyller DB.</li><li>Stort filopplastningsfelt → disk full.</li></ul>
+    <p><strong>E — Elevation of privilege</strong>:</p>
+    <ul><li>Vanlig bruker eskalerer til admin via manglende rolle-sjekk på <code>/admin</code>.</li><li>JWT med <code>alg=none</code> godkjent.</li></ul>`,
+    links: [{ href: "kap5/stride.html", label: "Kap 5 · STRIDE" }]
+  },
+  {
+    id: "tm-7",
+    topic: "Threat modeling",
+    verb: "Explain",
+    front: "Hva er kjerne-verdiene i Threat Modeling Manifesto?",
+    back: `<p>Fire verdi-par (venstre verdsettes mer enn høyre, men begge teller):</p>
+    <ol>
+      <li><strong>A culture of finding and fixing design issues</strong> over checkbox compliance.</li>
+      <li><strong>People and collaboration</strong> over processes, methodologies, and tools.</li>
+      <li><strong>A journey of understanding</strong> over a security or privacy snapshot.</li>
+      <li><strong>Doing threat modeling</strong> over talking about it.</li>
+    </ol>
+    <p><strong>Prinsipper</strong> (utvalg):</p>
+    <ul>
+      <li>Best resultater = systematisk + kreativt.</li>
+      <li>Threat modeling skal tilpasses behovet for konteksten.</li>
+      <li>Resultater er meningsfulle når de er verdifulle for stakeholders.</li>
+      <li>Dialog er nøkkelen, ikke dokumentene.</li>
+    </ul>
+    <p>Kilde: <code>threatmodelingmanifesto.org</code></p>`,
+    links: [{ href: "kap5/index.html", label: "Kap 5 · Threat modeling" }]
+  },
+
+  // ============================================================
+  // TEMA 6 — Risk management during development
   // ============================================================
   {
     id: "rmf-1",
     topic: "Risikohåndtering",
     verb: "Define",
-    front: "Hva er CVSS, og hvilke tre metric-grupper består skåren av?",
-    back: `<p><strong>CVSS</strong> (Common Vulnerability Scoring System) — standard for å gi sårbarheter en alvorlighetsskår 0–10.</p>
+    front: "Hva er CVSS? Hvilke tre metric-grupper består skåren av?",
+    back: `<p><strong>CVSS</strong> (Common Vulnerability Scoring System) — industristandard for å gi sårbarheter alvorlighetsskår 0–10.</p>
     <ul>
-      <li><strong>Base</strong> — iboende egenskaper (Attack Vector, Complexity, Privileges, User Interaction, Scope, CIA-impact).</li>
-      <li><strong>Threat</strong> (tidl. Temporal) — endrer seg over tid (exploit-modenhet).</li>
-      <li><strong>Environmental</strong> — kontekstuell justering for organisasjonen.</li>
+      <li><strong>Base</strong> — iboende egenskaper, endres ikke. Attack Vector (Network/Adjacent/Local/Physical), Attack Complexity, Privileges Required, User Interaction, Scope (changed/unchanged), CIA-impact (None/Low/High).</li>
+      <li><strong>Threat</strong> (tidl. Temporal) — endres over tid. Exploit Maturity (proof-of-concept, functional, weaponized).</li>
+      <li><strong>Environmental</strong> — kontekstuell justering for organisasjonen. F.eks. system med kun offentlige data: senk Confidentiality Requirement.</li>
     </ul>
-    <p>Versjon 4.0 er nyeste — kalkulator: <code>first.org/cvss/calculator/4.0</code>.</p>`
+    <p><strong>Severity bands</strong>: 0.1–3.9 Low, 4.0–6.9 Medium, 7.0–8.9 High, 9.0–10.0 Critical.</p>
+    <p>Versjon 4.0 er nyeste — kalkulator: <code>first.org/cvss/calculator/4.0</code>.</p>`,
+    links: [{ href: "kap6/risikohåndtering.html", label: "Kap 6 · Risikohåndtering" }]
+  },
+  {
+    id: "rmf-2",
+    topic: "Risikohåndtering",
+    verb: "Explain",
+    front: "Hva er de typiske stegene i et Risk Management Framework (RMF)?",
+    back: `<p>NIST SP 800-37 RMF har syv steg (sirkulær):</p>
+    <ol>
+      <li><strong>Prepare</strong> — etabler kontekst, roller, risikoappetitt.</li>
+      <li><strong>Categorize</strong> — klassifiser systemet og dataene (LOW/MOD/HIGH for CIA).</li>
+      <li><strong>Select</strong> — velg kontroller fra et katalog (NIST 800-53).</li>
+      <li><strong>Implement</strong> — implementer kontrollene i systemet.</li>
+      <li><strong>Assess</strong> — vurder at kontrollene virker (test, audit).</li>
+      <li><strong>Authorize</strong> — ledelsen aksepterer restrisikoen og godkjenner drift.</li>
+      <li><strong>Monitor</strong> — kontinuerlig overvåking; nye trusler, endringer, hendelser → tilbake til steg 1.</li>
+    </ol>
+    <p>Mer generelt: Identifiser assets/trusler → Vurder risiko → Behandle risiko (mitiger/aksepter/overfør/unngå) → Overvåk.</p>`,
+    links: [{ href: "kap6/risikohåndtering.html", label: "Kap 6 · Risikohåndtering" }]
+  },
+  {
+    id: "rmf-3",
+    topic: "Risikohåndtering",
+    verb: "Explain",
+    front: "Kvalitativ vs kvantitativ risikoanalyse — formler og bruk?",
+    back: `<p><strong>Kvalitativ</strong>: bruker kategorier (Low/Medium/High eller 1–5) for sannsynlighet og konsekvens. Risiko = sannsynlighet × konsekvens i en matrise (heatmap).</p>
+    <ul>
+      <li>+ Rask, krever lite data, intuitiv.</li>
+      <li>− Subjektiv, vanskelig å sammenligne på tvers.</li>
+      <li>Brukes når data mangler eller for å bestemme grovsortering.</li>
+    </ul>
+    <p><strong>Kvantitativ</strong>: tallfester i penger.</p>
+    <ul>
+      <li><strong>SLE</strong> (Single Loss Expectancy) = Asset Value × Exposure Factor</li>
+      <li><strong>ARO</strong> (Annualized Rate of Occurrence) = hvor mange ganger per år</li>
+      <li><strong>ALE</strong> (Annualized Loss Expectancy) = SLE × ARO</li>
+    </ul>
+    <p><strong>Eksempel</strong>: kundedatabase verdt 10 MNOK, ransomware tar 50% (SLE = 5 MNOK), 1 av 10 år (ARO = 0.1) → ALE = 500 000 kr/år. Da kan vi bruke inntil 500k på mitigering.</p>
+    <p>− Tall blir falsk presisjon, fakta-grunnlag ofte tynt.</p>`,
+    links: [{ href: "kap6/risikohåndtering.html", label: "Kap 6 · Risikohåndtering" }]
+  },
+  {
+    id: "rmf-4",
+    topic: "Risikohåndtering",
+    verb: "Explain",
+    front: "Fire måter å behandle risiko på etter vurdering?",
+    back: `<ul>
+      <li><strong>Mitigate / Reduce</strong> — implementer kontroller for å senke sannsynlighet eller konsekvens. WAF, MFA, kryptering, opplæring.</li>
+      <li><strong>Transfer</strong> — overfør risikoen til en tredjepart. Cyberforsikring, outsourcing, kontraktklausuler (men juridisk ansvar kan ikke fullt overføres).</li>
+      <li><strong>Accept</strong> — kostnad ved kontroll &gt; forventet tap. Dokumenter beslutning, eier signerer.</li>
+      <li><strong>Avoid</strong> — fjern aktiviteten som skaper risikoen. Dropp funksjonen, ikke lagre dataene, ikke gå inn i markedet.</li>
+    </ul>
+    <p>Valget styres av risikoappetitt, kost/nytte og regulatoriske krav. Restrisiko skal alltid være eksplisitt akseptert av eier.</p>`,
+    links: [{ href: "kap6/risikohåndtering.html", label: "Kap 6 · Risikohåndtering" }]
+  },
+  {
+    id: "rmf-5",
+    topic: "Risikohåndtering",
+    verb: "Apply",
+    front: "Bruk RMF på en webapp som lagrer kundebetalinger. Hva ville du gjort?",
+    back: `<ol>
+      <li><strong>Identifiser assets</strong>: kortdata (PCI-DSS scope), kundekontoer, betalingslogger, admin-tilgang.</li>
+      <li><strong>Identifiser trusler</strong> (bruk STRIDE/Top 10): SQLi mot betalings-API, kontoovertakelse via stjålet token, lekkasje av kortdata via SSRF.</li>
+      <li><strong>Vurder risiko</strong>: CVSS-skår per sårbarhet × business impact. Kortdata-lekkasje → kritisk (bøter, omdømme).</li>
+      <li><strong>Velg kontroller</strong>: tokenisering av kortdata (offload til PCI-godkjent prosessor), MFA på admin, parameteriserte queries, WAF, rate-limit, logging + SIEM.</li>
+      <li><strong>Implementer + test</strong>: SAST/DAST i CI/CD, pen test før prod, third-party audit.</li>
+      <li><strong>Aksepter restrisiko</strong>: dokumenter at vi aksepterer f.eks. risiko for innsideangrep, mitigert med audit-logger.</li>
+      <li><strong>Monitor</strong>: vulnerability scanning ukentlig, IDS, incident response-plan, årlig pen test.</li>
+    </ol>`,
+    links: [{ href: "kap6/risikohåndtering.html", label: "Kap 6 · Risikohåndtering" }]
+  },
+  {
+    id: "rmf-6",
+    topic: "Risikohåndtering",
+    verb: "Explain",
+    front: "Forskjellen mellom et godt og et dårlig sikkerhetskrav?",
+    back: `<p><strong>Dårlig</strong>: "Systemet skal være sikkert." — ikke testbart, ikke konkret, alle vet ikke hva det betyr.</p>
+    <p><strong>Dårlige eksempler</strong>:</p>
+    <ul>
+      <li>"Bruk sterk kryptering" (hva er sterk? hvor?)</li>
+      <li>"Hindre uautorisert tilgang" (åpenbart, men hvordan måles?)</li>
+      <li>"Følg best practice"</li>
+    </ul>
+    <p><strong>Godt krav er SMART</strong>: Specific, Measurable, Achievable, Relevant, Time-bound. Også: testbart, sporbart, atomisk, entydig.</p>
+    <p><strong>Gode eksempler</strong>:</p>
+    <ul>
+      <li>"Passord skal lagres med Argon2id, minst 64 MB minne og 3 iterasjoner."</li>
+      <li>"All data i transit mellom klient og server skal bruke TLS 1.2 eller nyere, med cipher suites godkjent av BSI TR-02102."</li>
+      <li>"Et innloggingsforsøk feiler etter 5 mislykkede forsøk innen 10 minutter; brukeren må vente 15 minutter før neste forsøk."</li>
+    </ul>
+    <p>Bruk gjerne OWASP ASVS som mal — har ferdig formulerte testbare krav per nivå.</p>`,
+    links: [{ href: "kap6/sdl.html", label: "Kap 6 · SDL" }]
+  },
+  {
+    id: "rmf-7",
+    topic: "Risikohåndtering",
+    verb: "Define",
+    front: "Hva er et sikkerhetskrav — definisjon og typer?",
+    back: `<p><strong>Sikkerhetskrav</strong>: en testbar utsagn som spesifiserer en sikkerhetsegenskap systemet må ha for å oppfylle CIA-mål, regulatoriske krav, eller mitigere identifiserte trusler.</p>
+    <p><strong>Tre hovedtyper</strong>:</p>
+    <ul>
+      <li><strong>Funksjonelle</strong> — beskriver sikkerhetsmekanismer systemet skal ha. "Systemet skal kreve MFA for admin-roller."</li>
+      <li><strong>Ikke-funksjonelle</strong> — beskriver kvaliteter ved sikkerheten. "TLS-handshake skal fullføres på &lt; 200ms i 99%-tilfellet."</li>
+      <li><strong>Avledede</strong> (derived) — fra trusler eller compliance. "Som mitigering av STRIDE-trussel T-12 (tampering av API): alle PUT-kall skal autentiseres med HMAC."</li>
+    </ul>
+    <p><strong>Kilder</strong>: trusselmodell, regulering (GDPR, PCI-DSS, NIS2), standarder (ASVS, ISO 27001), forretningsbehov, tidligere hendelser.</p>
+    <p>Hvert krav bør spores til både en trussel (hvorfor) og en test (hvordan vet vi at det virker).</p>`,
+    links: [{ href: "kap6/sdl.html", label: "Kap 6 · SDL" }]
   },
 ];
 
