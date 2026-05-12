@@ -347,19 +347,20 @@ const CARDS = [
     id: "owasp-1",
     topic: "OWASP Top 10",
     verb: "Understand",
-    front: "List opp OWASP Top 10 (2021) — alle ti kategorier.",
+    front: "List opp OWASP Top 10 (2025) — alle ti kategorier.",
     back: `<ol>
       <li><strong>A01</strong> Broken Access Control</li>
-      <li><strong>A02</strong> Cryptographic Failures</li>
-      <li><strong>A03</strong> Injection (inkl. XSS)</li>
-      <li><strong>A04</strong> Insecure Design</li>
-      <li><strong>A05</strong> Security Misconfiguration</li>
-      <li><strong>A06</strong> Vulnerable and Outdated Components</li>
-      <li><strong>A07</strong> Identification and Authentication Failures</li>
-      <li><strong>A08</strong> Software and Data Integrity Failures</li>
-      <li><strong>A09</strong> Security Logging and Monitoring Failures</li>
-      <li><strong>A10</strong> Mishandling of Exceptional Conditions</li>
-    </ol>`,
+      <li><strong>A02</strong> Security Misconfiguration <em>(↑ fra 2021-A05)</em></li>
+      <li><strong>A03</strong> Software Supply Chain Failures <em>(ny / utvidet fra 2021-A06)</em></li>
+      <li><strong>A04</strong> Cryptographic Failures <em>(↓ fra 2021-A02)</em></li>
+      <li><strong>A05</strong> Injection <em>(↓ fra 2021-A03 — XSS hører hit)</em></li>
+      <li><strong>A06</strong> Insecure Design</li>
+      <li><strong>A07</strong> Authentication Failures</li>
+      <li><strong>A08</strong> Software &amp; Data Integrity Failures</li>
+      <li><strong>A09</strong> Security Logging &amp; Alerting Failures</li>
+      <li><strong>A10</strong> Mishandling of Exceptional Conditions <em>(NY)</em></li>
+    </ol>
+    <p style="margin-top:10px; font-size:14px; color: var(--ink-faded);"><em>SSRF (2021-A10) er smeltet inn i A01 Broken Access Control.</em></p>`,
     links: [{ href: "kap2/index.html", label: "Kap 2 · OWASP Top 10 (oversikt)" }]
   },
   {
@@ -383,13 +384,13 @@ const CARDS = [
     id: "owasp-3",
     topic: "OWASP Top 10",
     verb: "Understand",
-    front: "Forklar Injection (A03). Hovedtyper + forsvar.",
+    front: "Forklar Injection (A05). Hovedtyper + forsvar.",
     back: `<p>Ufiltrert brukerdata tolkes som kommando i tolker.</p>
     <ul>
       <li><strong>SQLi</strong> — <code>"SELECT * FROM u WHERE id=" + input</code></li>
       <li><strong>OS command</strong> — <code>os.system("ping " + host)</code></li>
       <li><strong>LDAP / XPath / NoSQL injection</strong></li>
-      <li><strong>XSS</strong> — injection av HTML/JS i nettleseren (er nå i A03)</li>
+      <li><strong>XSS</strong> — injection av HTML/JS i nettleseren (er nå i A05 i 2025)</li>
     </ul>
     <p><strong>Forsvar</strong>:</p>
     <ul>
@@ -492,7 +493,7 @@ return o.to_json()</pre>`,
     password = md5(user_password)<br>
     cipher = DES.new(b"12345678", DES.MODE_ECB)
     </code>`,
-    back: `<p><strong>Cryptographic Failures (A02)</strong>:</p>
+    back: `<p><strong>Cryptographic Failures (A04)</strong>:</p>
     <ul>
       <li>Hardkodet secret i kildekoden — hører i secrets manager / env</li>
       <li><code>MD5</code> for passord — kollisjonssvak, ingen salt, for raskt. Bruk bcrypt/argon2/scrypt.</li>
@@ -505,8 +506,8 @@ return o.to_json()</pre>`,
     id: "owasp-9",
     topic: "OWASP Top 10",
     verb: "Understand",
-    front: "Hva er SSRF (A10)? Hvordan utnyttes det og hvordan forsvares?",
-    back: `<p><strong>Server-Side Request Forgery</strong> — angriper får serveren til å hente URL angriper kontrollerer. Server stoler på sin egen IP.</p>
+    front: "Hva er SSRF? Hvordan utnyttes det og hvordan forsvares?",
+    back: `<p><strong>Server-Side Request Forgery</strong> — angriper får serveren til å hente URL angriper kontrollerer. Server stoler på sin egen IP. <em>I OWASP Top 10 2025 er SSRF smeltet inn i A01 Broken Access Control (var egen A10 i 2021).</em></p>
     <p><strong>Utnyttelse</strong>:</p>
     <ul>
       <li>Hent cloud metadata: <code>http://169.254.169.254/latest/meta-data/</code> (AWS IMDSv1) — stjeler credentials</li>
