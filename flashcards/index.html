@@ -503,6 +503,189 @@ return o.to_json()</pre>`,
     links: [{ href: "kap2/konfig-krypto-ssrf.html", label: "Kap 2 · Konfig/Krypto/SSRF" }, { href: "kap3/symmetrisk-krypto.html", label: "Kap 3 · Symmetrisk krypto" }]
   },
   {
+    id: "find-cmd",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    @app.route('/ping')<br>
+    def ping():<br>
+    &nbsp;&nbsp;host = request.args.get('host')<br>
+    &nbsp;&nbsp;out = subprocess.check_output(<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;f"ping -c 1 {host}", shell=True)<br>
+    &nbsp;&nbsp;return out
+    </code>`,
+    back: `<p><strong>OS command injection</strong> (A05). <code>shell=True</code> + streng-konkat = angriper kan kjede med <code>;</code>, <code>&amp;&amp;</code>, <code>|</code>, <code>$()</code>. <code>?host=8.8.8.8; cat /etc/passwd</code> gir RCE.</p>
+    <p><strong>Fiks</strong>:</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">import ipaddress, subprocess
+ipaddress.ip_address(host)  # whitelist-validering
+subprocess.check_output(
+    ["ping", "-c", "1", host], shell=False)</pre>
+    <p>Argumentliste + <code>shell=False</code> hindrer at shell tolker metategn. Valider input mot streng whitelist (IP-adresse her).</p>`,
+    links: [{ href: "kap2/injection.html", label: "Kap 2 · Injection" }]
+  },
+  {
+    id: "find-pickle",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    @app.route('/restore', methods=['POST'])<br>
+    def restore():<br>
+    &nbsp;&nbsp;blob = base64.b64decode(request.form['state'])<br>
+    &nbsp;&nbsp;state = pickle.loads(blob)<br>
+    &nbsp;&nbsp;return f"Restored {state['user']}"
+    </code>`,
+    back: `<p><strong>Insecure deserialization</strong> (A08 Software &amp; Data Integrity Failures). <code>pickle.loads</code> kan kjøre vilkårlig Python via <code>__reduce__</code>. Angriper sender preparert payload → RCE.</p>
+    <p><strong>Fiks</strong> — bruk format uten kode-eksekvering:</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">state = json.loads(request.form['state'])
+# validér schema med pydantic / jsonschema</pre>
+    <p>Hvis pickle <em>må</em> brukes (interne tillit-grenser): krypter + HMAC-signer payload med server-secret før <code>loads</code>. Aldri pickle på uautentisert input.</p>`,
+    links: [{ href: "kap2/injection.html", label: "Kap 2 · Injection / deserialisering" }]
+  },
+  {
+    id: "find-xxe",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    from lxml import etree<br><br>
+    def parse_invoice(xml_bytes):<br>
+    &nbsp;&nbsp;parser = etree.XMLParser()<br>
+    &nbsp;&nbsp;tree = etree.fromstring(xml_bytes, parser)<br>
+    &nbsp;&nbsp;return tree.find('.//total').text
+    </code>`,
+    back: `<p><strong>XXE — XML External Entity</strong> (A05 Injection). Default-parseren resolver eksterne entiteter. Angriper sender:</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">&lt;!DOCTYPE foo [
+  &lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;
+]&gt;
+&lt;invoice&gt;&lt;total&gt;&amp;xxe;&lt;/total&gt;&lt;/invoice&gt;</pre>
+    <p>→ lekker filer, intern nettverk-scan (SSRF), DoS (billion-laughs).</p>
+    <p><strong>Fiks</strong>:</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">parser = etree.XMLParser(
+    resolve_entities=False,
+    no_network=True,
+    load_dtd=False)</pre>
+    <p>Bedre: bruk <code>defusedxml</code>, eller bytt til JSON-format der mulig.</p>`,
+    links: [{ href: "kap2/injection.html", label: "Kap 2 · Injection / XXE" }]
+  },
+  {
+    id: "find-ssrf",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    @app.route('/fetch')<br>
+    def fetch():<br>
+    &nbsp;&nbsp;url = request.args.get('url')<br>
+    &nbsp;&nbsp;r = requests.get(url, timeout=5)<br>
+    &nbsp;&nbsp;return r.text
+    </code>`,
+    back: `<p><strong>SSRF</strong> (A01 i 2025). Server henter URL angriper kontrollerer. Klassisk utnyttelse: AWS metadata —</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">?url=http://169.254.169.254/latest/meta-data/
+    iam/security-credentials/role-name</pre>
+    <p>→ stjeler IAM-credentials. Kan også skanne <code>localhost</code>, intern admin-API, RFC1918-nett.</p>
+    <p><strong>Fiks</strong>:</p>
+    <ul>
+      <li>Allowlist destinasjoner (domener eller URL-prefiks)</li>
+      <li>Resolv DNS selv, blokker private/link-local IP (<code>10/8</code>, <code>127/8</code>, <code>169.254/16</code>, <code>172.16/12</code>, <code>192.168/16</code>)</li>
+      <li>Kjør i nettverkssegment uten tilgang til metadata-IP</li>
+      <li>AWS: tving <strong>IMDSv2</strong> (krever PUT-token)</li>
+    </ul>`,
+    links: [{ href: "kap2/konfig-krypto-ssrf.html", label: "Kap 2 · Konfig/Krypto/SSRF" }]
+  },
+  {
+    id: "find-jwt",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    def current_user(request):<br>
+    &nbsp;&nbsp;token = request.headers['Authorization'][7:]<br>
+    &nbsp;&nbsp;payload = jwt.decode(<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;token, options={"verify_signature": False})<br>
+    &nbsp;&nbsp;return User.query.get(payload['uid'])
+    </code>`,
+    back: `<p><strong>Authentication failure</strong> (A07). Signaturen verifiseres ikke — angriper lager hvilket som helst JWT med vilkårlig <code>uid</code> og blir hvem som helst (inkl. admin).</p>
+    <p><strong>Fiks</strong>:</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">payload = jwt.decode(
+    token,
+    key=SECRET,
+    algorithms=["HS256"])  # eksplisitt liste
+# sjekk exp, iss, aud, nbf</pre>
+    <p>Aldri <code>algorithms=["none"]</code> eller "any". Lock til én algoritme — ellers <strong>alg-confusion</strong> (angriper sender RS256-token, server bruker public key som HS256-secret).</p>`,
+    links: [{ href: "kap4/autentisering.html", label: "Kap 4 · Autentisering / JWT" }]
+  },
+  {
+    id: "find-random",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    import random, hashlib<br><br>
+    def new_reset_token(user_id):<br>
+    &nbsp;&nbsp;seed = f"{user_id}-{time.time()}"<br>
+    &nbsp;&nbsp;return hashlib.md5(seed.encode()).hexdigest()
+    </code>`,
+    back: `<p><strong>Forutsigbart sikkerhetstoken</strong> (A02 Cryptographic Failures / A07). To feil:</p>
+    <ul>
+      <li><code>time.time()</code> er gjettbar — angriper med kjent <code>user_id</code> kan brute-force token-rommet på sekunder.</li>
+      <li>MD5 endrer ikke entropien — input har lav entropi, så output også.</li>
+    </ul>
+    <p>Standard <code>random</code>-modul er forresten Mersenne Twister — <strong>ikke kryptografisk</strong>, kan rekonstrueres etter 624 outputs.</p>
+    <p><strong>Fiks</strong>:</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">import secrets
+token = secrets.token_urlsafe(32)  # 256 bit CSPRNG</pre>
+    <p>JS: bruk <code>crypto.getRandomValues</code>, aldri <code>Math.random()</code>.</p>`,
+    links: [{ href: "kap3/hashing-mac.html", label: "Kap 3 · Hashing/MAC" }, { href: "kap4/autentisering.html", label: "Kap 4 · Autentisering" }]
+  },
+  {
+    id: "find-django",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarhetene i denne Django <code>settings.py</code>?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    DEBUG = True<br>
+    SECRET_KEY = "django-insecure-abc123"<br>
+    ALLOWED_HOSTS = ['*']<br>
+    SESSION_COOKIE_SECURE = False<br>
+    CSRF_COOKIE_SECURE = False<br>
+    SECURE_SSL_REDIRECT = False
+    </code>`,
+    back: `<p><strong>Security Misconfiguration</strong> (A02):</p>
+    <ul>
+      <li><code>DEBUG=True</code> i prod → stack traces + settings lekker ved exception; angriper får SECRET_KEY, DB-config, env.</li>
+      <li>Hardkodet/svak <code>SECRET_KEY</code> → angriper kan forfalske session-cookies, signaturer, CSRF-tokens.</li>
+      <li><code>ALLOWED_HOSTS=['*']</code> → Host header injection / cache poisoning / password-reset til angriper-domene.</li>
+      <li>Cookie- og SSL-flagg av → cookies sendes over HTTP, sniffes på café-WiFi.</li>
+    </ul>
+    <p><strong>Fiks</strong>: <code>DEBUG=False</code>, last <code>SECRET_KEY</code> fra env, sett <code>ALLOWED_HOSTS=['app.example.com']</code>, alle <code>SECURE_*</code>=True, +<code>SECURE_HSTS_SECONDS</code>.</p>`,
+    links: [{ href: "kap2/konfig-krypto-ssrf.html", label: "Kap 2 · Konfig/Krypto/SSRF" }]
+  },
+  {
+    id: "find-redirect",
+    topic: "OWASP Top 10",
+    verb: "Find",
+    front: `Hva er sårbarheten?<br><br>
+    <code style="display:block; padding:8px; background:#e8e3d6; font-size:13px; line-height:1.5;">
+    @app.route('/login', methods=['POST'])<br>
+    def login():<br>
+    &nbsp;&nbsp;if check_password(...):<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;next_url = request.args.get('next', '/')<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;return redirect(next_url)
+    </code>`,
+    back: `<p><strong>Open redirect</strong>. <code>/login?next=https://bank.no.evil.example</code> sender bruker til angripers phishing-side <em>etter</em> at hen så det legitime domenet + gyldig TLS. Klassisk byggekloss i phishing-kjeder.</p>
+    <p><strong>Fiks</strong> — kun relative interne stier:</p>
+    <pre style="background:#e8e3d6; padding:10px; font-size:13px;">from urllib.parse import urlparse
+nxt = request.args.get('next', '/')
+p = urlparse(nxt)
+if p.netloc or p.scheme or nxt.startswith('//'):
+    nxt = '/'
+return redirect(nxt)</pre>
+    <p>Bedre: server-side allowlist av tillatte stier, eller lagre destinasjonen i session i stedet for query-parameter.</p>`,
+    links: [{ href: "kap2/authn-autorisasjonsfeil.html", label: "Kap 2 · Authn/Autorisasjonsfeil" }]
+  },
+  {
     id: "owasp-9",
     topic: "OWASP Top 10",
     verb: "Understand",
