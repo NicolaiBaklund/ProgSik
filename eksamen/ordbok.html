@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ordbok — angrep, tjenester, forkortelser · TDT4237</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/png" href="../favicon.png">
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+.ord-hero { padding: 90px 0 40px; position: relative; z-index: 10; }
+.ord-hero .course-code { font-family: var(--mono); font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--rust); margin-bottom: 18px; display: inline-block; padding: 6px 14px; border: 1px solid var(--rust); border-radius: 2px; }
+.ord-hero h1 { font-size: clamp(40px, 6.5vw, 72px); font-weight: 500; line-height: 1.0; letter-spacing: -0.03em; margin-bottom: 24px; }
+.ord-hero h1 em { font-style: italic; color: var(--rust); }
+.ord-hero .lead { font-size: 19px; font-style: italic; color: var(--ink-soft); max-width: 680px; line-height: 1.5; }
+.ord-hero .crumb { font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faded); margin-bottom: 22px; }
+.ord-hero .crumb a { color: var(--rust); text-decoration: none; border-bottom: 1px solid rgba(176,68,40,0.35); }
+
+.ord-controls { padding: 24px 0 18px; position: sticky; top: 0; z-index: 50;
+  background: rgba(244,241,234,0.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line); }
+.ord-controls .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.ord-search { position: relative; flex: 1; min-width: 260px; }
+.ord-search input { width: 100%; font-family: var(--serif); font-size: 16px; padding: 11px 14px 11px 40px; border: 1px solid rgba(176,68,40,0.32); border-radius: 4px; background: var(--paper); color: var(--ink); outline: none; }
+.ord-search input:focus { border-color: var(--rust); box-shadow: 0 0 0 3px rgba(176,68,40,0.14); }
+.ord-search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--ink-ghost); pointer-events: none; }
+
+.ord-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.ord-tab { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 9px 14px; border: 1px solid var(--line); background: var(--paper);
+  color: var(--ink-faded); cursor: pointer; border-radius: 3px; transition: all 0.12s; }
+.ord-tab:hover { color: var(--rust); border-color: var(--rust); }
+.ord-tab.active { background: var(--rust); color: var(--paper); border-color: var(--rust); }
+.ord-tab .count { opacity: 0.7; margin-left: 6px; font-weight: 400; }
+
+.ord-lectures { display: flex; gap: 6px; flex-wrap: wrap; padding: 14px 0 0; }
+.ord-lec-chip { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.05em;
+  padding: 4px 9px; border: 1px solid var(--line-soft); background: var(--paper-dark); color: var(--ink-faded);
+  border-radius: 12px; cursor: pointer; user-select: none; transition: all 0.12s; }
+.ord-lec-chip:hover { color: var(--rust); border-color: var(--rust); }
+.ord-lec-chip.active { background: var(--ochre); color: #1a1612; border-color: var(--ochre); }
+
+.ord-results { padding: 30px 0 80px; }
+.ord-section { margin-bottom: 60px; }
+.ord-section h2 { font-family: var(--serif); font-size: 32px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 8px; }
+.ord-section h2 em { font-style: italic; color: var(--rust); font-weight: 400; }
+.ord-section .sec-intro { font-family: var(--serif); font-style: italic; color: var(--ink-soft); margin-bottom: 28px; font-size: 16px; }
+.ord-section.hidden { display: none; }
+
+.ord-item { padding: 18px 0; border-bottom: 1px solid var(--line-soft); }
+.ord-item.hidden { display: none; }
+.ord-item .term { font-family: var(--serif); font-size: 20px; font-weight: 500; line-height: 1.3; color: var(--ink); margin-bottom: 4px; }
+.ord-item .term em { font-style: italic; color: var(--rust); }
+.ord-item .desc { font-size: 15.5px; line-height: 1.55; color: var(--ink-soft); margin-bottom: 8px; }
+.ord-item .desc code { font-family: var(--mono); font-size: 0.86em; background: var(--paper-dark); padding: 1px 5px; border-radius: 2px; color: var(--rust-dark); }
+.ord-item .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.ord-item .tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em; padding: 2px 7px; background: var(--paper-dark); color: var(--ink-faded); border-radius: 10px; border: 1px solid var(--line-soft); }
+.ord-item mark { background: rgba(176,68,40,0.18); color: var(--rust); padding: 0 2px; border-radius: 2px; }
+
+.ord-empty { padding: 40px 0; text-align: center; font-style: italic; color: var(--ink-ghost); display: none; }
+.ord-empty.show { display: block; }
+
+@media (max-width: 700px) {
+  .ord-hero { padding: 60px 0 30px; }
+  .ord-controls { padding: 16px 0 12px; }
+  .ord-item .term { font-size: 17px; }
+  .ord-item .desc { font-size: 14.5px; }
+}
+</style>
+</head>
+<body>
+<header class="ord-hero">
+  <div class="container">
+    <div class="crumb"><a href="./">&larr; Øvingseksamener</a> · <a href="../">Forsiden</a></div>
+    <div class="course-code">TDT4237 · Repetisjon</div>
+    <h1>Ord<em>bok</em></h1>
+    <p class="lead">Angrep, tjenester/verktøy/standarder og forkortelser nevnt i PPT-foilene (forelesning 1–13). Søk eller filtrer per kategori og forelesning. Bruk som hurtigoppslag før eksamen.</p>
+  </div>
+</header>
+
+<div class="ord-controls">
+  <div class="container">
+    <div class="row">
+      <div class="ord-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="ord-search" placeholder="Søk etter angrep, verktøy eller forkortelse…" autocomplete="off">
+      </div>
+      <div class="ord-tabs">
+        <button class="ord-tab active" data-cat="all">Alle <span class="count" id="cnt-all"></span></button>
+        <button class="ord-tab" data-cat="attack">Angrep <span class="count" id="cnt-attack"></span></button>
+        <button class="ord-tab" data-cat="service">Tjenester · verktøy <span class="count" id="cnt-service"></span></button>
+        <button class="ord-tab" data-cat="abbr">Forkortelser <span class="count" id="cnt-abbr"></span></button>
+      </div>
+    </div>
+    <div class="ord-lectures" id="ord-lectures"></div>
+  </div>
+</div>
+
+<main class="ord-results" data-chapter="Ordbok">
+  <div class="container">
+    <section class="ord-section" id="sec-attack">
+      <h2>An<em>grep</em></h2>
+      <p class="sec-intro">Sårbarheter, exploits og angrepsteknikker — fra klassisk SQLi til LLM-spesifikke trusler.</p>
+      <div class="ord-list" id="list-attack"></div>
+    </section>
+
+    <section class="ord-section" id="sec-service">
+      <h2>Tjenester · verk<em>tøy</em> · standarder</h2>
+      <p class="sec-intro">Konkrete navn på protokoller, bibliotek, rammeverk, organer og standarder du må kjenne igjen.</p>
+      <div class="ord-list" id="list-service"></div>
+    </section>
+
+    <section class="ord-section" id="sec-abbr">
+      <h2>Forkort<em>elser</em></h2>
+      <p class="sec-intro">Bokstavkombinasjonene som dukker opp uten forklaring — slå opp her.</p>
+      <div class="ord-list" id="list-abbr"></div>
+    </section>
+
+    <div class="ord-empty" id="ord-empty">Ingen treff. Prøv et annet søkeord eller fjern filtre.</div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="ornament">&#10038; &#10038; &#10038;</div>
+    <p>NTNU · TDT4237 · Vår 2026 · Innhold trukket fra forelesningsfoilene</p>
+  </div>
+</footer>
+
+<script>
+const DATA = [
+  // ============ ATTACKS ============
+  { cat:"attack", term:"Web defacement", desc:"Angriper endrer det synlige innholdet på et nettsted for å spre budskap eller skade omdømme. Forhindres med tilgangskontroll, integritetskontroll og oppdaterte CMS.", lectures:["L1"] },
+  { cat:"attack", term:"Control hijacking / Infiltration", desc:"Angriper tar over kontrollflyten i et program (ofte via buffer overflow i C/C++) og kjører egen kode. Klassiske eksempler: DroidDream, SolarWinds Orion. Mitigeres med typesikre språk og minnesikkerhet.", lectures:["L1","L5"] },
+  { cat:"attack", term:"Phishing", desc:"Sosial manipulering via falske e-poster/sider som lurer brukere til å gi fra seg legitimasjon. Forsvares med MFA, opplæring og e-postfiltre.", lectures:["L1"] },
+  { cat:"attack", term:"Data theft / data loss", desc:"Tyveri eller eksponering av sensitive data (LinkedIn 2016, Twitter 2023). Forsvares med kryptering, tilgangskontroll og monitorering.", lectures:["L1"] },
+  { cat:"attack", term:"Denial of Service (DoS / DDoS)", desc:"Overbelaster en tjeneste med trafikk slik at legitime brukere stenges ute. Mitigeres med rate limiting, throttling og DDoS-beskyttelse foran applikasjonen.", lectures:["L1","L6","L10 Microservice"] },
+  { cat:"attack", term:"Ransomware", desc:"Skadevare som krypterer data og krever løsepenger. Forsvares med backup, segmentering, endepunktbeskyttelse og rask patching.", lectures:["L1","L7"] },
+  { cat:"attack", term:"SQL Injection (SQLi)", desc:"Ondsinnet inndata blandes inn i SQL-spørringen slik at angriper kan endre, hente ut eller slette data. Forhindres med prepared statements / bind variables, ikke streng-konkatenering.", lectures:["L2","L7","L12 SAST"] },
+  { cat:"attack", term:"Blind SQL Injection", desc:"SQLi der applikasjonen ikke returnerer feilmeldinger; angriper utleder data via boolske svar eller tidsforskjeller (timing). Forsvares som vanlig SQLi.", lectures:["L2"] },
+  { cat:"attack", term:"XPath Injection", desc:"Injeksjon i XPath-spørringer mot XML-data. Fungerer som SQLi men mot XML-strukturen. Mitigeres med parameteriserte spørringer og inputvalidering.", lectures:["L2"] },
+  { cat:"attack", term:"LDAP / XML / SSI / IMAP / SMTP / Code Injection", desc:"Øvrige injeksjonsvarianter der ufiltrert input havner i en tolker (LDAP-katalog, mailserver, kode-eval). Løses med whitelist, escaping og parametrisering.", lectures:["L2"] },
+  { cat:"attack", term:"Session token theft", desc:"Angriper stjeler sesjonscookie via nettverkssniffing, XSS eller logger og kan opptre som brukeren. Mitigeres med HTTPS, HttpOnly, SameSite og kort levetid.", lectures:["L2"] },
+  { cat:"attack", term:"Session token prediction", desc:"Sesjons-ID-er er for forutsigbare (f.eks. teller) og kan gjettes. Forhindres med kryptografisk sterke tilfeldige tokens fra rammeverk.", lectures:["L2"] },
+  { cat:"attack", term:"Session fixation", desc:"Angriper plasserer en kjent sesjons-ID hos offeret før innlogging; ID-en eskaleres til innlogget når offeret logger inn. Fikses ved å regenerere sesjons-ID etter pålogging.", lectures:["L2","L3"] },
+  { cat:"attack", term:"Replay attack", desc:"Gjenbruk av fanget forespørsel eller token mot serveren. Forsvares med nonces, tidsstempler, engangstokens og invalidasjon av tokens ved logout.", lectures:["L2"] },
+  { cat:"attack", term:"Reflected XSS", desc:"Ondsinnet skript reflekteres tilbake fra serveren via URL/parametere og kjøres i offerets nettleser. Forhindres med output-encoding, CSP og input-validering.", lectures:["L3","L12 SAST"] },
+  { cat:"attack", term:"Stored XSS", desc:"Skadelig skript lagres i databasen og leveres til alle som henter siden. Spres lettere enn reflektert XSS. Forsvares med sanering og kontekst-riktig output-encoding.", lectures:["L3"] },
+  { cat:"attack", term:"XSS Worm (Samy / MySpace 2005)", desc:"Selvspredende XSS som la til skript hos hver som besøkte en infisert profil — over en million venner på &lt;20 timer. Demonstrerer kraften i stored XSS uten output-encoding.", lectures:["L3"] },
+  { cat:"attack", term:"CSRF (Cross-Site Request Forgery)", desc:"Innlogget bruker lures til å sende en forespørsel til et nettsted uten kunnskap. Forhindres med anti-CSRF-token, SameSite-cookies, Referer-sjekk og re-autentisering.", lectures:["L3","L6","L12 SAST"] },
+  { cat:"attack", term:"SSRF (Server-Side Request Forgery)", desc:"Server narres til å gjøre HTTP-kall til intern infrastruktur (<code>file:///etc/passwd</code>, <code>127.0.0.1/admin</code>). Forsvares med whitelist, DNS-validering, deaktivering av farlige URL-schemas og nettverkssegregering.", lectures:["L3"] },
+  { cat:"attack", term:"XXE (XML External Entity)", desc:"XML-parser eksponerer interne filer eller utfører nettverkskall via eksterne entiteter. Mitigeres ved å slå av DTD-prosessering eller bruke <code>defusedxml</code>.", lectures:["L3"] },
+  { cat:"attack", term:"Billion Laughs", desc:"XML-bombe der nestede entiteter ekspanderer eksponentielt og tømmer minnet. Forsvares med <code>defusedxml</code> og entitetsbegrensninger.", lectures:["L3"] },
+  { cat:"attack", term:"Clickjacking", desc:"Bruker lurer til å klikke på usynlige elementer plassert oppå en legitim side via iframes med opacity 0. Forhindres med <code>X-Frame-Options</code> og CSP <code>frame-ancestors</code>.", lectures:["L3","L13"] },
+  { cat:"attack", term:"Insecure Deserialization", desc:"Ondsinnede objekter (Java/Pickle/YAML/XML) deserialiseres og kan føre til RCE eller injection via tamperete payload. Bruk JSON, integritetssjekker (signaturer) og kjør i sandbox.", lectures:["L3","L12 SAST"] },
+  { cat:"attack", term:"Dictionary attack", desc:"Prøver passord fra en liste over vanlige passord mot hash. Forsvares med hash + salt + pepper, throttling og sterke passordkrav.", lectures:["L3"] },
+  { cat:"attack", term:"Brute force", desc:"Prøver alle mulige passord/nøkler systematisk. Mitigeres med tilstrekkelig nøkkellengde, throttling, kontosperring og MFA.", lectures:["L3","L4"] },
+  { cat:"attack", term:"MitM (Man-in-the-Middle)", desc:"Angriper plasserer seg mellom to parter og avlytter eller endrer kommunikasjon. Forhindres med TLS, sertifikatvalidering og PKI.", lectures:["L4"] },
+  { cat:"attack", term:"Raccoon Attack", desc:"Tidssidekanalsangrep mot TLS 1.2 som utnytter Diffie-Hellman-implementasjonen. Mitigeres ved å bruke TLS 1.3.", lectures:["L4"] },
+  { cat:"attack", term:"Heartbleed", desc:"Buffer read overflow i OpenSSLs heartbeat-funksjon som lekker minne — inkludert private nøkler. Eksempel på read overflow; krever patching.", lectures:["L5"] },
+  { cat:"attack", term:"Buffer Overflow (stack overflow)", desc:"Skriving forbi en buffer overskriver returadresser eller variabler og gir kontrollflytkapring. Forhindres med safe-funksjoner, stack canaries, ASLR og typesikre språk.", lectures:["L5","L12 SAST"] },
+  { cat:"attack", term:"Buffer Read Overflow", desc:"Lesing forbi bufferen lekker hemmelig minne (jf. Heartbleed). Mitigeres med korrekt lengdesjekk.", lectures:["L5"] },
+  { cat:"attack", term:"Trojan Horse (DAC bypass)", desc:"Skjult kode i en app utfører handlinger på vegne av en autorisert bruker uten kunnskap — svakhet i DAC. Mitigeres med MAC-modeller som Bell-LaPadula.", lectures:["L5"] },
+  { cat:"attack", term:"Zero-day exploit", desc:"Angrep mot en ukjent eller upatchet sårbarhet før forsvar finnes. Mitigeres med dybdeforsvar, anomalideteksjon og rask patching.", lectures:["L5","L12 AI"] },
+  { cat:"attack", term:"Morris Worm / Code Red / SQL Slammer", desc:"Historiske ormer som spredte seg via bufferoverflow. Eksempler på kontroll-hijacking i praksis og hvorfor minnesikkerhet er viktig.", lectures:["L5"] },
+  { cat:"attack", term:"Spoofing", desc:"Utgir seg for å være noen/noe annet — falske nettsider, IP/DNS/GPS-spoofing, deep fake. STRIDE-S. Forsvares med autentisering og digitale signaturer.", lectures:["L6"] },
+  { cat:"attack", term:"Tampering", desc:"Uautorisert endring av data i skjemaer, URL, filer, DB eller minne. STRIDE-T. Forsvares med integritetskontroll (MAC/HMAC, signaturer).", lectures:["L6"] },
+  { cat:"attack", term:"Repudiation", desc:"Bruker benekter en handling; angriper bruker andres konto eller endrer logger. STRIDE-R. Forhindres med signerte logger og non-repudiation.", lectures:["L6"] },
+  { cat:"attack", term:"Information Disclosure", desc:"Eksponering av data til uautoriserte parter (filer, DB-innhold, API-info, stacktraces). STRIDE-I. Forhindres med tilgangskontroll og kryptering.", lectures:["L6"] },
+  { cat:"attack", term:"Elevation of Privilege", desc:"Bruker eller program oppnår høyere rettigheter enn tildelt (via XSS, buffer overflow, injection). STRIDE-E. Forsvares med least privilege og sandboxing.", lectures:["L6"] },
+  { cat:"attack", term:"DNS Spoofing / DNS Poisoning", desc:"Forfalsker DNS-svar slik at brukeren sendes til ondsinnet server. Mitigeres med DNSSEC.", lectures:["L6"] },
+  { cat:"attack", term:"IP / GPS Spoofing", desc:"Falske IP-pakker eller GPS-signaler brukt for å lure systemer. Forsvares med autentisering og kryptografisk signering av signaler.", lectures:["L6"] },
+  { cat:"attack", term:"Deep Fake", desc:"AI-generert lyd eller video som etterligner en person; brukt til bedrageri og phishing. Forsvares med biometriske livssjekker og signerte medier.", lectures:["L6"] },
+  { cat:"attack", term:"Social Engineering", desc:"Psykologisk manipulasjon for å få tilgang eller informasjon — ofte sikkerhetens svakeste ledd. Forhindres med opplæring og prosesser.", lectures:["L1","L6"] },
+  { cat:"attack", term:"Cryptojacking", desc:"Skjult bruk av offerets ressurser til kryptoutvinning. Mitigeres med endepunktsbeskyttelse og blokkering av mining-skript.", lectures:["L7"] },
+  { cat:"attack", term:"BOLA / IDOR (URL-tukling)", desc:"Broken Object Level Authorization / Insecure Direct Object Reference: bruker manipulerer URL/ID for å lese andres data. Forhindres med autorisasjonssjekk per objekt.", lectures:["L7"] },
+  { cat:"attack", term:"Path Traversal / Directory Traversal", desc:"Angriper bruker <code>../</code> eller absolutte stier for å lese filer utenfor tiltenkt katalog. Forhindres med stinormalisering og whitelist.", lectures:["L12 SAST"] },
+  { cat:"attack", term:"Command Injection", desc:"Brukerstyrt input havner i en shell-kommando og kjøres på serveren. Forhindres med parametrisert exec-API og strengt input-filter, aldri streng-konkatenering inn i shell.", lectures:["L12 SAST"] },
+  { cat:"attack", term:"Pickle deserialization", desc:"Python pickle-lasting av ubetrodd data gir vilkårlig kodeeksekvering. Bruk JSON eller signerte payloads i stedet.", lectures:["L12 SAST"] },
+  { cat:"attack", term:"SUNBURST / SolarWinds Orion", desc:"Klassisk supply chain-angrep der ondsinnet kode ble injisert i build-prosessen og distribuert via offisielle Orion-oppdateringer til 18 000 kunder. Forsvares med signering, SBOM og isolerte builds.", lectures:["L1","L10 Supply chain"] },
+  { cat:"attack", term:"Dependency Confusion", desc:"Angriper publiserer pakke med samme navn som intern pakke på offentlig register med høyere versjonsnummer — package manager henter den ondsinnede. Mitigeres med scopes, proxy/mirror og pinning.", lectures:["L10 Supply chain"] },
+  { cat:"attack", term:"Typosquatting / Slopsquatting", desc:"Typosquatting: pakke med lite typografisk variasjon av populært navn. Slopsquatting: angriper registrerer pakkenavn som LLM-er ofte halusinerer. Mitigeres med review av imports og lockfiles.", lectures:["L10 Supply chain"] },
+  { cat:"attack", term:"Malicious upstream package", desc:"Angriper publiserer ondsinnet pakke som downstream-brukere henter inn. Mitigeres med SBOM, dependency scanning og pinning.", lectures:["L10 Supply chain"] },
+  { cat:"attack", term:"Build process tampering", desc:"Angriper endrer CI/CD-build-stegene slik at sluttproduktet inneholder ondsinnet kode. Mitigeres med reproducible builds, signering og isolerte build-miljøer (SLSA-prinsippene).", lectures:["L10 Supply chain"] },
+  { cat:"attack", term:"Leaked credentials (supply chain)", desc:"Lekkede nøkler/tokens brukes til å pushe ondsinnet kode til repo/registry. Mitigeres med commit-signering, hemmelighetsskanning og rotasjon.", lectures:["L10 Supply chain"] },
+  { cat:"attack", term:"Vulnerable / outdated components", desc:"Bruk av komponenter med kjente CVE-er (OWASP A06). Mitigeres med Dependabot, npm audit, oppdateringsrutiner og SBOM.", lectures:["L10 Supply chain"] },
+  { cat:"attack", term:"Prompt Injection (Direct)", desc:"Bruker sender input som overstyrer LLM-ens systemprompt eller policy. Mitigeres med inputfiltre, separasjon mellom system- og brukerprompt og output-håndtering.", lectures:["L9 LLM","L12 AI","L13"] },
+  { cat:"attack", term:"Indirect Prompt Injection", desc:"LLM henter inn ekstern kontekst (nettsider, dokumenter, RAG) som inneholder skjulte instruksjoner. Mitigeres med sanering av eksterne kilder og strenge skjemaer for verktøy-kall.", lectures:["L12 AI"] },
+  { cat:"attack", term:"Jailbreak (LLM)", desc:"Variant av prompt injection som får modellen til å bryte sikkerhetsreglene (rollespill, fiktive scenarier, base64). Forsvares med robust alignment, output-filtre og HITL.", lectures:["L9 LLM","L12 AI"] },
+  { cat:"attack", term:"Data Poisoning / Model Poisoning", desc:"Ondsinnet treningsdata får modellen til å lære feil oppførsel eller skjulte bakdører. Mitigeres med rene datakilder, outlier-deteksjon og dataprovenans.", lectures:["L12 AI"] },
+  { cat:"attack", term:"PoisonGPT", desc:"Eksempel der en åpen modell ble manipulert i fem steg (modifisering, omdøping, opplasting) for å spre desinformasjon. Demonstrerer modell-supply-chain-risiko.", lectures:["L9 LLM"] },
+  { cat:"attack", term:"Sensitive Information Disclosure (LLM)", desc:"LLM lekker hemmeligheter fra treningsdata eller kontekstvinduet. Mitigeres med datafiltrering, DLP og minimering av sensitive kontekster.", lectures:["L12 AI"] },
+  { cat:"attack", term:"Improper / Insecure Output Handling", desc:"Ufiltrert LLM-output mates direkte inn i sårbar downstream-kode (XSS, SQLi via LLM). Behandle alltid LLM-output som ubetrodd input.", lectures:["L12 AI"] },
+  { cat:"attack", term:"Excessive Agency", desc:"LLM-agent har for mange rettigheter eller verktøy og tar farlige handlinger uten kontroll. Begrens med least privilege og menneskelig godkjenning.", lectures:["L12 AI"] },
+  { cat:"attack", term:"System Prompt Leakage", desc:"Modellen avslører den interne systempromten ved manipulering. Mitigeres med å unngå hemmeligheter i prompt og overvåking.", lectures:["L12 AI"] },
+  { cat:"attack", term:"Vector / Embedding Weaknesses", desc:"Svakheter i vektor-DBer eller embeddings, f.eks. forgiftning eller inversjonsangrep mot RAG. Mitigeres med tilgangskontroll og innholdsvalidering.", lectures:["L12 AI"] },
+  { cat:"attack", term:"Misinformation / Hallucinations (LLM)", desc:"Modellen produserer plausibel men feil informasjon. Forsvares med kilde-grounding, sitering og menneskelig kontroll.", lectures:["L12 AI"] },
+  { cat:"attack", term:"Unbounded Consumption (LLM)", desc:"Misbruk av LLM-API som tømmer kvote og koster penger. Mitigeres med rate limiting, kostnadsovervåking og auth.", lectures:["L12 AI"] },
+  { cat:"attack", term:"Adversarial ML / Adversarial Examples", desc:"Subtilt manipulerte input som lurer en ML-modell til feilklassifisering (perturberte bilder, lyd). Mitigeres med robust trening og ensembles.", lectures:["L12 AI"] },
+  { cat:"attack", term:"AI-Generated Zero Days", desc:"Angripere bruker AI til å oppdage og utnytte nye sårbarheter raskere. Forsvares med AI-assistert deteksjon og rask patching.", lectures:["L12 AI"] },
+  { cat:"attack", term:"Insecure AI-generated code", desc:"AI-kodeassistenter (Copilot, ChatGPT) foreslår sårbar kode som utviklere godtar (Pearce-studien). Mitigeres med SAST, code review og security-trening.", lectures:["L9 LLM","L12 AI"] },
+  { cat:"attack", term:"Sensitive data leak via AI assistants", desc:"Utviklere limer hemmelig kode/data inn i AI-prompter som lagres hos leverandøren. Mitigeres med policy og private/lokale modeller.", lectures:["L9 LLM"] },
+  { cat:"attack", term:"Weak / Predictable PRNG", desc:"Bruk av forutsigbar <code>java.util.Random</code> eller lignende for sikkerhetstokens. Mitigeres med kryptografisk PRNG (<code>SecureRandom</code>, <code>secrets</code>).", lectures:["L12 SAST"] },
+  { cat:"attack", term:"Zimbra Calendar XSS (CVE-eksempel)", desc:"HTML i kalenderelement-attributter ble unescaped og førte til JavaScript-injeksjon. Eksempel på lagret XSS i kommersiell programvare.", lectures:["L7"] },
+
+  // ============ SERVICES / TOOLS / STANDARDS ============
+  { cat:"service", term:"OWASP", desc:"Open Web Application Security Project — non-profit som lager guider, Top 10, ASVS, Testing Guide og gratis verktøy.", lectures:["L1","L2","L3","L7","L8"] },
+  { cat:"service", term:"OWASP Top 10 (2025)", desc:"Toppliste over de mest utbredte websårbarhetene; danner pensumstrukturen i kurset.", lectures:["L1","L2","L3","L10 Supply chain"] },
+  { cat:"service", term:"OWASP ASVS", desc:"Application Security Verification Standard — katalog over sikkerhetskrav som kan brukes til kravspesifikasjon og verifisering.", lectures:["L7","L8"] },
+  { cat:"service", term:"OWASP Top 10 for LLM", desc:"Toppliste over LLM-spesifikke sårbarheter: prompt injection, sensitive info disclosure, excessive agency osv.", lectures:["L12 AI"] },
+  { cat:"service", term:"OWASP Threat Dragon", desc:"Gratis trusselmodelleringsverktøy med STRIDE-støtte. Brukes i øvelse 3.", lectures:["L6"] },
+  { cat:"service", term:"OWASP Testing Guide (WSTG)", desc:"Veileder for systematisk sikkerhetstesting av webapplikasjoner; ID-er som WSTG-INPV-05 refererer hit.", lectures:["L1","L2","L3"] },
+  { cat:"service", term:"OWASP Juice Shop / WebGoat / DVWA", desc:"Bevisst sårbare øvingsapplikasjoner for sikkerhetstesting.", lectures:["L1"] },
+  { cat:"service", term:"OWASP CLASP", desc:"Comprehensive, Lightweight Application Security Process — rollebasert SDL-rammeverk som tildeler aktiviteter til ledere, utviklere og sikkerhetsmestere.", lectures:["L8"] },
+  { cat:"service", term:"Microsoft SDL", desc:"Microsofts Security Development Lifecycle — faser fra trening til respons, integrert i alle utviklingsprosjekter.", lectures:["L6","L8"] },
+  { cat:"service", term:"McGraw's Seven Touchpoints", desc:"Syv konkrete sikkerhetsaktiviteter som settes inn i SDLC: code review, risk analysis, pen test, security requirements, abuse cases, risk-based testing, security operations.", lectures:["L8"] },
+  { cat:"service", term:"SAMM / OpenSAMM", desc:"Software Assurance Maturity Model — modenhetsnivå 0–3 for sikkerhetsaktiviteter i en organisasjon.", lectures:["L8"] },
+  { cat:"service", term:"BSIMM", desc:"Building Security In Maturity Model — deskriptiv modell som måler hva firmaer faktisk gjør (i motsetning til SAMM som er preskriptiv).", lectures:["L8"] },
+  { cat:"service", term:"NIST SSDF (800-218)", desc:"Secure Software Development Framework — NISTs best-practice-rammeverk for sikker programvareutvikling.", lectures:["L8"] },
+  { cat:"service", term:"ISO 27001", desc:"Standard for ledelsessystem for informasjonssikkerhet (ISMS).", lectures:["L8"] },
+  { cat:"service", term:"ISO 27005", desc:"Veiledning for håndtering av informasjonssikkerhetsrisiko.", lectures:["L7"] },
+  { cat:"service", term:"ISO 27090", desc:"Ny AI-sikkerhetsstandard som dekker hele AI-livsløpet.", lectures:["L12 AI"] },
+  { cat:"service", term:"ISO 42001", desc:"Ledelsessystemstandard for AI; integreres med ISO 27090.", lectures:["L12 AI"] },
+  { cat:"service", term:"PCI DSS", desc:"Payment Card Industry Data Security Standard — krav til håndtering av betalingskortdata.", lectures:["L8"] },
+  { cat:"service", term:"NIST AI RMF", desc:"AI Risk Management Framework — fire funksjoner (Govern, Map, Measure, Manage) for å håndtere AI-risiko.", lectures:["L12 AI"] },
+  { cat:"service", term:"NIST Dioptra", desc:"NISTs testplattform for vurdering av AI-tillit (trustworthiness).", lectures:["L12 AI"] },
+  { cat:"service", term:"MITRE ATLAS", desc:"Kunnskapsbase over angrepstaktikker mot AI-systemer — AI-versjonen av MITRE ATT&CK.", lectures:["L12 AI"] },
+  { cat:"service", term:"MITRE ATT&CK", desc:"Kunnskapsbase over angrepers taktikker og teknikker mot tradisjonelle IT-systemer.", lectures:["L6"] },
+  { cat:"service", term:"MIT AI Risk Repository", desc:"Database med over 1600 AI-risikoer kategorisert etter årsak og domene.", lectures:["L12 AI"] },
+  { cat:"service", term:"ETSI SAI", desc:"ETSIs gruppe og dokumenter for sikring av AI (Securing AI).", lectures:["L12 AI"] },
+  { cat:"service", term:"EU AI Act", desc:"EU-regulering som setter krav til AI-systemer etter risikoklasse: forbudt, høyrisiko, begrenset, minimal.", lectures:["L12 AI"] },
+  { cat:"service", term:"EU Cyber Resilience Act (CRA)", desc:"EU-regulering (fra 2025) med krav om risikovurdering, SBOM, conformity og sårbarhetsrapportering for produkter med digitale elementer.", lectures:["L1"] },
+  { cat:"service", term:"GDPR / Personopplysningsloven", desc:"EU-forordning som regulerer behandling av personopplysninger; Norges versjon supplerer med nasjonale tilpasninger.", lectures:["L11"] },
+  { cat:"service", term:"Data Privacy Framework (DPF)", desc:"Avtaleordning fra 2023 som gjør overføring av persondata til USA lovlig under visse betingelser (etterfølger til Privacy Shield).", lectures:["L11"] },
+  { cat:"service", term:"US Cloud Act", desc:"Amerikansk lov som lar US-myndigheter kreve data fra amerikanske skyleverandører, også når data er lagret utenfor USA. Spenningsfelt mot GDPR.", lectures:["L11"] },
+  { cat:"service", term:"CVE / MITRE CVE", desc:"Common Vulnerabilities and Exposures — felles katalog over identifiserte sårbarheter.", lectures:["L1","L7","L9 LLM","L12 SAST"] },
+  { cat:"service", term:"NVD", desc:"National Vulnerability Database — NISTs CVE-database med metadata, scorer (CVSS) og affected versions.", lectures:["L1","L5"] },
+  { cat:"service", term:"CWE", desc:"Common Weakness Enumeration — klassifiserer typer programvarefeil (f.eks. CWE-89 SQLi).", lectures:["L12 SAST"] },
+  { cat:"service", term:"CAPEC", desc:"Common Attack Pattern Enumeration and Classification — katalog over angrepsmønstre, brukes ved trusselmodellering.", lectures:["L6"] },
+  { cat:"service", term:"CVSS", desc:"Common Vulnerability Scoring System — 0–10 score med Base-, Threat-, Environmental- og Supplemental-metrikker for teknisk alvorlighet.", lectures:["L7","L9 LLM"] },
+  { cat:"service", term:"exploit-db", desc:"Database med offentlige exploits og Google Hacking Database (GHDB); brukes under informasjonsinnsamling.", lectures:["L2"] },
+  { cat:"service", term:"Burp Suite", desc:"Proxy- og sikkerhetstestingsverktøy for webapplikasjoner — kan fange opp, manipulere og angripe HTTP(S).", lectures:["L2"] },
+  { cat:"service", term:"OWASP ZAP", desc:"Zed Attack Proxy — gratis web-sikkerhetsskanner og proxy fra OWASP.", lectures:["L2"] },
+  { cat:"service", term:"Kali Linux", desc:"Penetrasjonstest-distribusjon med ferdige verktøy for offensiv sikkerhetstesting.", lectures:["L2"] },
+  { cat:"service", term:"Fiddler", desc:"HTTP/HTTPS-proxy og analyseverktøy for inspeksjon av nettverkstrafikk.", lectures:["L2"] },
+  { cat:"service", term:"HTTrack", desc:"Verktøy for å speile et helt nettsted lokalt — nyttig under informasjonsinnsamling.", lectures:["L2"] },
+  { cat:"service", term:"VisualWget", desc:"GUI for <code>wget</code>; brukes til offline-kopiering av nettsider.", lectures:["L2"] },
+  { cat:"service", term:"Firefox DevTools", desc:"Innebygde utviklerverktøy i nettleseren for å inspisere og manipulere requests, cookies og DOM.", lectures:["L2"] },
+  { cat:"service", term:"Google Dorking", desc:"Bruk av avanserte Google-søk (<code>site:</code>, <code>filetype:</code>, <code>inurl:</code>) for å finne eksponerte data og sårbarheter.", lectures:["L2"] },
+  { cat:"service", term:"Shodan / crt.sh", desc:"Passive recon-tjenester. Shodan indekserer internett-eksponerte enheter; <code>crt.sh</code> søker i Certificate Transparency-logger for å avdekke subdomener.", lectures:["L2"] },
+  { cat:"service", term:"reCAPTCHA / CAPTCHA", desc:"Completely Automated Public Turing test to tell Computers and Humans Apart — blokkerer bots ved skjemainnsending og innlogging.", lectures:["L3"] },
+  { cat:"service", term:"SAML 2.0", desc:"XML-basert standard for utveksling av autentiseringsdata mellom Identity Provider og Service Provider. Brukes f.eks. av Feide.", lectures:["L5","L13"] },
+  { cat:"service", term:"OAuth 2.0", desc:"Autorisasjonsprotokoll som lar tredjepartsapper få tilgang til ressurser via access tokens — løser «konfidensiell-passord-til-tredjepart»-problemet.", lectures:["L5","L13"] },
+  { cat:"service", term:"OpenID Connect (OIDC)", desc:"Autentiseringslag oppå OAuth 2.0; bruker ID Token (JWT) for å identifisere brukeren.", lectures:["L5","L10 Supply chain"] },
+  { cat:"service", term:"LDAP", desc:"Lightweight Directory Access Protocol — brukes som katalogtjeneste for brukere og grupper, ofte mot Active Directory.", lectures:["L5"] },
+  { cat:"service", term:"Feide", desc:"Norsk SSO-løsning for utdanningssektoren, basert på SAML 2.0.", lectures:["L5"] },
+  { cat:"service", term:"Active Directory / Entra ID", desc:"Microsofts katalogtjeneste / identitetsplattform (tidligere Azure AD).", lectures:["L11"] },
+  { cat:"service", term:"BankID", desc:"Norsk autentiseringsløsning basert på «noe du har» (BankID-app eller kodebrikke) — eksempel på 2FA.", lectures:["L1","L3"] },
+  { cat:"service", term:"FIDO2 / WebAuthn", desc:"Phishing-resistent autentisering basert på public-key og kryptografisk binding til opprinnelse (origin).", lectures:["L13"] },
+  { cat:"service", term:"TLS 1.2", desc:"Eldre TLS-versjon — sårbar for bl.a. Raccoon-angrepet. Bør erstattes med TLS 1.3.", lectures:["L4"] },
+  { cat:"service", term:"TLS 1.3", desc:"Moderne TLS-versjon — raskere handshake og fjerner usikre cipher suites. Bør foretrekkes.", lectures:["L4"] },
+  { cat:"service", term:"SSL/TLS Handshake", desc:"Protokoll som etablerer en delt nøkkel mellom klient og server via sertifikat og asymmetrisk kryptografi.", lectures:["L4"] },
+  { cat:"service", term:"HTTPS", desc:"HTTP over TLS — krypterer trafikken mellom klient og server, beskytter mot sniffing og MitM.", lectures:["L2","L13"] },
+  { cat:"service", term:"mTLS (Mutual TLS)", desc:"Toveis TLS hvor både klient og server autentiserer hverandre med sertifikat. Standard mellom mikrotjenester i service mesh.", lectures:["L10 Microservice"] },
+  { cat:"service", term:"PKI", desc:"Public Key Infrastructure — system av CA-er, sertifikater og nøkkelhåndtering som muliggjør tillit i TLS, mTLS og signaturer.", lectures:["L4"] },
+  { cat:"service", term:"Certificate Authority (CA)", desc:"Tredjepart som signerer og utsteder sertifikater (f.eks. Let's Encrypt, DigiCert).", lectures:["L4"] },
+  { cat:"service", term:"HSM (Hardware Security Module)", desc:"Maskinvare for sikker nøkkeloppbevaring og kryptografiske operasjoner; brukes til bootstrap av tillit og rotnøkler.", lectures:["L10 Microservice"] },
+  { cat:"service", term:"Secure Enclave (iOS)", desc:"Maskinvarebasert beskyttet område som hindrer apper å lese sikkerhetsnøkler.", lectures:["L5"] },
+  { cat:"service", term:"AES", desc:"Advanced Encryption Standard — blokkchiffer (128-bits blokk; 128/192/256-bits nøkkel) som erstattet DES i 2000.", lectures:["L4"] },
+  { cat:"service", term:"DES", desc:"Eldre 64-bits blokkchiffer med 56-bits nøkkel; sprukket av EFF Deep Crack i 1998.", lectures:["L4"] },
+  { cat:"service", term:"3DES (Triple DES)", desc:"DES kjørt tre ganger; ikke lenger godkjent av NIST etter 2023.", lectures:["L4"] },
+  { cat:"service", term:"RSA", desc:"Asymmetrisk kryptografi basert på primtallsfaktorisering; brukes til signering og nøkkelutveksling.", lectures:["L4"] },
+  { cat:"service", term:"ECDSA / ECC", desc:"Elliptic Curve-baserte signaturer og kryptografi — kortere nøkler og raskere enn RSA for samme sikkerhetsnivå.", lectures:["L4"] },
+  { cat:"service", term:"Diffie-Hellman (DH / ECDH)", desc:"Protokoll for å avtale en felles hemmelig nøkkel over en åpen kanal. ECDH er den moderne elliptic-curve-varianten.", lectures:["L4"] },
+  { cat:"service", term:"MD5", desc:"Hashfunksjon — sterkt kompromittert (kollisjoner kan genereres på sekunder). Skal ikke brukes til sikkerhet.", lectures:["L4"] },
+  { cat:"service", term:"SHA-1", desc:"Hashfunksjon — kjent som brutt (SHAttered 2017). Bør erstattes med SHA-256/SHA-3.", lectures:["L4"] },
+  { cat:"service", term:"SHA-256 / SHA-2", desc:"Sikker hashfamilie med 224/256/384/512-bits utgang. SHA-256 er standardvalg for hashing av passord (med salt + KDF).", lectures:["L3","L4"] },
+  { cat:"service", term:"SHA-3", desc:"Nyere hashstandard (Keccak) fra 2015 — alternativ konstruksjon til SHA-2 (sponge).", lectures:["L4"] },
+  { cat:"service", term:"HMAC", desc:"Keyed-hash Message Authentication Code — gir både integritet og autentisitet basert på en hashfunksjon og hemmelig nøkkel.", lectures:["L4"] },
+  { cat:"service", term:"CBC + IV", desc:"Cipher Block Chaining-modus med Initialization Vector — sikker bruk av blokkchiffer der hver blokk avhenger av forrige.", lectures:["L4"] },
+  { cat:"service", term:"ECB", desc:"Electronic Code Book-modus — usikker fordi like plaintext-blokker gir like chiffertekst-blokker (penguin-bildet).", lectures:["L4"] },
+  { cat:"service", term:"AES-CMAC", desc:"CBC-basert MAC over AES — alternativ til HMAC for blokkchiffer.", lectures:["L4"] },
+  { cat:"service", term:"ML-KEM (FIPS 203)", desc:"Post-quantum nøkkel-innkapslingsmekanisme (tidligere CRYSTALS-Kyber) — standardisert av NIST i 2024.", lectures:["L4"] },
+  { cat:"service", term:"ML-DSA (FIPS 204)", desc:"Post-quantum digital signaturalgoritme (tidligere CRYSTALS-Dilithium).", lectures:["L4"] },
+  { cat:"service", term:"SLH-DSA (FIPS 205)", desc:"Stateless hash-basert signaturalgoritme som backup for ML-DSA (SPHINCS+).", lectures:["L4"] },
+  { cat:"service", term:"FN-DSA (FIPS 206)", desc:"Fast Fourier-transform-basert PQC-signatur (FALCON) — ennå ikke utgitt.", lectures:["L4"] },
+  { cat:"service", term:"Quantum Key Distribution (QKD)", desc:"Bruker fotoner for å detektere avlytting under nøkkelutveksling. Eksperimentell; ikke utbredt.", lectures:["L4"] },
+  { cat:"service", term:"Django", desc:"Python web-rammeverk med innebygd CSRF-beskyttelse, ORM som hindrer SQLi (om brukt riktig) og <code>defusedxml</code>.", lectures:["L3"] },
+  { cat:"service", term:"defusedxml", desc:"Python-bibliotek som beskytter mot XXE og billion laughs ved å deaktivere farlige XML-funksjoner.", lectures:["L3"] },
+  { cat:"service", term:"validators.domain", desc:"Python-validator som hjelper mot SSRF ved å sjekke om URL-er peker på lovlige domener.", lectures:["L3"] },
+  { cat:"service", term:"STRIDE", desc:"Mnemonisk trusselmodell: Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege. Microsoft-utviklet, basert på DFD.", lectures:["L6","L13"] },
+  { cat:"service", term:"Misuse Cases", desc:"Negative use cases som dokumenterer hvordan systemet kan misbrukes — typisk i UML-format med trussel-aktør.", lectures:["L6"] },
+  { cat:"service", term:"Attack Trees", desc:"Trestruktur med AND/OR-noder som viser angripers veier mot et mål. Lar deg score sannsynlighet og kost.", lectures:["L6","L7"] },
+  { cat:"service", term:"Attack-Defense Tree", desc:"Utvidet attack tree som også inkluderer forsvarstiltak (counters) på hver gren.", lectures:["L6"] },
+  { cat:"service", term:"Bow-tie Diagram", desc:"Diagram med årsaker (venstre), uønsket hendelse (midten) og konsekvenser (høyre), med preventive og reaktive kontroller.", lectures:["L6"] },
+  { cat:"service", term:"Data Flow Diagram (DFD)", desc:"Diagram med eksterne entiteter, prosesser, datalagre og trust boundaries — grunnlag for STRIDE-analyse.", lectures:["L6"] },
+  { cat:"service", term:"Threat Modeling Manifesto", desc:"Sett av verdier og prinsipper for trusselmodellering (publisert 2020).", lectures:["L6","L13"] },
+  { cat:"service", term:"Risk Management Framework (RMF)", desc:"McGraws prosess: business context → identifisere risikoer → prioritering → krav → fix og validering.", lectures:["L7"] },
+  { cat:"service", term:"Bell-LaPadula Model", desc:"MAC-modell for konfidensialitet: «no read up, no write down» — beskytter mot lekkasje oppover sikkerhetsnivåene.", lectures:["L5"] },
+  { cat:"service", term:"Biba Model", desc:"MAC-modell for integritet: «no read down, no write up» — beskytter mot at lavt nivå korrumperer høyere nivå.", lectures:["L5"] },
+  { cat:"service", term:"DAC", desc:"Discretionary Access Control — eier av ressursen bestemmer tilgang. Sårbar for Trojan Horse.", lectures:["L5"] },
+  { cat:"service", term:"MAC", desc:"Mandatory Access Control — sentral myndighet håndhever tilgangsklasser (Bell-LaPadula/Biba).", lectures:["L5"] },
+  { cat:"service", term:"RBAC", desc:"Role-Based Access Control — tilgang basert på roller; godt for grovkornet styring i organisasjoner.", lectures:["L5","L11"] },
+  { cat:"service", term:"ABAC", desc:"Attribute-Based Access Control — fin-kornet tilgang basert på attributter (kontekst, tid, sted, klassifisering).", lectures:["L5"] },
+  { cat:"service", term:"Access Control List (ACL)", desc:"Liste over hvem (subjekter) som har hvilke rettigheter til et objekt — brukt i moderne filsystemer.", lectures:["L5"] },
+  { cat:"service", term:"Capability", desc:"Tilgang knyttet til subjekt («billett») — f.eks. iOS-tillatelsesmodell der appen får håndtak til en ressurs.", lectures:["L5"] },
+  { cat:"service", term:"Same-Origin Policy", desc:"Nettleserregel som begrenser kommunikasjon til samme opprinnelse (protokoll + host + port).", lectures:["L5"] },
+  { cat:"service", term:"Sandbox", desc:"Begrenset utførelsesmiljø — nettlesere, mobil-apper og containere isolerer kode for å begrense skade.", lectures:["L5"] },
+  { cat:"service", term:"API Gateway", desc:"Inngangspunkt foran mikrotjenester som håndterer autentisering, autorisasjon og throttling. Reduserer ansvar på hver mikrotjeneste.", lectures:["L10 Microservice"] },
+  { cat:"service", term:"Service Mesh / Sidecar Proxy", desc:"Plasserer fellestjenester (mTLS, logging, retries) som sidecar ved siden av primær-tjenesten (f.eks. Istio + Envoy).", lectures:["L10 Microservice"] },
+  { cat:"service", term:"Phantom Token Pattern", desc:"Klienten bærer en opak token; reverse proxy bytter den med intern JWT slik at sensitive claims aldri lekker ut.", lectures:["L10 Microservice"] },
+  { cat:"service", term:"Circuit Breaker", desc:"Designmønster som hindrer feil i én mikrotjeneste fra å spre seg ved å «åpne kretsen» etter for mange feil.", lectures:["L10 Microservice"] },
+  { cat:"service", term:"CQRS", desc:"Command Query Responsibility Segregation — skiller lese- og skriveoperasjoner for ytelse og sikkerhet.", lectures:["L10 Microservice"] },
+  { cat:"service", term:"Strangler Pattern", desc:"Gradvis migrering fra monolitt til mikrotjenester ved å rute trafikk vekk fra gammel kode.", lectures:["L10 Microservice"] },
+  { cat:"service", term:"JWT (JSON Web Token)", desc:"Signert (eller kryptert) JSON-token brukt for autentisering og autorisasjon mellom tjenester. Sårbar for <code>alg=none</code> og algorithm confusion hvis dårlig validert.", lectures:["L10 Microservice"] },
+  { cat:"service", term:"Rate Limiting / Throttling", desc:"Begrenser antall forespørsler per tidsenhet som forsvar mot DoS, brute force og misbruk av LLM-API.", lectures:["L3","L10 Microservice","L12 AI"] },
+  { cat:"service", term:"SBOM", desc:"Software Bill of Materials — nestet inventar over komponenter i en programvare; kreves bl.a. av CRA og US Executive Order 14028.", lectures:["L1","L10 Supply chain","L13"] },
+  { cat:"service", term:"SPDX / CycloneDX", desc:"Standardiserte SBOM-formater — SPDX (Software Package Data eXchange) fra Linux Foundation; CycloneDX fra OWASP.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"SLSA", desc:"Supply-chain Levels for Software Artifacts — modenhetsnivå for hvor sikker en build-pipeline er (nivå 0–4).", lectures:["L10 Supply chain","L13"] },
+  { cat:"service", term:"Sigstore / Rekor / Cosign", desc:"Identitetsbasert «keyless» signering via OIDC, med Rekor som offentlig transparency-logg. Brukes til signering av container images og artefakter.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"in-toto", desc:"Rammeverk for å verifisere at hvert steg i leverandørkjeden er utført av rett aktør i rett rekkefølge.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"Git commit signing", desc:"Bruk av privat nøkkel (GPG/SSH) til å signere commits så forfatter kan verifiseres med offentlig nøkkel.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"npm audit", desc:"Verktøy som sjekker avhengighetstreet for kjente sårbarheter i npm-pakker.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"Dependabot", desc:"GitHub-tjeneste som lager pull requests som oppgraderer sårbare avhengigheter automatisk.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"GitHub Actions", desc:"CI/CD-plattform på GitHub. Trusselmodellen krever isolerte og reproduserbare build-miljøer for å oppnå SLSA.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"npm / PyPI / Maven", desc:"Pakkemanagere/registry for hhv. JavaScript, Python og Java. Brukes som eksempler på supply chain-angrep (dependency confusion, slopsquatting).", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"Lockfile / version pinning", desc:"Låser hvilke versjoner av avhengigheter som brukes (<code>package-lock.json</code>, <code>poetry.lock</code>) for å hindre at ondsinnede oppdateringer dras inn automatisk.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"Package scope (@org/pkg)", desc:"Begrenser pakker til et namespace/registry og hindrer dependency confusion ved å skille interne fra offentlige.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"Private proxy / mirror registry", desc:"Speilet eller proxy-register som forhindrer henting av ondsinnede pakker direkte fra offentlige kilder.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"Reproducible builds", desc:"Build-prosess der samme input alltid gir bit-identisk output — gjør tampering oppdagbart.", lectures:["L10 Supply chain"] },
+  { cat:"service", term:"FindSecBugs / SpotBugs", desc:"SAST-rammeverk og sikkerhetsutvidelse som finner sikkerhetsbugs i Java-bytekode.", lectures:["L12 SAST"] },
+  { cat:"service", term:"SonarQube", desc:"Plattform for statisk kodeanalyse, inkludert sikkerhet og kodekvalitet — vanlig i CI-pipeline.", lectures:["L12 SAST"] },
+  { cat:"service", term:"Checkmarx / Fortify", desc:"Kommersielle SAST-verktøy med dyp semantisk analyse og taint tracking.", lectures:["L12 SAST"] },
+  { cat:"service", term:"CodeQL", desc:"GitHubs semantiske SAST-verktøy — koden behandles som data, og man skriver spørringer for å finne sårbarhetsmønstre.", lectures:["L12 SAST"] },
+  { cat:"service", term:"Lapse+ / JLint / FindBugs", desc:"Statiske analyseverktøy referert til i SAST-evaluering (Java-bytekode).", lectures:["L12 SAST"] },
+  { cat:"service", term:"NIST Juliet Test Suite", desc:"Benchmark-suite med kjente sårbarhetsmønstre brukt til å evaluere SAST-verktøy (presisjon/recall).", lectures:["L12 SAST"] },
+  { cat:"service", term:"Metasploit", desc:"Rammeverk for utvikling og kjøring av exploits — kjent offensiv plattform.", lectures:["L12 SAST"] },
+  { cat:"service", term:"Apache BCEL / ASM", desc:"Bibliotek for å manipulere og analysere Java-bytecode i statisk analyse.", lectures:["L12 SAST"] },
+  { cat:"service", term:"LLMAS", desc:"LLM-Assisted SAST — prototype som kombinerer SpotBugs med Gemini for å filtrere false positives.", lectures:["L12 SAST"] },
+  { cat:"service", term:"Gemini Flash Lite / GitHub Copilot", desc:"LLM-er brukt til kodeanalyse, SAST-assistanse og AI-assistert utvikling. Studert i Pearce/Stanford-empiri.", lectures:["L12 SAST","L9 LLM"] },
+  { cat:"service", term:"MalCVE / Favia (NTNU)", desc:"NTNU-forskningsverktøy: MalCVE LLM-basert malware-deteksjon på dekompilert Java; Favia agent-basert identifisering av CVE-fix.", lectures:["L9 LLM"] },
+  { cat:"service", term:"CFR / Procyon", desc:"Open source Java-dekompilatorer brukt i MalCVE-pipelinen.", lectures:["L9 LLM"] },
+  { cat:"service", term:"RAG (Retrieval-Augmented Generation)", desc:"LLM henter kontekst fra ekstern kilde (vektor-DB) ved spørring. Eksponert for indirekte prompt injection.", lectures:["L12 AI"] },
+  { cat:"service", term:"HITL (Human-in-the-Loop)", desc:"Mennesket godkjenner kritiske LLM-handlinger før de utføres — sentralt mottiltak mot Excessive Agency.", lectures:["L9 LLM"] },
+  { cat:"service", term:"Cavoukian's 7 PbD-prinsipper", desc:"Privacy by Design — 7 prinsipper (proaktivt, default, embedded, full functionality, end-to-end, visibility, user-centric) som ligger bak GDPR art. 25.", lectures:["L11","L13"] },
+  { cat:"service", term:"Tenor (testdata)", desc:"Digdir-verktøy for syntetiske testdata på tvers av testmiljøer — alternativ til ekte persondata i utvikling.", lectures:["L11"] },
+  { cat:"service", term:"Datatilsynet", desc:"Norsk personverntilsyn — veileder om DPIA og GDPR-etterlevelse.", lectures:["L11"] },
+  { cat:"service", term:"Id-porten / Digdir", desc:"Norske digitale fellesløsninger og myndigheten Digdir, referert i Data Protection-gjesteforelesningen.", lectures:["L11"] },
+  { cat:"service", term:"Folkeregisteret", desc:"Autoritativ kilde for personopplysninger; eksempel på kilde som hever datakvalitet under GDPR-prinsippet «Accuracy».", lectures:["L11"] },
+  { cat:"service", term:"Bug Bounty Program", desc:"Organisasjon betaler ekstern forsker per verifisert sårbarhet — utvider sikkerhetstesting med ekstern hjernekraft.", lectures:["L8"] },
+  { cat:"service", term:"Responsible Disclosure", desc:"Prosess for å rapportere sårbarheter privat til leverandør før offentliggjøring — gir tid til patching.", lectures:["L8"] },
+  { cat:"service", term:"HashiCorp Vault / KMS", desc:"Sentralisert hemmelighets- og nøkkelhåndtering for tjenester — alternativ til hardkodede credentials.", lectures:["L10 Microservice"] },
+  { cat:"service", term:"Kerckhoffs' Prinsipp", desc:"En kryptosystems sikkerhet skal kun avhenge av nøkkelen, ikke av at algoritmen er hemmelig. Grunnlag for moderne kryptografi.", lectures:["L4"] },
+
+  // ============ ABBREVIATIONS ============
+  { cat:"abbr", term:"CIA", desc:"Confidentiality, Integrity, Availability — grunnpilarene i informasjonssikkerhet.", lectures:["L1"] },
+  { cat:"abbr", term:"CRA", desc:"Cyber Resilience Act — EU-regulering for sikker programvare.", lectures:["L1"] },
+  { cat:"abbr", term:"OWASP", desc:"Open Web Application Security Project.", lectures:["L1"] },
+  { cat:"abbr", term:"CVE", desc:"Common Vulnerabilities and Exposures — identifikatorer for sårbarheter.", lectures:["L1"] },
+  { cat:"abbr", term:"NVD", desc:"National Vulnerability Database (NIST).", lectures:["L1"] },
+  { cat:"abbr", term:"CWE", desc:"Common Weakness Enumeration — kategorier av programvarefeil.", lectures:["L12 SAST"] },
+  { cat:"abbr", term:"CAPEC", desc:"Common Attack Pattern Enumeration and Classification.", lectures:["L6"] },
+  { cat:"abbr", term:"CVSS", desc:"Common Vulnerability Scoring System.", lectures:["L7"] },
+  { cat:"abbr", term:"SQLi", desc:"SQL Injection.", lectures:["L2"] },
+  { cat:"abbr", term:"XSS", desc:"Cross-Site Scripting.", lectures:["L3"] },
+  { cat:"abbr", term:"CSRF / XSRF", desc:"Cross-Site Request Forgery.", lectures:["L3"] },
+  { cat:"abbr", term:"SSRF", desc:"Server-Side Request Forgery.", lectures:["L3"] },
+  { cat:"abbr", term:"XXE", desc:"XML External Entity.", lectures:["L3"] },
+  { cat:"abbr", term:"DoS / DDoS", desc:"Denial of Service / Distributed Denial of Service.", lectures:["L1","L10 Microservice"] },
+  { cat:"abbr", term:"RCE", desc:"Remote Code Execution.", lectures:["L8"] },
+  { cat:"abbr", term:"MitM", desc:"Man-in-the-Middle.", lectures:["L4"] },
+  { cat:"abbr", term:"IDOR / BOLA", desc:"Insecure Direct Object Reference / Broken Object Level Authorization.", lectures:["L7"] },
+  { cat:"abbr", term:"SDL / SDLC", desc:"Security Development Lifecycle / Software Development Lifecycle.", lectures:["L8"] },
+  { cat:"abbr", term:"SSDLC", desc:"Secure Software Development Lifecycle.", lectures:["L8"] },
+  { cat:"abbr", term:"SSDF", desc:"Secure Software Development Framework (NIST SP 800-218).", lectures:["L8"] },
+  { cat:"abbr", term:"BSIMM", desc:"Building Security In Maturity Model.", lectures:["L8"] },
+  { cat:"abbr", term:"SAMM", desc:"Software Assurance Maturity Model (OWASP).", lectures:["L8"] },
+  { cat:"abbr", term:"CLASP", desc:"Comprehensive, Lightweight Application Security Process.", lectures:["L8"] },
+  { cat:"abbr", term:"ASVS", desc:"Application Security Verification Standard (OWASP).", lectures:["L7","L8"] },
+  { cat:"abbr", term:"PCI DSS", desc:"Payment Card Industry Data Security Standard.", lectures:["L8"] },
+  { cat:"abbr", term:"ISO", desc:"International Organization for Standardization.", lectures:["L8"] },
+  { cat:"abbr", term:"NIST", desc:"National Institute of Standards and Technology (USA).", lectures:["L8","L12 AI"] },
+  { cat:"abbr", term:"ETSI", desc:"European Telecommunications Standards Institute.", lectures:["L12 AI"] },
+  { cat:"abbr", term:"ENISA", desc:"European Union Agency for Cybersecurity.", lectures:["L12 AI"] },
+  { cat:"abbr", term:"SSG", desc:"Software Security Group — sentralt sikkerhetsteam i en organisasjon.", lectures:["L8"] },
+  { cat:"abbr", term:"PII", desc:"Personally Identifiable Information.", lectures:["L8","L11"] },
+  { cat:"abbr", term:"DAC", desc:"Discretionary Access Control.", lectures:["L5"] },
+  { cat:"abbr", term:"MAC", desc:"Mandatory Access Control (eller Message Authentication Code i kryptografi).", lectures:["L4","L5"] },
+  { cat:"abbr", term:"RBAC", desc:"Role-Based Access Control.", lectures:["L5","L11"] },
+  { cat:"abbr", term:"ABAC", desc:"Attribute-Based Access Control.", lectures:["L5"] },
+  { cat:"abbr", term:"CBAC / GBAC / LBAC / OrBAC / RSBAC", desc:"Context-/Graph-/Lattice-/Organization-/Rule-Set-Based Access Control — øvrige modeller nevnt i tilgangskontroll-forelesningen.", lectures:["L5"] },
+  { cat:"abbr", term:"ACL", desc:"Access Control List.", lectures:["L5"] },
+  { cat:"abbr", term:"SSO", desc:"Single Sign-On.", lectures:["L5"] },
+  { cat:"abbr", term:"IdP", desc:"Identity Provider.", lectures:["L5"] },
+  { cat:"abbr", term:"SAML", desc:"Security Assertion Markup Language.", lectures:["L5"] },
+  { cat:"abbr", term:"LDAP", desc:"Lightweight Directory Access Protocol.", lectures:["L5"] },
+  { cat:"abbr", term:"OAuth", desc:"Open Authorization (2.0).", lectures:["L5"] },
+  { cat:"abbr", term:"OIDC", desc:"OpenID Connect.", lectures:["L5"] },
+  { cat:"abbr", term:"JWT", desc:"JSON Web Token.", lectures:["L10 Microservice"] },
+  { cat:"abbr", term:"MFA / 2FA", desc:"Multi-/Two-Factor Authentication.", lectures:["L3","L7"] },
+  { cat:"abbr", term:"OTP", desc:"One-Time Password (også brukt om One-Time Pad i kryptografi).", lectures:["L3","L4"] },
+  { cat:"abbr", term:"TLS / SSL", desc:"Transport Layer Security / Secure Sockets Layer.", lectures:["L4"] },
+  { cat:"abbr", term:"HTTPS", desc:"HTTP Secure (HTTP over TLS).", lectures:["L2"] },
+  { cat:"abbr", term:"mTLS", desc:"Mutual TLS — toveis sertifikatautentisering.", lectures:["L10 Microservice"] },
+  { cat:"abbr", term:"PKI", desc:"Public Key Infrastructure.", lectures:["L4"] },
+  { cat:"abbr", term:"CA", desc:"Certificate Authority.", lectures:["L4"] },
+  { cat:"abbr", term:"HSM", desc:"Hardware Security Module.", lectures:["L10 Microservice"] },
+  { cat:"abbr", term:"KMS", desc:"Key Management Service.", lectures:["L10 Microservice"] },
+  { cat:"abbr", term:"AES", desc:"Advanced Encryption Standard.", lectures:["L4"] },
+  { cat:"abbr", term:"DES / 3DES", desc:"Data Encryption Standard / Triple DES.", lectures:["L4"] },
+  { cat:"abbr", term:"RSA", desc:"Rivest-Shamir-Adleman (asymmetrisk kryptografi).", lectures:["L4"] },
+  { cat:"abbr", term:"ECC", desc:"Elliptic Curve Cryptography.", lectures:["L4"] },
+  { cat:"abbr", term:"ECDSA / ECDH", desc:"Elliptic Curve Digital Signature Algorithm / Elliptic Curve Diffie-Hellman.", lectures:["L4"] },
+  { cat:"abbr", term:"SHA", desc:"Secure Hash Algorithm.", lectures:["L3","L4"] },
+  { cat:"abbr", term:"HMAC", desc:"Hash-based Message Authentication Code.", lectures:["L4"] },
+  { cat:"abbr", term:"CBC / ECB / IV", desc:"Cipher Block Chaining / Electronic Code Book / Initialization Vector.", lectures:["L4"] },
+  { cat:"abbr", term:"KDF / PBKDF2", desc:"Key Derivation Function / Password-Based Key Derivation Function 2.", lectures:["L4"] },
+  { cat:"abbr", term:"PRG / PRNG", desc:"Pseudo Random Generator / Pseudo Random Number Generator.", lectures:["L4","L12 SAST"] },
+  { cat:"abbr", term:"PQC", desc:"Post-Quantum Cryptography.", lectures:["L4"] },
+  { cat:"abbr", term:"QKD", desc:"Quantum Key Distribution.", lectures:["L4"] },
+  { cat:"abbr", term:"FIPS", desc:"Federal Information Processing Standards.", lectures:["L4"] },
+  { cat:"abbr", term:"ML-KEM / ML-DSA / SLH-DSA / FN-DSA", desc:"Post-quantum-algoritmer (lattice- og hash-baserte) standardisert av NIST.", lectures:["L4"] },
+  { cat:"abbr", term:"GDPR", desc:"General Data Protection Regulation (EU 2016/679).", lectures:["L1","L11"] },
+  { cat:"abbr", term:"DPIA", desc:"Data Protection Impact Assessment — kreves ved høyrisiko-behandling.", lectures:["L11"] },
+  { cat:"abbr", term:"DPO", desc:"Data Protection Officer — personvernombud.", lectures:["L11"] },
+  { cat:"abbr", term:"DSAR", desc:"Data Subject Access Request — den registrertes innsynsrett.", lectures:["L11"] },
+  { cat:"abbr", term:"ROPA", desc:"Record of Processing Activities — protokoll over behandlinger.", lectures:["L11"] },
+  { cat:"abbr", term:"DPF", desc:"Data Privacy Framework (EU–USA, 2023).", lectures:["L11"] },
+  { cat:"abbr", term:"eID / LoA", desc:"Electronic ID / Level of Assurance for elektronisk ID.", lectures:["L11"] },
+  { cat:"abbr", term:"API", desc:"Application Programming Interface.", lectures:["L5","L11"] },
+  { cat:"abbr", term:"REST / SOAP", desc:"Representational State Transfer / Simple Object Access Protocol — to stiler for web-API-er.", lectures:["L5"] },
+  { cat:"abbr", term:"JSON / XML", desc:"Dataformat for utveksling — JSON tekstbasert og kompakt, XML mer verbose med skjema.", lectures:["L3"] },
+  { cat:"abbr", term:"DTD", desc:"Document Type Definition — skjemaformat for XML; misbrukes i XXE-angrep.", lectures:["L3"] },
+  { cat:"abbr", term:"DFD", desc:"Data Flow Diagram.", lectures:["L6"] },
+  { cat:"abbr", term:"STRIDE", desc:"Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege.", lectures:["L6"] },
+  { cat:"abbr", term:"RMF", desc:"Risk Management Framework.", lectures:["L7","L12 AI"] },
+  { cat:"abbr", term:"CSP (web)", desc:"Content Security Policy — HTTP-header med <code>frame-ancestors</code> mot clickjacking og <code>script-src</code> mot XSS.", lectures:["L3"] },
+  { cat:"abbr", term:"CSP (sky)", desc:"Cloud Service Provider — f.eks. AWS, Azure, GCP.", lectures:["L10 Microservice"] },
+  { cat:"abbr", term:"VPC / NAT", desc:"Virtual Private Cloud / Network Address Translation — nettverksisolasjon i sky.", lectures:["L10 Microservice"] },
+  { cat:"abbr", term:"CQRS", desc:"Command Query Responsibility Segregation.", lectures:["L10 Microservice"] },
+  { cat:"abbr", term:"SBOM", desc:"Software Bill of Materials.", lectures:["L1","L10 Supply chain"] },
+  { cat:"abbr", term:"SPDX", desc:"Software Package Data eXchange — SBOM-format.", lectures:["L10 Supply chain"] },
+  { cat:"abbr", term:"SLSA", desc:"Supply-chain Levels for Software Artifacts.", lectures:["L10 Supply chain"] },
+  { cat:"abbr", term:"CI/CD", desc:"Continuous Integration / Continuous Delivery (eller Deployment).", lectures:["L10 Supply chain","L12 SAST"] },
+  { cat:"abbr", term:"DevSecOps", desc:"Integrering av sikkerhet i DevOps — sikkerhet som delt ansvar fra start.", lectures:["L11"] },
+  { cat:"abbr", term:"SAST", desc:"Static Application Security Testing — analyse av kildekode uten å kjøre den.", lectures:["L12 SAST"] },
+  { cat:"abbr", term:"DAST / IAST", desc:"Dynamic / Interactive Application Security Testing — kjørende-tilstand-analyse.", lectures:["L12 SAST"] },
+  { cat:"abbr", term:"SCA", desc:"Software Composition Analysis — finner sårbarheter i avhengigheter.", lectures:["L10 Supply chain"] },
+  { cat:"abbr", term:"TP / FP / TN / FN", desc:"True / False Positives / Negatives — SAST-presisjonsmål.", lectures:["L12 SAST"] },
+  { cat:"abbr", term:"AST", desc:"Abstract Syntax Tree — kodemodellen SAST-verktøy jobber over.", lectures:["L9 LLM","L12 SAST"] },
+  { cat:"abbr", term:"AI", desc:"Artificial Intelligence.", lectures:["L12 AI"] },
+  { cat:"abbr", term:"ML", desc:"Machine Learning.", lectures:["L12 AI"] },
+  { cat:"abbr", term:"LLM", desc:"Large Language Model.", lectures:["L9 LLM","L12 AI"] },
+  { cat:"abbr", term:"GenAI", desc:"Generative AI — modeller som genererer tekst, bilde, lyd osv.", lectures:["L12 AI"] },
+  { cat:"abbr", term:"NLP", desc:"Natural Language Processing.", lectures:["L12 AI"] },
+  { cat:"abbr", term:"HITL", desc:"Human-in-the-Loop.", lectures:["L9 LLM"] },
+  { cat:"abbr", term:"RAG", desc:"Retrieval-Augmented Generation.", lectures:["L12 AI"] },
+  { cat:"abbr", term:"RNN / LSTM", desc:"Recurrent Neural Network / Long Short-Term Memory.", lectures:["L12 AI"] },
+  { cat:"abbr", term:"ReAct", desc:"Reasoning + Acting — LLM-agentmønster der modellen veksler mellom tanke og verktøykall.", lectures:["L9 LLM"] },
+  { cat:"abbr", term:"NSA / NSM / CIS", desc:"National Security Agency (USA) / Nasjonal sikkerhetsmyndighet (Norge) / Center for Internet Security.", lectures:["L1","L12 AI"] },
+  { cat:"abbr", term:"MITRE ATT&CK / ATLAS", desc:"MITREs angreps-taksonomier — klassisk (ATT&CK) og AI-spesifikk (ATLAS).", lectures:["L6","L12 AI"] },
+  { cat:"abbr", term:"NTIA", desc:"National Telecommunications and Information Administration — definerer SBOM minimum elements.", lectures:["L10 Supply chain"] },
+  { cat:"abbr", term:"UML", desc:"Unified Modeling Language — misuse cases bygger på UML use case-diagrammer.", lectures:["L6"] },
+  { cat:"abbr", term:"RPC", desc:"Remote Procedure Call — Windows RPC Runtime referert i CVE-eksempel.", lectures:["L5"] },
+  { cat:"abbr", term:"FIDO2 / WebAuthn", desc:"Phishing-resistente autentiseringsstandarder basert på public-key og origin-binding.", lectures:["L13"] },
+  { cat:"abbr", term:"NTNU", desc:"Norges teknisk-naturvitenskapelige universitet.", lectures:["L1"] }
+];
+
+// ============ LECTURE TAGS ============
+const LECTURE_ORDER = [
+  "L1","L2","L3","L4","L5","L6","L7","L8","L9 LLM","L10 Microservice","L10 Supply chain","L11","L12 AI","L12 SAST","L13"
+];
+const LECTURE_LABELS = {
+  "L1":"L1 Prinsipper",
+  "L2":"L2 OWASP-1",
+  "L3":"L3 OWASP-2",
+  "L4":"L4 Krypto",
+  "L5":"L5 Authn/Authz",
+  "L6":"L6 Threat modeling",
+  "L7":"L7 Risk mgmt",
+  "L8":"L8 SDL",
+  "L9 LLM":"L9 LLM",
+  "L10 Microservice":"L10 Microservice",
+  "L10 Supply chain":"L10 Supply chain",
+  "L11":"L11 Data Protection",
+  "L12 AI":"L12 AI guest",
+  "L12 SAST":"L12 SAST guest",
+  "L13":"L13 Summary"
+};
+
+// ============ STATE ============
+let activeCat = "all";
+let activeLectures = new Set();
+let query = "";
+
+const listEls = {
+  attack: document.getElementById("list-attack"),
+  service: document.getElementById("list-service"),
+  abbr: document.getElementById("list-abbr")
+};
+const secEls = {
+  attack: document.getElementById("sec-attack"),
+  service: document.getElementById("sec-service"),
+  abbr: document.getElementById("sec-abbr")
+};
+
+// ============ RENDER ============
+function render() {
+  // Build chips
+  const chipBar = document.getElementById("ord-lectures");
+  if (!chipBar.children.length) {
+    LECTURE_ORDER.forEach(L => {
+      const b = document.createElement("button");
+      b.className = "ord-lec-chip";
+      b.textContent = LECTURE_LABELS[L] || L;
+      b.dataset.lec = L;
+      b.addEventListener("click", () => {
+        if (activeLectures.has(L)) activeLectures.delete(L);
+        else activeLectures.add(L);
+        b.classList.toggle("active");
+        applyFilter();
+      });
+      chipBar.appendChild(b);
+    });
+  }
+
+  // Build items
+  ["attack","service","abbr"].forEach(cat => {
+    listEls[cat].innerHTML = "";
+    DATA.filter(d => d.cat === cat).forEach(d => {
+      const div = document.createElement("div");
+      div.className = "ord-item";
+      div.dataset.cat = d.cat;
+      div.dataset.lectures = d.lectures.join("|");
+      div.dataset.searchblob = (d.term + " " + d.desc).toLowerCase();
+      const tags = d.lectures.map(L => `<span class="tag">${LECTURE_LABELS[L] || L}</span>`).join("");
+      div.innerHTML = `<div class="term">${d.term}</div><div class="desc">${d.desc}</div><div class="tags">${tags}</div>`;
+      listEls[cat].appendChild(div);
+    });
+  });
+
+  document.getElementById("cnt-all").textContent = DATA.length;
+  document.getElementById("cnt-attack").textContent = DATA.filter(d => d.cat === "attack").length;
+  document.getElementById("cnt-service").textContent = DATA.filter(d => d.cat === "service").length;
+  document.getElementById("cnt-abbr").textContent = DATA.filter(d => d.cat === "abbr").length;
+}
+
+function applyFilter() {
+  const q = query.trim().toLowerCase();
+  let any = false;
+  document.querySelectorAll(".ord-item").forEach(it => {
+    const catMatch = activeCat === "all" || it.dataset.cat === activeCat;
+    const lecs = it.dataset.lectures.split("|");
+    const lecMatch = activeLectures.size === 0 || lecs.some(L => activeLectures.has(L));
+    const qMatch = !q || it.dataset.searchblob.includes(q);
+    const show = catMatch && lecMatch && qMatch;
+    it.classList.toggle("hidden", !show);
+    if (show) any = true;
+  });
+  // Hide section if all items in it hidden
+  ["attack","service","abbr"].forEach(cat => {
+    const sec = secEls[cat];
+    const visible = sec.querySelectorAll(".ord-item:not(.hidden)").length;
+    sec.classList.toggle("hidden", visible === 0);
+  });
+  document.getElementById("ord-empty").classList.toggle("show", !any);
+
+  // Highlight matches
+  if (q) {
+    const re = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ")", "gi");
+    document.querySelectorAll(".ord-item:not(.hidden)").forEach(it => {
+      const termEl = it.querySelector(".term");
+      const descEl = it.querySelector(".desc");
+      const orig = it.dataset;
+      termEl.innerHTML = termEl.textContent.replace(re, "<mark>$1</mark>");
+      // Don't break HTML in desc — rebuild from text + tags safely: skip rich-highlight in desc to preserve <code>
+      // Simple: only highlight in term to avoid breaking inline code/em.
+    });
+  } else {
+    document.querySelectorAll(".ord-item .term").forEach(t => { t.innerHTML = t.textContent; });
+  }
+}
+
+// ============ EVENTS ============
+document.querySelectorAll(".ord-tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".ord-tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    activeCat = t.dataset.cat;
+    applyFilter();
+  });
+});
+
+document.getElementById("ord-search").addEventListener("input", e => {
+  query = e.target.value;
+  applyFilter();
+});
+
+render();
+applyFilter();
+</script>
+<script src="../chat-widget.js"></script>
+</body>
+</html>
